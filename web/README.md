@@ -10,17 +10,18 @@ Two halves that never know about each other's details:
 sites/<id>.json ──build──▶ web/data/<id>/manifest.json + layer files ──▶ web/app.js + web/themes/<theme>.json
 ```
 
-Run locally: `py -m http.server 8765 --directory web`, open http://localhost:8765/?scene=<id>&theme=<name>&lang=uk|en
+Run locally: `uv run sars serve`, open http://localhost:8765/?scene=<id>&theme=<name> (add `&lang=uk` for the Ukrainian interface).
 
 ## Add a place (no code)
 
-1. Fill the GUNW cache for the box (`scripts/nisar_gunw_rate.py`), so `data/raw/nisar_cache/bbox_..._h<height>/` exists.
-2. Copy a site file and edit it:
+1. `uv run sars new <id> --bbox W S E N --direction ASCENDING --height <m>` writes `sites/<id>.json` from the template,
+   then `uv run sars fetch <id>` fills the NISAR cache (`data/raw/nisar_cache/bbox_..._h<height>/`), the DEM and the context.
+2. Edit the site file; the existing plates are worked examples:
    - `sites/mexico-city-asc.json`: slow motion (subsidence). Layers terrain + velocity + grid; GNSS check optional.
    - `sites/central-valley-asc.json`: fields rhythm (coherence through the year). Layer `fields`.
    - `sites/langtang-asc.json`: sudden change footprint (debris flow, landslide, flood edge). Layer `footprint`.
    - `sites/panama-quake.json`: earthquake card. Built by `export_quake.py`; needs a trained network for that area.
-3. `uv run python scripts/build_site.py sites/<id>.json` (for a quake: `uv run --group ml python scripts/export_quake.py ...`).
+3. `uv run sars build <id>` (for a quake: `uv run --group ml python scripts/export_quake.py ...`).
    The scene appears in the menu (`web/data/scenes.json`).
 
 Useful keys: `bbox`, `direction`, `cache_height`, `ref_bbox`, `iono`, `layers`, `terrain{}`, `velocity{}`, `trust{}`,
@@ -73,7 +74,7 @@ that lifts a district and drops it back does not ring twice. Still rows stay sil
 
 A plate is played as pages. Write `sites/<id>.story.json`, point the site at it (`"story": "sites/<id>.story.json"`), then
 
-    uv run python scripts/story.py sites/<id>.json      # seconds: copies the pages, no layer rebuild
+    uv run sars story <id>      # seconds: copies the pages, no layer rebuild
 
 and reload. Each page: `section` (intro | what | why | sure | next | listen, shown as the kicker), `title`, `text[]`
 (paragraphs, `{en, uk}`), optional `facts[{value, unit, label}]` (big numbers), `camera` (`{bbox}` or `{center, zoom}`),
@@ -88,7 +89,7 @@ Text is short on purpose: a page should read in about 20 seconds.
 
 ## Send one place as one file
 
-    uv run python scripts/pack_scene.py mexico-city-asc --theme scroll --drop built --show city
+    uv run sars pack mexico-city-asc --theme scroll   # extra pack_scene.py options pass through
 
 writes `share/<scene>-<theme>.html` (~5 MB): all data inside, pickers hidden, opens from disk without a server.
 Needs internet only for the map libraries and the font.

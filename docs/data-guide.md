@@ -1,0 +1,134 @@
+# Data guide
+
+Every dataset the atlas uses: what it is, who publishes it, its licence, how to get it, where it lands on disk, its
+format, and which plate needs it.
+
+## Rules
+
+- **No data in git.** `data/` is ignored. The one exception is `web/data/`, the built plates, which the web app and GitHub
+  Pages need.
+- **One way to fetch.** `uv run sars fetch <plate>` gets everything a plate needs. It is resumable: what is on disk is
+  never read again. Start with `--dry-run` to see what it will do and roughly how big it is.
+- **Windows, not files.** NISAR files are 1–25 GB each. We read only the plate's box over HTTP, and only the HDF5 chunks
+  under it travel. A plate costs MBs per date, not GBs.
+- **Pinned pairs.** `sites/<plate>.lock.json` lists the exact NISAR granules a plate is built from. Everyone fetching
+  that plate gets the same granules, so everyone builds the same map. `sars fetch <plate> --update` searches ASF again
+  and rewrites the lock: commit the new lock only if the plate should move to the new pairs.
+- **Credentials stay outside the repo.** Only NISAR needs a login: an Earthdata token in `~/.edl_token` or
+  `EARTHDATA_TOKEN`. Everything else is open and anonymous.
+
+## Folder map
+
+```
+data/
+  raw/
+    nisar_cache/bbox_<W>_<S>_<E>_<N>_h<height>/<granule>.npz   GUNW windows (one per pair)        sars fetch
+    gcov_cache/bbox_<W>_<S>_<E>_<N>_f<A|B>/<granule>.npz        GCOV windows (one per date)        src/hachure/gcov.py
+    nisar_events/<event>/                                       GUNW windows around earthquakes    scripts/fetch_event.py
+    nisar_offsets/<name>/                                       GUNW pixel offsets                 scripts/fetch_offsets.py
+    copdem_<name>_<res>m.tif, dem/<name>.tif                    Copernicus DEM windows             sars fetch
+    context/<plate>_worldcover_10m.tif                          ESA WorldCover clip                sars fetch
+    osm/<plate>/<layer>.json                                    OpenStreetMap (Overpass JSON)      sars fetch
+    cdmx_atlas/*.geojson                                        Mexico City risk atlas layers      sars fetch
+    gnss/<STATION>.tenv3                                        GNSS daily positions               sars fetch
+  processed/<plate>/                                            intermediate products (rate maps, series, test outputs)
+web/data/<plate>/                                               the built plate: manifest + layers (in git)
+```
+
+## Datasets
+
+### Used by the plates
+
+| Dataset | Publisher | Licence | What we take | How to get it |
+|---|---|---|---|---|
+| **NISAR L2 GUNW** (geocoded unwrapped interferograms) | NASA/JPL and ISRO, via the ASF DAAC | NASA open data, no restrictions; cite the mission | unwrapped phase, coherence, connected components, ionosphere screen, incidence angle; 80 m grid, 12-day pairs | `sars fetch <plate>` (needs the Earthdata token) |
+| **Copernicus DEM GLO-30** | ESA / Airbus | free licence with attribution | heights for the relief hachures, terrain shading and summits | `sars fetch` (public AWS bucket, anonymous) |
+| **ESA WorldCover 2021, 10 m** | ESA | CC BY 4.0 | land-cover classes: built-up blocks, trees, cropland | `sars fetch` (public COG tiles, anonymous) |
+| **OpenStreetMap** | OSM contributors | ODbL | rivers, lakes, glaciers, paths, villages, roads, metro | `sars fetch` (Overpass API) |
+| **Atlas de Riesgos CDMX** | Government of Mexico City | open data portal; check the terms before redistributing | geotechnical zones (the old lakebed), mapped ground cracks | `sars fetch` (URL in the plate's `context` entry) |
+| **GNSS daily series** | Nevada Geodetic Laboratory | free; cite Blewitt, Hammond & Kreemer (2018) | station MMX1 (Mexico City airport) as ground truth | `sars fetch` (station listed in the plate's `gnss`) |
+
+### Used in research and experiments, not by the CLI
+
+| Dataset | Licence | Used for | How to get it |
+|---|---|---|---|
+| **NISAR L2 GCOV** (backscatter gamma0, HH and HV) | NASA open data | test GC: crop seasons by polarization (`notes/research-resources-2026-11-13.md`) | `experiments/probe_gcov.py` via `src/hachure/gcov.py` |
+| NISAR GUNW pixel offsets | NASA open data | landslide test L-offsets | `scripts/fetch_offsets.py` |
+| NISAR GUNW around earthquakes | NASA open data | fault parameter tests (SBI), quake cards | `scripts/fetch_event.py --name ... --lon ... --lat ... --date ...` |
+| USGS earthquake catalogue and finite faults | public domain | blind check of our fault estimates | `scripts/fetch_event.py`, `scripts/sbi_compare.py` |
+| Open-Meteo daily rain (historical) | CC BY 4.0 | test H9 (Central Valley) | `experiments/fetch_h9_context.py` |
+| GOES-19 water vapour, IGRA radiosondes | public | atmosphere tests (B6, E2, T2) | `experiments/fetch_goes.py`, `experiments/t2_radiosonde.py` |
+
+## What each plate needs
+
+| Plate | Kind | Needs | Status for a fresh clone |
+|---|---|---|---|
+| `mexico-city-asc` | slow motion (subsidence) | NISAR (28 pairs), DEM, WorldCover, OSM, CDMX atlas, GNSS MMX1 | `sars fetch` + `sars build` |
+| `langtang-asc` | sudden change (debris flow) | NISAR (25 pairs), DEM, OSM | `sars fetch` + `sars build` (checked on a clean clone: same result) |
+| `central-valley-asc` | fields rhythm (coherence) | NISAR (25 pairs), plus a land-cover grid | **two extra steps**, see below |
+| `panama-quake` | earthquake card | quake windows, a trained network (GPU) | research pipeline: `scripts/fetch_event.py`, then `scripts/export_quake.py` with `uv sync --group ml` |
+
+**Central Valley, extra steps.** The `fields` layer clusters cropland pixels, so it needs WorldCover fractions on the
+plate's rate grid. Both files come from the research pipeline, not from `sars fetch` yet:
+
+1. `uv run python scripts/nisar_gunw_rate.py --name central-valley-asc --bbox -120.20 35.80 -119.00 36.50 --ref-bbox -119.10 36.33 -119.02 36.43 --direction ASCENDING --height 80 --max-pairs 30`
+   writes `data/processed/central-valley-asc/nisar_rate.tif`. It reads the windows that `sars fetch` already cached. The
+   `fields` layer uses only this file's grid: 80 m, EPSG:32611, 1007 × 1376.
+2. `uv run python experiments/fetch_h9_context.py` writes `data/raw/context/cv_worldcover_frac.npz` (and the rain series).
+
+These two commands are reconstructed from the scripts' options and have not yet been run on a clean clone.
+`sars fetch central-valley-asc` warns when either file is missing. Folding both steps into the CLI is open work.
+
+## File formats
+
+**GUNW window** (`nisar_cache/.../<granule>.npz`, written by `nisar.RawWindow.save`):
+
+| Key | Meaning |
+|---|---|
+| `phase` | unwrapped phase in radians (NaN = no data) |
+| `iono` | ionosphere phase screen in radians (empty if the file has none) |
+| `coherence` | interferometric coherence, 0 to 1 |
+| `comp` | connected components (0 = invalid) |
+| `incidence` | incidence angle in degrees, at the plate's typical height `cache_height` |
+| `x`, `y` | projected pixel-centre coordinates (UTM, metres) |
+| `epsg`, `wavelength` (m), `days` | grid projection, radar wavelength, pair length in days |
+
+Read one with `nisar.RawWindow.load(path)`, then use `nisar.process(raw, ...)` to get vertical displacement in metres.
+
+- The file name is the granule name.
+- The folder name holds the plate box and `cache_height`, so two plates with the same box share windows.
+- Size per pair ranges from about 2.6 MB (Langtang) to about 45 MB (Central Valley, a large box).
+
+**GCOV window** (`gcov_cache/.../<granule>.npz`, `gcov.Window`):
+
+| Key | Meaning |
+|---|---|
+| `hh`, `hv` | gamma0 as linear power |
+| `mask` | validity mask (1 = valid in the windows we read) |
+| `looks` | number of looks |
+| `x`, `y`, `epsg` | pixel-centre coordinates and grid projection |
+| `date`, `name` | acquisition date, granule name |
+
+`Window.db("hv")` returns values in dB. Frequency B (80 m) is about 13 MB per date for the Central Valley box.
+
+**Lock file** (`sites/<plate>.lock.json`):
+- Contains `site`, `bbox`, `direction`, `track {path, frame}` and `searched` (UTC time of the ASF search).
+- `granules[]` lists each pair as `{name, url, ref, sec, days}`.
+- Written by `sars fetch --update` or `sars lock`.
+
+**Built plate** (`web/data/<plate>/`):
+- `manifest.json` lists the layers and their files. The files are GeoJSON or JSON with physical values only, no colours.
+- The web app's contract for layer kinds is in [web/README.md](../web/README.md).
+
+## Adding a dataset
+
+1. Prefer sources that are open, anonymous and readable by window (COG, HDF5 or Zarr over HTTP, an API with a bbox).
+2. Write the fetcher so it is idempotent:
+   - skip what exists;
+   - write to a temporary name, then rename;
+   - send the User-Agent `space-apps-research`;
+   - never send personal data.
+3. Put the output under `data/raw/<dataset>/...` and reference it from the plate config. If a plain URL is enough, give
+   the `context` entry a `url` and `sars fetch` downloads it.
+4. Add a row to the tables above and to the credits in [README.md](../README.md): publisher, licence, what we use.
+5. Pre-register any claim the dataset will support in `notes/experiments.md` before looking at the result.

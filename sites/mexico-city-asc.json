@@ -113,7 +113,8 @@
    "note": {
     "en": "Zone III 'Lacustre' of the CDMX geotechnical zoning (Atlas de Riesgos CDMX).",
     "uk": "Зона III «Lacustre» геотехнічного районування CDMX (Атлас ризиків CDMX)."
-   }
+   },
+   "url": "https://www.atlas.cdmx.gob.mx/datosAbiertos/SPC_Zonificacion_Geotecnica.geojson"
   },
   {
    "id": "cracks",
@@ -129,7 +130,8 @@
    "note": {
     "en": "Where field teams mapped cracks; our test found no link to uneven sinking.",
     "uk": "Там, де польові команди нанесли тріщини; наш тест не знайшов зв'язку з нерівним просіданням."
-   }
+   },
+   "url": "https://www.atlas.cdmx.gob.mx/datosAbiertos/Fracturas.geojson"
   },
   {
    "group": "city",

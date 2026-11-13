@@ -7,6 +7,9 @@ An interactive atlas of surface change seen by the NISAR radar. Each **plate** i
 engraved maps (Dufour, Lehmann hachures) instead of rainbow fringes, and told as a few short pages. Every plate says how
 sure it is: weak signal is drawn dashed, numbers carry their error, tests that failed are reported.
 
+**New here?** Read this page, then [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/data-guide.md](docs/data-guide.md).
+Claude Code sessions start from [CLAUDE.md](CLAUDE.md). Ukrainian onboarding: [docs/uk/README.md](docs/uk/README.md).
+
 ## Quick start (the same for everyone)
 
 1. Install [uv](https://docs.astral.sh/uv/) and clone the repo. On Windows clone into a short folder (e.g. `C:\sars`):
@@ -15,14 +18,15 @@ sure it is: weak signal is drawn dashed, numbers carry their error, tests that f
 3. Earthdata token, once: log in at https://urs.earthdata.nasa.gov, Generate Token, and save it as **one line** in
    `~/.edl_token` (Windows: `C:\Users\<you>\.edl_token`) or in the env var `EARTHDATA_TOKEN`.
    Use your own account. Never commit the token or paste it into chats, docs or issues.
-4. Check: `uv run sars doctor` (add `--deep` to have ASF accept the token).
+4. Check: `uv run sars doctor` (add `--deep` to have ASF accept the token), then `uv run python tests/smoke.py`
+   (offline, ~15 s).
 
 Then, for any plate in `sites/`:
 
 ```bash
 uv run sars sites                         # plates, cached pairs, lock, built?
 uv run sars fetch mexico-city-asc --dry-run
-uv run sars fetch mexico-city-asc         # DEM + NISAR windows + OSM + WorldCover; resumable
+uv run sars fetch mexico-city-asc         # DEM, NISAR windows, OSM, WorldCover, context, GNSS; resumable
 uv run sars build mexico-city-asc         # -> web/data/mexico-city-asc/
 uv run sars serve                         # http://localhost:8765/?scene=mexico-city-asc&theme=scroll
 ```
@@ -30,7 +34,7 @@ uv run sars serve                         # http://localhost:8765/?scene=mexico-
 `fetch` reads only the plate's window of each NISAR GUNW file over HTTP (MBs, not the 2 GB files), caches it in
 `data/raw/nisar_cache/`, and never re-reads what is cached. The pairs are pinned in `sites/<id>.lock.json`, so everyone
 builds from the same granules. `uv run sars fetch <id> --update` searches ASF again and rewrites the lock (commit it if the
-plate should move to the new pairs). Checked on a fresh clone (13.11): the NISAR windows and the DEM come out
+plate should move to the new pairs). Checked on a fresh clone: the NISAR windows and the DEM come out
 byte-identical and the built Langtang plate matches. Only OpenStreetMap context can differ a little (it is fetched live,
 e.g. 641 vs 649 glacier outlines two days apart).
 
@@ -56,7 +60,9 @@ All site keys, layer kinds, themes and the page format are in [web/README.md](we
 | `scripts/` | pipeline steps the CLI calls (build, story, pack, OSM, WorldCover, quake card) |
 | `web/` | the map app (MapLibre + deck.gl, no build step); `web/data/` holds built plates |
 | `experiments/` | one-off tests behind the numbers in `notes/experiments.md` (pre-registered thresholds, results) |
-| `notes/` | plans, decisions, experiment log, data tutorial |
+| `notes/` | research notes and the experiment log (index: `notes/README.md`) |
+| `docs/` | data guide (datasets, licences, formats, what each plate needs); `docs/uk/` Ukrainian onboarding |
+| `tests/` | `smoke.py`: offline check of the engine, plate configs and built plates |
 | `data/` | downloads and caches (not in git) |
 
 ## Data and credits

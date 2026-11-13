@@ -1,130 +1,130 @@
-# Тексти кроків «Чесної карти» (чернетка 11.11, на правку)
+# Step texts for the "Honest map" (draft 11.11, for editing)
 
-Як читати: кожен крок = що видно на карті + текст на екрані (1–2 речення, без жаргону) + чим перевіряємо реальність.
-Позначки: ✅ дані вже є · 🔧 треба зробити на карті · 🧪 треба перевірити тестом (з попередньою реєстрацією) · ❓ факт треба звірити з джерелом.
+How to read: each step = what is visible on the map + on-screen text (1–2 sentences, no jargon) + how we check it against reality.
+Marks: ✅ data already exists · 🔧 needs to be done on the map · 🧪 needs to be checked with a test (pre-registered) · ❓ fact needs to be checked against a source.
 
-Наскрізна лінія: **«Земля не стоїть на місці»**. Повільно — там, де люди качають воду (Мехіко, Каліфорнія). Раптово — землетрус і обвал (Панама, Непал). Щоразу карта каже, де вона певна, а де ні.
-
----
-
-## 0. Вступ (над картою світу)
-
-**0.1** Видно: глобус або карта світу, чотири точки-місця.
-> Супутник NISAR кожні 12 днів оглядає всю Землю радаром: крізь хмари, вдень і вночі. Порівнюючи два прольоти, він помічає, що земля зрушила на кілька сантиметрів.
-
-**0.2** Видно: штрихи рельєфу Мехіко, крупно, як гравюра.
-> Ми малюємо цей рух штрихами, як картографи XIX століття малювали гори: що густіші штрихи, то більший рух. А там, де ми не впевнені, штрихи бліднуть або зникають.
+The through-line: **"The ground does not stand still"**. Slowly, where people pump water (Mexico City, California). Suddenly, an earthquake and a collapse (Panama, Nepal). Each time the map says where it is sure and where it is not.
 
 ---
 
-## 1. Мехіко: місто, що тоне
+## 0. Intro (over a world map)
 
-**1.1** Видно: усе місто, тільки рельєф, назви кількох районів. 🔧 (назви)
-> Мехіко стоїть на дні колишнього озера. Під ним м'яка глина, а місто десятиліттями п'є воду з-під власних ніг.
+**0.1** Visible: a globe or world map, four place dots.
+> The NISAR satellite scans the whole Earth with radar every 12 days: through clouds, day and night. By comparing two passes, it notices that the ground has moved by a few centimeters.
 
-**1.2** Видно: ▶, штрихи ростуть від жовтня 2025 до жовтня 2026. ✅
-> За один рік земля в найглибшому місці опустилася на **28 см** ❓. Кожне нове кільце штрихів — ще 2 см.
-
-**1.3** Видно: наближення до станції MMX1, маркер станції. 🔧 (маркер)
-> Чи можна цьому вірити? Тут стоїть GPS-станція MMX1. Вона каже: −27.0 см за рік. Радар каже: −26.9. ✅
-
-**1.4** Видно: бліді штрихи плюс клітинки з розривами ряду. ✅
-> Бліді штрихи там, де сигнал слабкий. Ми не ховаємо невпевненість, ми її малюємо.
-
-❓ **Перед демо з'ясувати цифру.** Карта каже «найглибше 28 см» (згладжена картина), але окремі штрихи мають швидкість до −46 см/рік (біля −99.05, 19.27, південний схід міста). Одна клітинка показує −72 см/рік з похибкою 7, це схоже на артефакт. Поки не розберемося, яку цифру називати, на екран її не ставимо. Також звірити з публікаціями, скільки Мехіко осідає за рік.
+**0.2** Visible: the relief strokes of Mexico City, large, like an engraving.
+> We draw this motion with strokes, the way 19th-century cartographers drew mountains: the denser the strokes, the larger the motion. And where we are not confident, the strokes fade or disappear.
 
 ---
 
-## 2. Центральна долина, Каліфорнія: ферми і вода
+## 1. Mexico City: a sinking city
 
-Два варіанти; обираємо після тесту.
+**1.1** Visible: the whole city, relief only, names of a few districts. 🔧 (names)
+> Mexico City stands on the bed of a former lake. Under it is soft clay, and for decades the city has been drinking water from under its own feet.
 
-### Варіант А (сильніший, але треба тест 🧪): «земля дихає з поливом»
+**1.2** Visible: ▶, the strokes grow from October 2025 to October 2026. ✅
+> In one year, the ground at the deepest spot sank by **28 cm** ❓. Each new ring of strokes is another 2 cm.
 
-**2.1** Видно: долина між горами, назви міст (Fresno, Hanford, Corcoran). 🔧
-> Центральна долина — один із головних городів Америки ❓ (частку врожаю звірити). Коли дощів мало, ферми качають ґрунтові води.
+**1.3** Visible: zoom to station MMX1, a station marker. 🔧 (marker)
+> Can we trust this? There is a GPS station here, MMX1. It says: −27.0 cm per year. The radar says: −26.9. ✅
 
-**2.2** Видно: штрихи осідання за рік.
-> Земля під полями осідає. GPS-станції в долині показують до **−17 см за рік** ✅ (за даними станцій; радарну цифру ставимо лише після тесту 🧪).
+**1.4** Visible: pale strokes plus cells with series breaks. ✅
+> Pale strokes are where the signal is weak. We do not hide uncertainty, we draw it.
 
-**2.3** Видно: повзунок по місяцях; крива однієї станції, наприклад HANF або CAHA.
-> Земля дихає разом із поливом: улітку качають — вона осідає на 5–6 см, узимку майже стоїть. ✅ (GPS: травень–вересень −5…−6 см, листопад–березень ≈ 0)
-
-**2.4** (якщо X-season пройде 🧪)
-> Частина цього осідання вже не повернеться: стиснута глина більше не тримає воду.
-
-⚠ **Пастка.** Наш радарний ряд у долині має відомий зимовий перекіс: близько +10 см фальшивого підйому через іоносферну поправку (P-port). Він накладається саме на сезонний сигнал. Тест має показати, що радар (з поправкою «площина») бачить те саме літнє осідання, що й GPS. Інакше варіант А не показуємо.
-
-### Варіант Б (запасний, дані є ✅): «коли поля оруть»
-
-> Радар помічає, коли поле змінюється: зорали, полили, зібрали врожай. Улітку поля «мерехтять», узимку стоять спокійно.
-
-Слабше, бо без карти культур (USDA CDL) ми не знаємо, що саме сталося з кожним полем.
+❓ **Clarify the number before the demo.** The map says "deepest 28 cm" (smoothed picture), but individual strokes have rates down to −46 cm/year (near −99.05, 19.27, southeast of the city). One cell shows −72 cm/year with an error of 7; this looks like an artifact. Until we sort out which number to quote, we do not put it on screen. Also check against publications how much Mexico City sinks per year.
 
 ---
 
-## 3. Панама: землетрус
+## 2. Central Valley, California: farms and water
 
-**3.1** Видно: берег, півострів, назви селищ, епіцентр. 🔧 (берег і назви)
-> 9 жовтня 2026. Землетрус магнітудою 7.7, за 10 км від селища Pitaloza Arriba ✅ (USGS) на півострові Асуеро ❓. Понад 2000 людей повідомили USGS, що відчули його ✅.
+Two options; we choose after the test.
 
-**3.2** Видно: штрихи стрибка землі (кільце = N см), один знімок «до і після» замість року. 🔧
-> Радар порівняв знімки до і після. Земля зрушила за секунди: на ранковому знімку до ~40 см ✅, а біля епіцентру ще більше ❓ (звірити з даними).
+### Option A (stronger, but needs a test 🧪): "the ground breathes with irrigation"
 
-**3.3** Видно: лінія розлому під штрихами.
-> З цього малюнка рушій за кілька секунд відновлює розлом під землею: близько 135 км завдовжки, на глибині ~11 км.
+**2.1** Visible: the valley between mountains, city names (Fresno, Hanford, Corcoran). 🔧
+> The Central Valley is one of America's main food-growing regions ❓ (check the share of the harvest). When there is little rain, the farms pump groundwater.
 
-**3.4** Видно: картка з прапорцем «НЕ ВПЕВНЕНИЙ».
-> Але рушій сам каже: «я не впевнений». Напрям розлому збігся з сейсмологами (285° проти 288°), а кут нахилу і сила — ні. На тестових землетрусах цей прапорець відрізняє правильні відповіді від хибних. ✅
+**2.2** Visible: the subsidence strokes over the year.
+> The ground under the fields is sinking. GPS stations in the valley show up to **−17 cm per year** ✅ (from the station data; we put up a radar number only after the test 🧪).
 
-**3.5** (необов'язково) Видно: вечірній знімок.
-> Через дві з половиною години вдарив ще один поштовх, M6.6, за 76 км на захід ✅. Вечірній знімок бачить обидва разом, тому картина така заплутана.
+**2.3** Visible: a month slider; the curve of one station, for example HANF or CAHA.
+> The ground breathes with irrigation: in summer they pump, and it sinks by 5–6 cm; in winter it almost stands still. ✅ (GPS: May–September −5…−6 cm, November–March ≈ 0)
 
-❓ На вечірньому знімку біля епіцентру є значення понад метр. Перевірити, чи це справжній зсув, чи помилка розгортки фази, перш ніж показувати.
+**2.4** (if X-season passes 🧪)
+> Part of this subsidence will not come back: compressed clay no longer holds water.
 
----
+⚠ **Trap.** Our radar series in the valley has a known winter bias: about +10 cm of fake uplift due to the ionosphere correction (P-port). It overlaps exactly with the seasonal signal. The test must show that the radar (with the "plane" correction) sees the same summer subsidence as GPS. Otherwise we do not show option A.
 
-## 4. Лангтанг, Непал: обвал гори
+### Option B (fallback, data exists ✅): "when the fields are plowed"
 
-**4.1** Видно: рельєф у штрихах, підпис «Лангтанг-Лірунг, 7227 м». 🔧 (підпис)
-> Долина Лангтанг у Непалі, на північ від Катманду ❓ (відстань звірити).
+> The radar notices when a field changes: plowed, irrigated, harvested. In summer the fields "flicker", in winter they stay calm.
 
-**4.2** Видно: позначка місця, звідки зірвалось (~5000–5500 м).
-> 26 серпня 2026, 08:37. Зі стіни Лангтанг-Лірунгу обвалилося близько 67 мільйонів кубометрів льоду й скелі ✅ (ICIMOD). Лавина перетворилася на сель і пішла долиною.
-
-**4.3** Видно: слід селю гравюрним штрихуванням замість помаранчевої плями. 🔧 (стиль штрихування)
-> Радар побачив, куди пішов сель: смуга 4.8 км², майже 6 км униз долиною, з 4000 до 2650 м ✅. Після події він просто «не впізнав» цю землю.
-
-**4.4** Видно: та сама міра на парах до події, порожньо.
-> За тиждень і за місяць до того та сама міра нічого не показувала ✅. Це не шум, а подія.
-
-**4.5** Видно: джерело обвалу, сірим.
-> Чесно: побачити, що гора готується впасти, наш радар не зміг. Лід на висоті 5000 м щоліта «мерехтить» і не дає виміряти рух ✅ (L-retro). Для цього потрібні точніші продукти NISAR.
-
-**4.6** (бажано) Видно: супутникове фото Sentinel-2 до і після поруч. 🔧 (треба ОК на завантаження)
-> А ось як це виглядає на звичайному фото.
-
-⚠ Для нас, не для екрану: те саме правило дає хибну пляму у вересні (осіннє «мерехтіння»). Перш ніж робити з цього загальний шар, потрібен сезонний запобіжник.
+Weaker, because without a crop map (USDA CDL) we do not know what exactly happened to each field.
 
 ---
 
-## 5. Фінал
+## 3. Panama: an earthquake
 
-> Повільно чи раптово, земля рухається. NISAR бачить це кожні 12 днів по всій планеті. Ми перетворюємо це на карту, яку може прочитати будь-хто, і чесно позначаємо, де не певні. Нове місце — один файл налаштувань.
+**3.1** Visible: the coast, the peninsula, village names, the epicenter. 🔧 (coast and names)
+> 9 October 2026. A magnitude 7.7 earthquake, 10 km from the village of Pitaloza Arriba ✅ (USGS) on the Azuero Peninsula ❓. More than 2000 people reported to USGS that they felt it ✅.
+
+**3.2** Visible: strokes of the ground jump (ring = N cm), a single "before and after" image instead of a year. 🔧
+> The radar compared images before and after. The ground moved within seconds: on the morning image up to ~40 cm ✅, and near the epicenter even more ❓ (check against the data).
+
+**3.3** Visible: the fault line under the strokes.
+> From this picture, the engine reconstructs the fault underground in a few seconds: about 135 km long, at a depth of ~11 km.
+
+**3.4** Visible: a card with the "NOT CONFIDENT" flag.
+> But the engine itself says: "I am not confident". The fault direction matched the seismologists (285° vs 288°), but the dip angle and the strength did not. On test earthquakes, this flag separates correct answers from wrong ones. ✅
+
+**3.5** (optional) Visible: the evening image.
+> Two and a half hours later another shock hit, M6.6, 76 km to the west ✅. The evening image sees both together, which is why the picture is so tangled.
+
+❓ On the evening image there are values over a meter near the epicenter. Check whether this is real displacement or a phase unwrapping error before showing it.
 
 ---
 
-## Що вирішити
+## 4. Langtang, Nepal: a mountain collapse
 
-1. Порядок: Мехіко → Каліфорнія → Панама → Непал (повільно → раптово)? Чи починати з Панами, бо вона найдраматичніша?
-2. Каліфорнія: запускаємо тест для варіанта А чи одразу беремо Б?
-3. Чи лишаємо крок 4.5 «що ми не змогли»? Мені він подобається: це чесність, а не слабкість.
-4. Завантаження: берег, річки й назви (Natural Earth / OSM); фото Sentinel-2 для Непалу. Обидва публічні, без логіну, але потрібне твоє ОК.
+**4.1** Visible: relief in strokes, label "Langtang Lirung, 7227 m". 🔧 (label)
+> The Langtang valley in Nepal, north of Kathmandu ❓ (check the distance).
 
-## Що будувати після правок (коротко)
+**4.2** Visible: a mark at the place it broke off from (~5000–5500 m).
+> 26 August 2026, 08:37. About 67 million cubic meters of ice and rock collapsed from the wall of Langtang Lirung ✅ (ICIMOD). The avalanche turned into a debris flow and went down the valley.
 
-- Режим історії: кроки в `sites/*.json` (`story: [{view, layers, time, text}]`), кнопки «Далі» та «Дослідити самому».
-- Шар назв і берега в стилі гравюри; маркери станцій.
-- Стрибок землі для Панами штрихами (як у Мехіко, але одна пара).
-- Слід селю штрихуванням.
-- Вступ над картою світу.
+**4.3** Visible: the debris-flow scar as engraving hatching instead of an orange patch. 🔧 (hatching style)
+> The radar saw where the debris flow went: a 4.8 km² strip, almost 6 km down the valley, from 4000 to 2650 m ✅. After the event it simply "did not recognize" this ground.
+
+**4.4** Visible: the same measure on pairs before the event, empty.
+> A week and a month before, the same measure showed nothing ✅. This is not noise, it is an event.
+
+**4.5** Visible: the collapse source, in gray.
+> Honestly: our radar could not see that the mountain was getting ready to fall. Ice at 5000 m "flickers" every summer and does not allow measuring motion ✅ (L-retro). For that, more precise NISAR products are needed.
+
+**4.6** (desirable) Visible: Sentinel-2 satellite photo before and after, side by side. 🔧 (needs an OK for the download)
+> And here is how it looks on an ordinary photo.
+
+⚠ For us, not for the screen: the same rule gives a false patch in September (autumn "flicker"). Before making this into a general layer, we need a seasonal safeguard.
+
+---
+
+## 5. Finale
+
+> Slowly or suddenly, the ground moves. NISAR sees it every 12 days across the whole planet. We turn this into a map that anyone can read, and we honestly mark where we are not sure. A new place is one settings file.
+
+---
+
+## What to decide
+
+1. Order: Mexico City → California → Panama → Nepal (slow → sudden)? Or start with Panama, because it is the most dramatic?
+2. California: do we run the test for option A, or take B right away?
+3. Do we keep step 4.5 "what we could not do"? I like it: it is honesty, not weakness.
+4. Downloads: coast, rivers and names (Natural Earth / OSM); Sentinel-2 photos for Nepal. Both are public, no login, but your OK is needed.
+
+## What to build after the edits (briefly)
+
+- Story mode: steps in `sites/*.json` (`story: [{view, layers, time, text}]`), "Next" and "Explore on your own" buttons.
+- A names and coastline layer in engraving style; station markers.
+- The ground jump for Panama as strokes (like Mexico City, but one pair).
+- The debris-flow scar as hatching.
+- Intro over a world map.

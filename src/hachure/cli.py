@@ -271,6 +271,9 @@ def fetch_dem(cfg, a) -> int:
     from hachure import dem
     if cfg.get("dem_path"):
         p = ROOT / cfg["dem_path"]
+    elif "dem_res" not in cfg:
+        print("  dem: not used by this plate")
+        return 0
     else:
         p = ROOT / "data/raw" / f"copdem_{cfg.get('dem_name', cfg['id'])}_{int(cfg['dem_res'])}m.tif"
     if p.exists():
@@ -308,10 +311,58 @@ def fetch_landcover(cfg, a) -> int:
     return 0
 
 
+def _download(url: str, dst: Path) -> None:
+    import requests
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dst.with_name(dst.name + ".part")
+    with requests.get(url, headers={"User-Agent": "space-apps-research"}, stream=True, timeout=120) as r:
+        r.raise_for_status()
+        with open(tmp, "wb") as f:
+            for chunk in r.iter_content(1 << 20):
+                f.write(chunk)
+    tmp.replace(dst)
+
+
+def fetch_context(cfg, a) -> int:
+    """Context files that carry a "url" in the site config (e.g. the CDMX risk atlas layers)."""
+    todo = [c for c in cfg.get("context", []) if c.get("url") and c.get("src") and not (ROOT / c["src"]).exists()]
+    bad = 0
+    for c in todo:
+        print(f"  context: {c['url']} -> {c['src']}" + (" (dry run)" if a.dry_run else ""))
+        if not a.dry_run:
+            try:
+                _download(c["url"], ROOT / c["src"])
+            except Exception as e:                                   # noqa: BLE001
+                bad += 1
+                print(f"    FAILED: {e}")
+    return 1 if bad else 0
+
+
+NGL_SERIES = "https://geodesy.unr.edu/gps_timeseries/IGS20/tenv3/IGS20/{}.tenv3"
+
+
+def fetch_gnss(cfg, a) -> int:
+    """GNSS daily series (Nevada Geodetic Laboratory) for the stations a plate checks against."""
+    bad = 0
+    for g in cfg.get("gnss", []):
+        if not g.get("series") or (ROOT / g["series"]).exists():
+            continue
+        url = NGL_SERIES.format(g["station"])
+        print(f"  gnss: {g['station']} -> {g['series']}" + (" (dry run)" if a.dry_run else ""))
+        if not a.dry_run:
+            try:
+                _download(url, ROOT / g["series"])
+            except Exception as e:                                   # noqa: BLE001
+                bad += 1
+                print(f"    FAILED: {e}")
+    return bad and 1
+
+
 def cmd_fetch(a):
     cfg = _site(a.site)
     print(f"{cfg['id']}:")
-    parts = {"dem": fetch_dem, "nisar": fetch_nisar, "osm": fetch_osm, "worldcover": fetch_landcover}
+    parts = {"dem": fetch_dem, "nisar": fetch_nisar, "osm": fetch_osm, "worldcover": fetch_landcover,
+             "context": fetch_context, "gnss": fetch_gnss}
     only = a.only.split(",") if a.only else list(parts)
     rc = 0
     for k in only:
@@ -319,7 +370,11 @@ def cmd_fetch(a):
     other = [c["src"] for c in cfg.get("context", []) if c.get("src") and "data/raw/osm/" not in c["src"]
              and not (ROOT / c["src"]).exists()]
     for s in other:
-        print(f"  !! context file not fetched by sars (get it by hand, see the site's notes): {s}")
+        print(f"  !! context file not fetched by sars (get it by hand, see docs/data-guide.md): {s}")
+    lc = (cfg.get("fields") or {}).get("landcover") or {}
+    for key in ("npz", "grid_tif"):
+        if lc.get(key) and not (ROOT / lc[key]).exists():
+            print(f"  !! fields.landcover.{key} missing: {lc[key]} (see docs/data-guide.md, Central Valley)")
     return rc
 
 
@@ -392,7 +447,7 @@ def main(argv=None):
             s.add_argument("--dry-run", action="store_true")
             s.add_argument("--update", action="store_true", help="search ASF again and rewrite the lock")
             s.add_argument("--max-pairs", type=int)
-            s.add_argument("--only", help="comma list of: dem,nisar,osm,worldcover")
+            s.add_argument("--only", help="comma list of: dem,nisar,osm,worldcover,context,gnss")
     lk = sub.add_parser("lock", help="pin the cached pairs of a plate (run where the plate was built)")
     lk.add_argument("site")
     b = sub.add_parser("build", help="build the web layers of a plate")

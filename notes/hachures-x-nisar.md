@@ -1,63 +1,63 @@
-# Гашури × NISAR — розбір ідеї
+# Hachures × NISAR: breaking down the idea
 
 ## TL;DR
-Ідея сильна, але одну річ треба виправити в тому, що радив Gemini:
-**InSAR (інтерферометрія) дає не вектор, а скаляр** — зсув уздовж лінії візування (LOS).
-Стрілки «з LOS» — це штучні вектори. Справжні векторні поля з SAR є, і їх три типи:
+The idea is strong, but one thing in Gemini's advice needs fixing:
+**InSAR (interferometry) gives a scalar, not a vector**: displacement along the line of sight (LOS).
+Arrows "from LOS" are artificial vectors. Real vector fields from SAR do exist, and there are three types:
 
-| Джерело вектора | Що це | Продукт NISAR | Де найкраще |
+| Vector source | What it is | NISAR product | Where it works best |
 |---|---|---|---|
-| **Pixel offsets** (кореляція амплітуд) | справжній 2D-зсув (range + azimuth), метри | **GOFF** (L2), ROFF (L1) | льодовики, великі зсуви ґрунту, косейсмічні зсуви |
-| **Градієнт скалярного поля** — класична гашура Лемана/Дюфура | −∇f будь-якого растру | GUNW (LOS-зсув), GCOV (backscatter), DEM | чаші просідання, «схили» зміни |
-| **Asc + desc декомпозиція** | E–W + Up з двох геометрій | 2× GUNW | просідання міст, вулкани |
+| **Pixel offsets** (amplitude correlation) | true 2D displacement (range + azimuth), meters | **GOFF** (L2), ROFF (L1) | glaciers, large ground displacements, coseismic displacements |
+| **Gradient of a scalar field**: the classic Lehmann/Dufour hachure | −∇f of any raster | GUNW (LOS displacement), GCOV (backscatter), DEM | subsidence bowls, "slopes" of change |
+| **Asc + desc decomposition** | E–W + Up from two geometries | 2× GUNW | urban subsidence, volcanoes |
 
-Тобто гашура не прикраса, а **оператор**: береш будь-яке поле (рельєф, зсув, зміну
-backscatter) → рахуєш градієнт → трасуєш лінії найшвидшого спуску. Той самий движок
-для всіх шарів.
+So the hachure is not decoration but an **operator**: take any field (relief, displacement, backscatter
+change) → compute the gradient → trace lines of steepest descent. The same engine
+for all layers.
 
-## Що видно на твоїх прикладах
-- **Everest (карта Washburn / Swissair)**: скелі — сірі гашури, **лід — блакитні лінії,
-  а на льодовику Kangshung видно лінії течії**. Це рівно наша візуальна граматика:
-  - сірий штрих = статичний рельєф (DEM),
-  - **синій штрих = рух льоду/води (NISAR offsets / маска води)**,
-  - третій колір (червоний/охра) = зміна (Δ backscatter, просідання).
-- **Dufour Blatt XVII**: північно-західне освітлення робить об'єм без жодного кольору →
-  колір лишається вільним каналом для даних. **В цьому й інформаційна цінність**:
-  монохромна гашура кодує напрям + величину, а колір — другу змінну.
+## What your examples show
+- **Everest (Washburn / Swissair map)**: rock is gray hachures, **ice is blue lines,
+  and flow lines are visible on the Kangshung glacier**. This is exactly our visual grammar:
+  - gray stroke = static relief (DEM),
+  - **blue stroke = ice/water motion (NISAR offsets / water mask)**,
+  - a third color (red/ochre) = change (Δ backscatter, subsidence).
+- **Dufour Blatt XVII**: northwest illumination creates volume without any color →
+  color stays free as a data channel. **This is where the information value lies**:
+  monochrome hachures encode direction + magnitude, and color encodes a second variable.
 
-## Відповідь на «чи це лише краса?»
-Ні, якщо кожен візуальний параметр штриха прив'язати до фізики:
-- **напрям** = напрям руху / градієнта,
-- **довжина/товщина** = швидкість / крутизна (закон Лемана),
-- **щільність** = **когерентність** InSAR. Низька когерентність → не малюємо → біла пляма
-  чесно каже «радар тут не впевнений». Це радарна версія генералізації Дюфура:
-  він прибирав шум свідомо, ми — за метрикою якості.
-- **анімація** = часові ряди (частинки, що рухаються лініями течії; дата на слайдері).
+## Answer to "is this just about beauty?"
+No, if every visual parameter of the stroke is tied to physics:
+- **direction** = direction of motion / of the gradient,
+- **length/thickness** = speed / steepness (Lehmann's law),
+- **density** = InSAR **coherence**. Low coherence → we do not draw → a white patch
+  honestly says "the radar is not confident here". This is the radar version of Dufour's generalization:
+  he removed noise deliberately, we do it by a quality metric.
+- **animation** = time series (particles moving along flow lines; date on a slider).
 
-## Кандидати на study area
-1. **Льодовик** (Greenland — Sermeq Kujalleq/Jakobshavn; Alaska — Malaspina):
-   GOFF дає справжні 2D-вектори → найкраще лягає на ідею ліній течії. Контроль —
-   NASA ITS_LIVE (готові поля швидкостей).
-2. **Мехіко — просідання** ~30+ см/рік: видно навіть за короткі інтервали, чаша
-   просідання = ідеальна «гора навпаки» для гашур.
-3. **Колишнє Каховське водосховище** — особиста українська історія: дно після 2023
-   заростає лісом. L-band чутливий до деревної рослинності → зміна backscatter (HV) як
-   «рельєф», що росте. Сильний сторітелінг, але треба перевірити покриття NISAR.
-4. Повінь / паводок — комбінація маски води з GCOV + гідрологічні гашури з DEM
-   (куди стікає вода). Тут твій досвід з NLCD-масками заходить напряму
-   (ESA WorldCover / NLCD як контекст).
+## Study area candidates
+1. **Glacier** (Greenland: Sermeq Kujalleq/Jakobshavn; Alaska: Malaspina):
+   GOFF gives true 2D vectors → fits the flow-line idea best. Control:
+   NASA ITS_LIVE (ready-made velocity fields).
+2. **Mexico City: subsidence** ~30+ cm/year: visible even over short intervals; the subsidence
+   bowl = an ideal "upside-down mountain" for hachures.
+3. **Former Kakhovka Reservoir**: a personal Ukrainian story: the bed has been growing into forest since 2023.
+   L-band is sensitive to woody vegetation → backscatter change (HV) as
+   a "relief" that grows. Strong storytelling, but NISAR coverage needs checking.
+4. Flood / high water: a combination of a water mask from GCOV + hydrological hachures from the DEM
+   (where the water drains). Your experience with NLCD masks applies directly here
+   (ESA WorldCover / NLCD as context).
 
-## Що зробити ДО 13.11 (поки ресурси закриті)
-- [x] Движок гашур на DEM (Copernicus GLO-30): градієнт → seeding (Jobard–Lefer
+## What to do BEFORE 13.11 (while the resources are closed)
+- [x] Hachure engine on a DEM (Copernicus GLO-30): gradient → seeding (Jobard–Lefer
       evenly-spaced streamlines) → RK2 → Lehmann thickness + Lambert shading → GeoJSON/SVG.
-      (2026-11-10, `src/hachure/`, приклади: Dents du Midi, Everest)
-- [ ] Той самий движок на векторному полі (ITS_LIVE як заміна GOFF).
-- [ ] Перевірити, що вже лежить у ASF для NISAR (`asf_search`, dataset NISAR) — формати
-      HDF5, структура GCOV/GUNW/GOFF.
-- [ ] Фронт-прототип: MapLibre + deck.gl, шар ліній + анімація частинок + шторка до/після.
+      (2026-11-10, `src/hachure/`, examples: Dents du Midi, Everest)
+- [ ] The same engine on a vector field (ITS_LIVE as a stand-in for GOFF).
+- [ ] Check what is already in ASF for NISAR (`asf_search`, dataset NISAR): formats
+      HDF5, structure of GCOV/GUNW/GOFF.
+- [ ] Front-end prototype: MapLibre + deck.gl, a line layer + particle animation + before/after swipe.
 
-## Дрібні поправки до тексту з Gemini
-- Не варто підміняти NISAR на Sentinel-1/ALOS у фіналі — челендж саме про NISAR.
-  S1/ALOS — лише для порівняння частот (C vs L) або як запасний варіант.
-- Алгоритм — Jobard & **Lefer** (1997), не «Leferve».
-- Тези про Synthetic Vision в авіоніці «як гашури» — сумнівні, в пітч не брати.
+## Small corrections to the Gemini text
+- Do not swap NISAR for Sentinel-1/ALOS in the final version: the challenge is specifically about NISAR.
+  S1/ALOS only for comparing frequencies (C vs L) or as a fallback.
+- The algorithm is Jobard & **Lefer** (1997), not "Leferve".
+- The claims about Synthetic Vision in avionics "as hachures" are doubtful; do not use them in the pitch.

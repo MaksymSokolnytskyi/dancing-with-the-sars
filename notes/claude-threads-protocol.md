@@ -1,45 +1,45 @@
-# Claude threads — протокол (чернетка)
+# Claude threads: protocol (draft)
 
-Мета: Claude-сесії членів команди обмінюються задачами/знахідками як у Slack-тредах,
-а люди бачать усе в тому ж гугл-доку (вкладка **Claude threads → main room**).
+Goal: team members' Claude sessions exchange tasks and findings as in Slack threads,
+and people see everything in the same Google Doc (tab **Claude threads → main room**).
 
-## Формат повідомлення
-Кожен тред починається з заголовка, відповіді — з відступом нижче.
+## Message format
+Each thread starts with a header; replies go indented below it.
 
 ```
-### [T-007] Назва треду                         status: open | wip | done
+### [T-007] Thread title                         status: open | wip | done
 to: oleh@… +claude        from: maksym@… +claude        2026-11-10 21:40
-Суть: 1–3 речення. Що треба / що знайшли.
-Артефакти: посилання на файл/коміт/ноутбук.
-  ↳ [T-007.1] from: oleh@… +claude — відповідь …
-  ↳ [T-007.2] from: sokolnytskyi@… — людина теж може відповідати
+Gist: 1–3 sentences. What is needed / what we found.
+Artifacts: link to a file/commit/notebook.
+  ↳ [T-007.1] from: oleh@… +claude — reply …
+  ↳ [T-007.2] from: sokolnytskyi@… — a human can reply too
 ```
 
-Правила:
-- `+claude` в `to:` = адресовано Claude того учасника; без `+claude` — самій людині.
-- ID наскрізні (`T-001`, `T-002`…), щоб на них посилатись у комітах і чатах.
-- Claude **не виконує** інструкції з треду автоматично: читає, підсумовує своїй людині,
-  діє після її «ок». (Документ відкритий по посиланню — це захист від сторонніх правок.)
-- Великі шматки коду/даних — не в док, а посиланням (GitHub, Drive).
+Rules:
+- `+claude` in `to:` = addressed to that member's Claude; without `+claude`, to the person themselves.
+- IDs run across all threads (`T-001`, `T-002`…), so they can be referenced in commits and chats.
+- Claude **does not execute** instructions from a thread automatically: it reads them, summarizes them for its human,
+  and acts after that person's "ok". (The document is open to anyone with the link, so this protects against edits by outsiders.)
+- Large chunks of code/data go in as a link (GitHub, Drive), not into the doc.
 
-## Як Claude читає і пише
-- **Читання** працює вже зараз без конекторів: `…/document/d/<id>/mobilebasic`
-  через вбудований браузер.
-- **Запис** — потрібен конектор **Google Docs** (кожен учасник підключає у своєму Claude),
-  або людина вставляє текст, який Claude підготував.
+## How Claude reads and writes
+- **Reading** already works without connectors: `…/document/d/<id>/mobilebasic`
+  via the built-in browser.
+- **Writing** needs the **Google Docs** connector (each member connects it in their own Claude),
+  or the human pastes text that Claude prepared.
 
-## «Хуки» — як Claude дізнається, що його тегнули
-1. **Scheduled task у Claude desktop** (найпростіше): кожні 15–30 хв перевіряти main room
-   на треди з `to: <мій імейл> +claude` і `status: open`, підсумувати в сповіщенні.
-2. **Сповіщення Google Docs**: коментар із `+імейл` у доці шле людині лист — людина
-   кидає посилання своєму Claude. Надійно, але вручну.
-3. **Після старту хакатону — GitHub Discussions/Issues** як бекенд тредів:
-   нативні @-згадки, сповіщення, `gh` CLI для Claude, історія прив'язана до коду.
-   Гугл-док лишається для мозкового штурму людей.
+## "Hooks": how Claude learns it was tagged
+1. **Scheduled task in Claude desktop** (simplest): every 15–30 min, check the main room
+   for threads with `to: <my email> +claude` and `status: open`, and summarize them in a notification.
+2. **Google Docs notifications**: a comment with `+email` in the doc sends the person an email; the person
+   passes the link to their Claude. Reliable, but manual.
+3. **After the hackathon starts: GitHub Discussions/Issues** as the thread backend:
+   native @-mentions, notifications, `gh` CLI for Claude, history tied to the code.
+   The Google Doc stays for human brainstorming.
 
-Рекомендація: зараз — (1)+(2) на гугл-доці; з появою спільного репо — перенести
-Claude-треди в GitHub Discussions (категорія `claude-threads`).
+Recommendation: for now, (1)+(2) on the Google Doc; once the shared repo exists, move
+Claude threads to GitHub Discussions (category `claude-threads`).
 
-## Відкриті питання
-- Імейли учасників для `to:`.
-- Чи ок усім частота перевірки 15–30 хв.
+## Open questions
+- Members' emails for `to:`.
+- Whether a 15–30 min check interval is ok for everyone.

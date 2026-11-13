@@ -1,5 +1,5 @@
 // Dancing with the SARs: style-free data (web/data/<scene>/manifest.json) + a theme (web/themes/<name>.json).
-// Add a place: run scripts/build_site.py with a new sites/*.json. Add a look: drop a new theme JSON and list it in THEMES.
+// Add a place: `uv run sars new <id> --bbox W S E N`, then `sars fetch` and `sars build` (see README.md). Add a look: drop a new theme JSON and list it in THEMES.
 // Layer kinds understood here (all described by the manifest, nothing site-specific in this file):
 //   hachures-static  relief strokes            {dark}
 //   hachures-time    motion strokes that grow  {rate_cm_yr, sigma_cm_yr, snr, segments, trust, dark, t[]}
@@ -87,8 +87,8 @@ const STR = {
         story_explore: "explore the map yourself ✕", story_open: "Read the plate ▸" },
 };
 const q = new URLSearchParams(location.search);
-const lang = q.get("lang") || "uk";
-const T = (k) => (STR[lang] || STR.uk)[k] ?? k;
+const lang = q.get("lang") || "en";                       // ?lang=uk for the Ukrainian interface
+const T = (k) => (STR[lang] || STR.en)[k] ?? k;
 const label = (l) => (l == null ? "" : typeof l === "string" ? l : l[lang] ?? l.en ?? Object.values(l)[0]);
 const $ = (id) => document.getElementById(id);
 const getJSON = (u) => fetch(u, { cache: "no-cache" }).then((r) => { if (!r.ok) throw new Error(u + " " + r.status); return r.json(); });
