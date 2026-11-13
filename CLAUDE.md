@@ -66,13 +66,14 @@ Datasets, licences, cache formats and per-plate needs are in [docs/data-guide.md
 
 ## Team
 
-| Name | Telegram |
-|---|---|
-| Andrii Bilych (team owner) | @vox_astutiae |
-| Oleh Paziuka | @prorabvasili |
-| Maksym Sokolnytskyi | @sokolnytskyi |
-| Yehor Matiiash | @kiber_atlett |
-| Illia Bondar | @kirillovw |
+| Name | GitHub | Telegram |
+|---|---|---|
+| Andrii Bilych (team owner) | `Bodomerka` | @vox_astutiae |
+| Oleh Paziuka | `ProrabVasili` | @prorabvasili |
+| Maksym Sokolnytskyi (repo owner) | `MaksymSokolnytskyi` | @sokolnytskyi |
+| Yehor Matiiash | `edoTenseii` | @kiber_atlett |
+| Illia Bondar | `kirillovw` | @kirillovw |
+| Yelyzaveta Razumovska | `geekata` | |
 
-One more member joins later. The team's brainstorm doc and the Claude-to-Claude thread protocol are described in
-`notes/claude-threads-protocol.md`.
+Use the GitHub login (with `@`) only to request a review or assign a PR; GitHub notifies that person. The team's
+brainstorm doc and the Claude-to-Claude thread protocol are described in `notes/claude-threads-protocol.md`.
