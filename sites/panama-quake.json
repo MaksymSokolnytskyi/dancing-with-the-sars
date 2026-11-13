@@ -1,0 +1,23 @@
+{
+  "id": "panama-quake",
+  "title": "Panama M7.7 earthquake",
+  "subtitle": "2026-10-09 · fault estimate from two NISAR passes, with a confidence flag",
+  "bbox": [-81.35, 6.61, -79.75, 8.37],
+  "direction": "ASCENDING+DESCENDING",
+  "anchor": "radar-only",
+  "dem_res": 200,
+  "dem_name": "panama-wide",
+  "terrain": {"interval_m": 150, "spacing_px": 2.5, "sigma_dir_m": 1500, "sigma_tone_m": 800},
+  "layers": ["terrain"],
+  "quake": {
+    "event": "Panama M7.7", "date": "2026-10-09",
+    "asc": "panama-wide", "desc": "panama-wide-desc",
+    "net": "data/processed/events/sbi_panama-wide_net.pt",
+    "epicentre": [-80.757, 7.607],
+    "n_net": 2000, "top": 16, "seeds": 12, "conf_threshold": 0.75,
+    "provenance": "Blind test D-3 was pre-registered before data; this map re-runs the frozen recipe (unblinded now).",
+    "reference": {"source": "USGS W-phase", "mw": 7.7,
+                  "planes": [[25.21, 74.77, -155.3], [288.32, 66.22, -16.68]]}
+  },
+  "notes": ["Env for the network: SBI_BLOCK=24 SBI_LMAX=200e3 SBI_XYMAX=60e3 HYB_XYMAX=80e3 HYB_LMAX=300e3"]
+}

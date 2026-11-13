@@ -1,0 +1,41 @@
+[project]
+name = "sars-hachures"
+version = "0.1.0"
+description = "Dufour/Lehmann-style hachures for DEMs and SAR-derived fields (NASA Space Apps 2026)"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy",
+    "scipy",
+    "rasterio",
+    "contourpy",
+    "matplotlib",
+    "h5py",
+    "fsspec",
+    "aiohttp",
+    "requests",
+    "imageio",
+    "imageio-ffmpeg",
+    "cutde>=26.3.6",
+]
+
+[project.scripts]
+sars = "hachure.cli:main"
+
+[dependency-groups]
+# GPU experiments (synthetic interferograms, denoisers): uv sync --group ml
+ml = ["torch"]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu126", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hachure"]

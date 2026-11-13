@@ -1,0 +1,408 @@
+{
+ "id": "mexico-city-asc",
+ "title": {
+  "en": "Mexico City",
+  "uk": "Мехіко"
+ },
+ "subtitle": "NISAR L-band GUNW, ascending (morning) pass",
+ "bbox": [
+  -99.32,
+  19.17,
+  -98.82,
+  19.58
+ ],
+ "ref_bbox": [
+  -99.14,
+  19.53,
+  -99.09,
+  19.57
+ ],
+ "ref_label": "Sierra de Guadalupe (rock)",
+ "direction": "ASCENDING",
+ "cache_height": 2240,
+ "iono": "plane",
+ "tropo": {
+  "mode": "height",
+  "stable_above_m": 2400
+ },
+ "coh_min": 0.3,
+ "dem_res": 50,
+ "dem_name": "mexico-city",
+ "terrain": {
+  "interval_m": 60,
+  "spacing_px": 1.5,
+  "sigma_dir_m": 150,
+  "sigma_tone_m": 80
+ },
+ "velocity": {
+  "band_m": 0.02,
+  "coh_min_draw": 0.45,
+  "noise_floor_m_yr": 0.05,
+  "sigma_dir_m": 500,
+  "sigma_tone_m": 250,
+  "sink_only": true,
+  "deramp": true,
+  "max_len_px": 30
+ },
+ "trust": {
+  "snr_strong": 3.0,
+  "snr_weak": 1.0,
+  "segments": true
+ },
+ "grid_km": 0.5,
+ "gnss": [
+  {
+   "station": "MMX1",
+   "lon": -99.0684,
+   "lat": 19.4317,
+   "rate_cm_yr": -27.0,
+   "note": "airport; GNSS vertical rate over the asc chain window",
+   "series": "data/raw/gnss/MMX1.tenv3"
+  }
+ ],
+ "anchor": "radar-only",
+ "layers": [
+  "terrain",
+  "velocity",
+  "contours",
+  "surface",
+  "grid"
+ ],
+ "surface": {
+  "step_m": 400,
+  "section": [
+   [
+    -99.22,
+    19.44
+   ],
+   [
+    -98.92,
+    19.44
+   ]
+  ]
+ },
+ "contours": {
+  "step_cm": 5,
+  "major_cm": 10
+ },
+ "context": [
+  {
+   "id": "lake",
+   "kind": "waterlines",
+   "src": "data/raw/cdmx_atlas/SPC_Zonificacion_Geotecnica.geojson",
+   "where": {
+    "INTENSIDAD": "Zona III"
+   },
+   "levels_m": [
+    0,
+    70,
+    160,
+    270,
+    400,
+    560,
+    760,
+    1000
+   ],
+   "style": "water_ghost",
+   "label": {
+    "en": "Old lakes (lakebed clay)",
+    "uk": "Старі озера (глина дна)"
+   },
+   "visible": true,
+   "z": 1.2,
+   "note": {
+    "en": "Zone III 'Lacustre' of the CDMX geotechnical zoning (Atlas de Riesgos CDMX).",
+    "uk": "Зона III «Lacustre» геотехнічного районування CDMX (Атлас ризиків CDMX)."
+   }
+  },
+  {
+   "id": "cracks",
+   "kind": "lines",
+   "src": "data/raw/cdmx_atlas/Fracturas.geojson",
+   "style": "crack",
+   "label": {
+    "en": "Mapped ground cracks (CDMX atlas)",
+    "uk": "Нанесені тріщини (атлас CDMX)"
+   },
+   "visible": false,
+   "z": 3.4,
+   "note": {
+    "en": "Where field teams mapped cracks; our test found no link to uneven sinking.",
+    "uk": "Там, де польові команди нанесли тріщини; наш тест не знайшов зв'язку з нерівним просіданням."
+   }
+  },
+  {
+   "group": "city",
+   "group_label": {
+    "en": "City (OpenStreetMap)",
+    "uk": "Місто (OpenStreetMap)"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": false,
+   "z": 1.3,
+   "id": "water",
+   "kind": "lines",
+   "src": "data/raw/osm/mexico-city-asc/water.json",
+   "style": "water",
+   "min_len_m": 600,
+   "label": {
+    "en": "Water",
+    "uk": "Вода"
+   }
+  },
+  {
+   "group": "city",
+   "group_label": {
+    "en": "City (OpenStreetMap)",
+    "uk": "Місто (OpenStreetMap)"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": false,
+   "z": 3.5,
+   "id": "canals",
+   "kind": "lines",
+   "src": "data/raw/osm/mexico-city-asc/canals.json",
+   "style": "canal",
+   "label_from": "name",
+   "label": {
+    "en": "Canals",
+    "uk": "Канали"
+   },
+   "min_len_m": 1500,
+   "label_only": [
+    "Gran Canal de Desagüe",
+    "Canal Nacional"
+   ]
+  },
+  {
+   "group": "city",
+   "group_label": {
+    "en": "City (OpenStreetMap)",
+    "uk": "Місто (OpenStreetMap)"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": false,
+   "z": 3.5,
+   "id": "rail",
+   "kind": "lines",
+   "src": "data/raw/osm/mexico-city-asc/rail.json",
+   "style": "rail",
+   "where": {
+    "railway": [
+     "rail",
+     "light_rail"
+    ]
+   },
+   "label": {
+    "en": "Railways",
+    "uk": "Залізниця"
+   },
+   "min_len_m": 300
+  },
+  {
+   "group": "city",
+   "group_label": {
+    "en": "City (OpenStreetMap)",
+    "uk": "Місто (OpenStreetMap)"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": false,
+   "z": 3.5,
+   "id": "metro",
+   "kind": "lines",
+   "src": "data/raw/osm/mexico-city-asc/metro.json",
+   "style": "metro",
+   "label_from": "ref",
+   "label_format": "L{}",
+   "label": {
+    "en": "Metro",
+    "uk": "Метро"
+   },
+   "dedupe_key": "ref"
+  },
+  {
+   "group": "city",
+   "group_label": {
+    "en": "City (OpenStreetMap)",
+    "uk": "Місто (OpenStreetMap)"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": false,
+   "id": "stations",
+   "kind": "lines",
+   "src": "data/raw/osm/mexico-city-asc/stations.json",
+   "style": "station",
+   "points_as": "dots",
+   "label": {
+    "en": "Stations",
+    "uk": "Станції"
+   },
+   "z": 3.55
+  },
+  {
+   "group": "city",
+   "group_label": {
+    "en": "City (OpenStreetMap)",
+    "uk": "Місто (OpenStreetMap)"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": false,
+   "z": 3.5,
+   "id": "runways",
+   "kind": "lines",
+   "src": "data/raw/osm/mexico-city-asc/runways.json",
+   "style": "runway",
+   "label": {
+    "en": "Runways",
+    "uk": "Злітні смуги"
+   }
+  },
+  {
+   "group": "city",
+   "group_label": {
+    "en": "City (OpenStreetMap)",
+    "uk": "Місто (OpenStreetMap)"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": false,
+   "z": 3.6,
+   "id": "places",
+   "kind": "lines",
+   "src": "data/raw/osm/mexico-city-asc/places.json",
+   "style": "place",
+   "where": {
+    "place": [
+     "city",
+     "borough"
+    ]
+   },
+   "rank": {
+    "city": 3,
+    "borough": 2,
+    "town": 1
+   },
+   "label": {
+    "en": "Places",
+    "uk": "Назви"
+   }
+  }
+ ],
+ "relief_info": {
+  "step_m": 300,
+  "peaks": 10,
+  "window_m": 3000,
+  "prominence_m": 300,
+  "spacing_m": 5000
+ },
+ "landcover": {
+  "src": "data/raw/context/mexico-city-asc_worldcover_10m.tif",
+  "attribution": "© ESA WorldCover 2021 (CC-BY 4.0)",
+  "trees": {
+   "class": 10,
+   "cell_m": 480,
+   "min_share": 0.75
+  },
+  "built": {
+   "class": 50,
+   "block_m": 60,
+   "min_share": 0.5,
+   "spacing_m": 220,
+   "min_run_m": 120
+  },
+  "blocks": {
+   "class": 50,
+   "cell_m": 18,
+   "min_share": 0.5,
+   "roads": "data/raw/osm/mexico-city-asc/roads.json",
+   "streets": "data/raw/osm/mexico-city-asc/streets.json",
+   "gap_m": {
+    "motorway": 60,
+    "trunk": 60,
+    "primary": 45,
+    "secondary": 36,
+    "tertiary": 25,
+    "street": 12
+   }
+  }
+ },
+ "rhythm": {
+  "r_km": 1.0,
+  "min_cells": 4,
+  "rows": [
+   {
+    "name": {
+     "en": "Nezahualcóyotl",
+     "uk": "Несауалькойотль"
+    },
+    "lon": -99.018,
+    "lat": 19.408
+   },
+   {
+    "name": {
+     "en": "Airport (GNSS MMX1)",
+     "uk": "Аеропорт (GNSS MMX1)"
+    },
+    "lon": -99.0684,
+    "lat": 19.4317
+   },
+   {
+    "name": {
+     "en": "Tláhuac",
+     "uk": "Тлауак"
+    },
+    "lon": -99.005,
+    "lat": 19.27
+   },
+   {
+    "name": {
+     "en": "Lake Texcoco bed",
+     "uk": "Дно озера Тескоко"
+    },
+    "lon": -98.99,
+    "lat": 19.47
+   },
+   {
+    "name": {
+     "en": "Xico",
+     "uk": "Шико"
+    },
+    "lon": -98.945,
+    "lat": 19.275
+   },
+   {
+    "name": {
+     "en": "Historic centre",
+     "uk": "Історичний центр"
+    },
+    "lon": -99.133,
+    "lat": 19.4326
+   },
+   {
+    "name": {
+     "en": "Xochimilco",
+     "uk": "Сочимілько"
+    },
+    "lon": -99.105,
+    "lat": 19.263
+   },
+   {
+    "name": {
+     "en": "Cerro de la Estrella (hill)",
+     "uk": "Серро-де-ла-Естрелья (пагорб)"
+    },
+    "lon": -99.0925,
+    "lat": 19.3589
+   },
+   {
+    "name": {
+     "en": "Sierra de Guadalupe (zero point)",
+     "uk": "Сьєрра-де-Гуадалупе (нуль)"
+    },
+    "lon": -99.115,
+    "lat": 19.55,
+    "ref": true
+   }
+  ]
+ },
+ "story": "sites/mexico-city-asc.story.json"
+}

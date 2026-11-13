@@ -1,0 +1,34 @@
+{
+ "scenes": [
+  {
+   "id": "mexico-city-asc",
+   "title": {
+    "en": "Mexico City",
+    "uk": "Мехіко"
+   },
+   "subtitle": "NISAR L-band GUNW, ascending (morning) pass",
+   "kind": "terrain+velocity+contours+surface+grid"
+  },
+  {
+   "id": "panama-quake",
+   "title": "Panama M7.7 earthquake",
+   "subtitle": "2026-10-09 · fault estimate from two NISAR passes, with a confidence flag",
+   "kind": "quake"
+  },
+  {
+   "id": "central-valley-asc",
+   "title": "Central Valley, California",
+   "subtitle": "Rhythm of the fields: radar coherence through the farming year",
+   "kind": "fields"
+  },
+  {
+   "id": "langtang-asc",
+   "title": {
+    "en": "Langtang valley, Nepal",
+    "uk": "Долина Лангтанг, Непал"
+   },
+   "subtitle": "Debris-flow footprint: where the radar lost the ground's fingerprint",
+   "kind": "terrain+footprint"
+  }
+ ]
+}

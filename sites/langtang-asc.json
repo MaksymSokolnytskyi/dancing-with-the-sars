@@ -1,0 +1,178 @@
+{
+ "id": "langtang-asc",
+ "title": {
+  "en": "Langtang valley, Nepal",
+  "uk": "Долина Лангтанг, Непал"
+ },
+ "subtitle": "Debris-flow footprint: where the radar lost the ground's fingerprint",
+ "bbox": [
+  85.37,
+  28.17,
+  85.67,
+  28.47
+ ],
+ "direction": "ASCENDING",
+ "cache_height": 5000,
+ "anchor": "radar-only",
+ "dem_path": "data/raw/dem/langtang_cop30_utm.tif",
+ "dem_res": 30,
+ "terrain": {
+  "interval_m": 200,
+  "spacing_px": 3.0,
+  "sigma_dir_m": 250,
+  "sigma_tone_m": 120
+ },
+ "layers": [
+  "terrain",
+  "footprint"
+ ],
+ "footprint": {
+  "event_date": "2026-08-26",
+  "ratio": 0.35,
+  "pre_coh": 0.4,
+  "min_km2": 0.05,
+  "series": true
+ },
+ "notes": [
+  "Footprint rule (co / adjacent-pre coherence < 0.35 where pre > 0.4) was found post-hoc on this event (L-dpm); not yet validated blind."
+ ],
+ "osm": {
+  "rivers": "way[\"waterway\"~\"^(river|stream)$\"]({b});out geom;",
+  "glaciers": "(way[\"natural\"=\"glacier\"]({b});relation[\"natural\"=\"glacier\"]({b}););out geom;",
+  "water": "(way[\"natural\"=\"water\"]({b});relation[\"natural\"=\"water\"]({b}););out geom;",
+  "villages": "node[\"place\"~\"^(town|village|hamlet)$\"]({b});out;",
+  "peaks": "node[\"natural\"=\"peak\"][\"name\"]({b});out;",
+  "paths": "way[\"highway\"~\"^(path|track|footway|unclassified)$\"]({b});out geom;"
+ },
+ "context": [
+  {
+   "id": "glaciers",
+   "kind": "waterlines",
+   "src": "data/raw/osm/langtang-asc/glaciers.json",
+   "levels_m": [
+    0,
+    50,
+    120,
+    210,
+    320,
+    460,
+    640
+   ],
+   "style": "glacier",
+   "label": {
+    "en": "Glaciers",
+    "uk": "Льодовики"
+   },
+   "z": 1.15,
+   "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "lakes",
+   "kind": "waterlines",
+   "src": "data/raw/osm/langtang-asc/water.json",
+   "levels_m": [
+    0,
+    20,
+    50,
+    90
+   ],
+   "style": "water",
+   "label": {
+    "en": "Lakes",
+    "uk": "Озера"
+   },
+   "z": 1.2,
+   "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "rivers",
+   "kind": "lines",
+   "src": "data/raw/osm/langtang-asc/rivers.json",
+   "style": "river",
+   "min_len_m": 1200,
+   "label_from": [
+    "name:en",
+    "name"
+   ],
+   "latin_only": true,
+   "label_only": [
+    "Lende Khola",
+    "Langtang Khola",
+    "Bhote Koshi",
+    "Chhochen Khola"
+   ],
+   "label": {
+    "en": "Rivers and streams",
+    "uk": "Річки й потоки"
+   },
+   "z": 1.25,
+   "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "paths",
+   "kind": "lines",
+   "src": "data/raw/osm/langtang-asc/paths.json",
+   "style": "path",
+   "min_len_m": 300,
+   "label": {
+    "en": "Trails",
+    "uk": "Стежки"
+   },
+   "z": 1.3,
+   "visible": false,
+   "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "villages",
+   "kind": "lines",
+   "src": "data/raw/osm/langtang-asc/villages.json",
+   "style": "place",
+   "name_key": [
+    "name:en",
+    "name"
+   ],
+   "latin_only": true,
+   "rank": {
+    "town": 2,
+    "village": 2,
+    "hamlet": 1
+   },
+   "label": {
+    "en": "Villages",
+    "uk": "Селища"
+   },
+   "z": 3.6,
+   "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "summits",
+   "kind": "lines",
+   "src": "data/raw/osm/langtang-asc/peaks.json",
+   "style": "peak",
+   "name_key": [
+    "name:en",
+    "name"
+   ],
+   "latin_only": true,
+   "min_tag": {
+    "ele": 6000
+   },
+   "point_format": "{name} ▲ {ele}",
+   "label": {
+    "en": "Summits, m above sea level",
+    "uk": "Вершини, м над рівнем моря"
+   },
+   "z": 3.6,
+   "attribution": "© OpenStreetMap contributors"
+  }
+ ],
+ "relief_info": {
+  "step_m": 300,
+  "peaks": 0
+ },
+ "story": "sites/langtang-asc.story.json",
+ "frame_sub": {
+  "en": "a mountainside that fell, seen by the NISAR radar · {a}–{b}",
+  "uk": "схил, що впав, очима радара NISAR · {a}–{b}"
+ }
+}

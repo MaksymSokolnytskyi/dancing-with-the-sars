@@ -1,0 +1,19 @@
+{
+  "id": "central-valley-asc",
+  "title": "Central Valley, California",
+  "subtitle": "Rhythm of the fields: radar coherence through the farming year",
+  "bbox": [-120.20, 35.80, -119.00, 36.50],
+  "ref_bbox": [-119.10, 36.33, -119.02, 36.43],
+  "ref_label": "built-up blocks (coherence normaliser)",
+  "direction": "ASCENDING",
+  "cache_height": 80,
+  "anchor": "radar-only",
+  "layers": ["fields"],
+  "fields": {
+    "block_km": 2, "k": 4,
+    "landcover": {"npz": "data/raw/context/cv_worldcover_frac.npz",
+                  "grid_tif": "data/processed/central-valley-asc/nisar_rate.tif",
+                  "crop": "cropland", "ref": "builtup", "crop_min": 0.6, "ref_min": 0.3}
+  },
+  "notes": ["Post-hoc exploratory clustering (X-coh, night 10-11.11); pre-registered X1-X3 results in notes/experiments.md."]
+}
