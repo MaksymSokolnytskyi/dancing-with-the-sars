@@ -64,7 +64,7 @@ uv run sars serve                         # відкрити http://localhost:87
 6. **Робочий цикл:**
    - гілка `<ім'я>/<тема>`;
    - smoke-тест;
-   - pull request;
+   - pull request: GitHub сам вставить чек-лист, пройдіть його (пояснення в [CONTRIBUTING.md](../../CONTRIBUTING.md#before-you-open-a-pull-request));
    - хтось із команди дивиться;
    - злиття.
 
