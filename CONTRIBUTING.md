@@ -36,6 +36,27 @@ your own Earthdata token, then run `uv run sars doctor`.
   check `git status` anyway.
 - Large files: keep each committed file under ~10 MB (the biggest built layer today is 5.4 MB).
 
+## Before you open a pull request
+
+The same checklist is in [.github/pull_request_template.md](.github/pull_request_template.md), so GitHub puts it in every
+new PR. Each line comes from a real review (PR #1).
+
+1. **Language.** Anything the jury can open starts in English: `lang` defaults to `en`, and the title and every map label
+   have an `en` version. Internal Ukrainian text goes in `docs/uk/`, not in `web/`.
+2. **The plate says no more than the test.** If a test came out "partly" or "no", the plate says so in one sentence
+   (for example: our value is above the paper's range; the method misses small events; 1 of 4 GNSS stations agrees).
+3. **One number, one value.** A figure that appears in several places (story text, layer note, legend) is the same
+   everywhere.
+4. **Pre-registered.** Every test behind a claim has its prediction and thresholds in `notes/experiments.md`, written
+   before the run. Choices made after looking at the data (a dropped station, a changed threshold) are marked post-hoc.
+5. **New data is documented.** Each new dataset has a row in `docs/data-guide.md` and in the credits in `README.md`,
+   with its licence.
+6. **Someone else can rebuild it.** The analysis scripts are in the repo, and the inputs come from `sars fetch` or are
+   described in the data guide. A page built from files only you have cannot be fixed by anyone else.
+7. **No personal e-mail in commits.** Set `git config user.email <id>+<login>@users.noreply.github.com` (the id is on
+   https://github.com/settings/emails). PRs are squash-merged.
+8. **Smoke test passes**: `uv run python tests/smoke.py`.
+
 ## Science rules
 
 - **Pre-register**: write the prediction and thresholds in `notes/experiments.md` before running a test that supports a
