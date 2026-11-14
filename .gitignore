@@ -7,6 +7,7 @@ __pycache__/
 
 # data: downloads, caches, intermediate products (fetch them with `uv run sars fetch <plate>`)
 /data/
+/output/
 *.part.npz
 
 # heavy local outputs
