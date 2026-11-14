@@ -12,7 +12,8 @@ import each other by module name, so run them by path, not as a package.
 - Inputs go to `data/` and results to `output/` at the repo root; both are ignored by git.
 - Secrets are read from the environment only (`_secrets.py`): `EARTHDATA_TOKEN` or the file `~/.edl_token` (NASA Earthdata),
   `FIRMS_MAP_KEY` (NASA FIRMS area API). Nothing is read from files inside the repo.
-- Extra packages used only here: `pyosmium` (OSM extract), `torch` (`uv sync --group ml`) for the NPE and real-time dike scripts.
+- Extra packages used only here: `uv sync --group ml --group research` installs `torch` and `zuko` (NPE and real-time dike
+  scripts) and `shapely` and `osmium` (OSM extract). Name every group you need in one `uv sync`: groups left out are removed.
 
 ## Order
 

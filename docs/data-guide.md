@@ -100,7 +100,7 @@ These two commands are reconstructed from the scripts' options and have not yet 
    → `output/reykjanes/ml/*.json`; `run_pipeline.py` runs the NISAR source, FE and real-time dike steps.
 5. `uv run python scripts/build_reykjanes_scroll.py` (add `--no-math` for a jury build) → `web/reykjanes-scroll.html`.
 
-Not yet checked on a clean clone. Extra packages used only here: `pyosmium` (OSM), `torch` (`uv sync --group ml`).
+Not yet checked on a clean clone. Extra packages used only here: `uv sync --group ml --group research` (torch, zuko, shapely, osmium).
 
 ## File formats
 

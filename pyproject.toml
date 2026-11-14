@@ -22,8 +22,10 @@ dependencies = [
 sars = "hachure.cli:main"
 
 [dependency-groups]
-# GPU experiments (synthetic interferograms, denoisers): uv sync --group ml
-ml = ["torch"]
+# GPU experiments (synthetic interferograms, denoisers, NPE flows): uv sync --group ml
+ml = ["torch", "zuko"]
+# research scripts outside the CLI (scripts/reykjanes/: OSM extract, geometry): uv sync --group research
+research = ["shapely", "osmium"]
 
 [tool.uv.sources]
 torch = [{ index = "pytorch-cu126", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
