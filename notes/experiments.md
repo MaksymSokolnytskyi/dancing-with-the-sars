@@ -1785,3 +1785,109 @@ Numbers come from `output/reykjanes/results.html` and `output/reykjanes/ml/*.jso
   the prior.
 - **R5c. Truly blind test on future NISAR pairs.** Model and hyper-parameters frozen at the commit that adds this line.
   Pass on a quiet pair: P(no dike) ≥ 0.8. Pass on a dike pair: trace within 2 km of the vents later mapped by IMO.
+
+## K. Kakhovka reservoir bed: L-band radio physics with GCOV (`edoTenseii` + Claude)
+
+Goal: use the drained Kakhovka reservoir bed (dry since June 2023) as a natural test range for L-band radio physics:
+mirror (water), volume (young willow and poplar forest that grew on the bed), rough bare ground (sand and silt), all side
+by side, seen by four NISAR tracks at different incidence angles. Afterwards the same code runs on a quad-pol site
+(northern Wisconsin, track D113/065) for validation.
+
+**Pre-registered 2026-11-14 ~19:30 (Dnipro time), before any GCOV backscatter value over Kakhovka was read.**
+What had been seen before writing this, and nothing else:
+- ASF search counts: ~50 GCOV scenes (`2005_DHDH`, HH + HV, band A 20 MHz on a 20 m grid, band B 5 MHz on 80 m) from
+  4 tracks (A42/26, A143/25, D36/64, D108/65), Nov 2025 – Nov 2026; Sentinel-2 L2A cloud-free scenes exist (tile 36TXT).
+- The metadata of one scene (A42, 2026-10-27): `noiseCorrectionApplied = False`, `faradayRotationApplied = False`,
+  `rfiMitigationApplied = False`, `isFullCovariance = False`; product noise-equivalent backscatter (`noiseEquivalentBackscatter`)
+  medians −15 dB HH / −14 dB HV in band A and −21 / −19 dB in band B; `rfiLikelihood` 2.4e6 (A) and 9.2 (B) although the
+  attribute says the value lies in [0, 1]; crosstalk all zeros; elevation antenna pattern exactly 1.
+
+**Window.** W 34.75, S 47.35, E 35.20, N 47.70 (the upper bed, Velykyi Luh). Chosen to leave out settlements and
+industrial sites; only natural surface classes are analysed. (This paragraph was reworded on 2026-11-14 before the repo
+goes public; the window and every rule below are unchanged.)
+
+**Classes** (independent of the radar):
+- *bed*: ESA WorldCover 2021 class "permanent water" (the reservoir before it was drained).
+- *water*: Sentinel-2 L2A scene classification SCL = 6 on both 2026-08-23 and 2026-02-27, NDWI ≥ 0.3 in August, and
+  every S2 pixel under a GCOV pixel water (no mixed edge pixels).
+- *vegetated bed*: bed, NDVI ≥ 0.6 on 2026-08-23, not water on either S2 date.
+- *bare bed*: bed, NDVI < 0.25 on 2026-08-23, not water on either date.
+- *cropland control*: WorldCover 2021 cropland outside the bed.
+- Frozen / unfrozen dates: Open-Meteo hourly 2 m air temperature at the overpass hour, plus the 24 h mean before it.
+  Frozen: overpass T < −2 °C and 24 h mean < 0 °C. Unfrozen: overpass T > +2 °C. Others are left out of K2 and K4.
+
+**K0. Product audit (reported, not judged).** For every scene: `rfiLikelihood` per band and polarization, Faraday rotation,
+the processing flags, whether crosstalk is all zero and the antenna pattern all one.
+
+**K1. Is the water at the noise floor the product states?** dB values = 10·log10 of gamma0 (linear power).
+NEB interpolated from its coarse grid to each GCOV pixel.
+- K1a. Band B, every scene: median over water of 10·log10(γ⁰_HV / NEB_HV) within ±2 dB in ≥ 80 % of scenes.
+  Pass means: noise is not subtracted, calm water returns nothing in HV, and the stated NEB is the real floor in γ⁰ units.
+- K1b. Band B: median water HH ≥ median water HV − 0.5 dB in ≥ 80 % of scenes (HH carries some Bragg return from
+  wind ripples, HV only noise).
+- K1c. Band A, one scene per track (4 scenes): the same ratio as K1a. Reported per scene; judged with the same ±2 dB.
+
+**K2. Does the 24 cm wave see leaves?** Band B, per track, unfrozen dates only (rule above), per-date class median in dB,
+seasonal amplitude = max − min of these medians.
+- K2a. Vegetated bed: HV amplitude ≤ 2.0 dB on ≥ 3 of 4 tracks (leaves ≈ 5 cm ≪ λ are weak Rayleigh scatterers;
+  trunks and branches dominate and do not change with season).
+- K2b. Vegetated-bed HV amplitude < cropland HV amplitude on ≥ 3 of 4 tracks.
+
+**K3. Angular signature γ⁰(θ).** Band B, dates 2026-06-01 … 2026-09-30, unfrozen. Per track: class median γ⁰ (dB) and
+class median incidence angle θ (from the `radarGrid/incidenceAngle` cube at the bed height).
+- If the four tracks span < 5° of θ over the classes, K3 is **inconclusive** and not judged.
+- K3a. Vegetated bed: max − min of the four track medians ≤ 1.5 dB in HV and in HH (volume scattering, γ⁰ almost flat in θ).
+- K3b. Bare bed: least-squares slope of HH γ⁰ against θ ≤ −0.10 dB/deg, and steeper (more negative) than the
+  vegetated-bed HH slope. Ascending and descending tracks also look from opposite sides; this confound is stated, not removed.
+
+**K4. Frozen ground lowers backscatter (permittivity of ice ≈ 3.2 against ≈ 80 for liquid water).** Band B, bare bed and
+cropland control, per track with ≥ 1 frozen and ≥ 2 unfrozen dates in Nov 2025 – Mar 2026:
+- K4. Median HH on frozen dates is lower than the median of the unfrozen dates of the same months by ≥ 1.5 dB on at
+  least half of the eligible track × class cases. Fewer than 2 eligible cases: inconclusive.
+
+**Amendment (2026-11-14 ~20:50, before any class-based radar value was computed; only the K0 audit had been printed).**
+The class layers came out empty: the Sentinel-2 scene of 2026-02-27 (S2B_36TXT_20260227_0) covers only ~21 % of the
+window (79 % no-data at the swath edge), and the code had picked the edge-of-swath scene of 2026-08-23 too. Changes:
+the second S2 date is **2026-03-11** (S2C_36TXT_20260311_0: 0 % no-data, 0.1 % cloud, no snow; early spring, leaf-off),
+and each date uses the scene with the least no-data. Every class rule and threshold above stays as written.
+Implementation details fixed now, also before any class-based radar value: *bed* = WorldCover water fraction ≥ 0.9 of
+the 80 m cell; *cropland control* = cropland fraction ≥ 0.9 and no water; a window is used for a class only with ≥ 50
+class pixels.
+
+**Timing note.** The pre-registration above and the results below went into git in one commit (efbd7ee, 21:31), so
+git cannot show that the predictions were written at ~19:30; that time is our own record. The planned Wisconsin run will
+commit its pre-registration on its own, before any data is read.
+
+**Results K (2026-11-14 ~21:30, `experiments/k_fetch.py`, `experiments/k_tests.py`).** 48 band B windows (A42: 17 dates
+Nov 2025 – Oct 2026; A143, D36, D108: Jun – Nov 2026 only), 4 band A windows (Aug 2026). Class pixels on the 80 m grid:
+water 2 631, vegetated bed 41 187, bare bed 2 758, cropland 73 973.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| K0 `rfiLikelihood` outside [0, 1] | A: 41 of 48 scenes (max 3.3e12); B: 39–40 of 48 (max 46) | reported | product field broken in later processing (X05009 Nov 2025 scenes are inside [0, 1]) |
+| K0 calibration layers | crosstalk all zero, elevation antenna pattern all one, Faraday 0 and not applied, noise not subtracted, in all 48 | reported | placeholders in this provisional product |
+| K1a water HV / NEB_HV within ±2 dB | 10 % of scenes; median ratio +6.4 dB | ≥ 80 % | **fail** |
+| K1b water HH ≥ HV − 0.5 dB | 40 % of scenes | ≥ 80 % | **fail** (HV above HH over water in most scenes) |
+| K1c band A water HV / NEB_HV | −5.9, +7.2, +6.7, +7.1 dB | ±2 dB | **fail** on 4 of 4 |
+| K2a vegetated-bed HV amplitude ≤ 2 dB | 4.5, 13.5, 5.1, 6.2 dB (D36, A42, D108, A143) | ≥ 3 of 4 | **fail** |
+| K2b vegetated-bed HV amp < cropland HV amp | 4 of 4 | ≥ 3 of 4 | pass |
+| K3 θ spread | 11.0° (34.6–45.4°) | ≥ 5° | judged |
+| K3a vegetated-bed range across tracks | HV 3.0 dB, HH 0.8 dB | ≤ 1.5 both | **fail** |
+| K3b bare-bed HH slope | +0.12 dB/deg (vegetated +0.07) | ≤ −0.10 and steeper | **fail** |
+| K4 frozen − unfrozen HH (A42 only, 2 cases) | bare +1.4 dB, cropland +1.0 dB | ≤ −1.5 on half | **fail** |
+
+**Diagnostic (post-hoc, not pre-registered).**
+- Over this window the backscatter levels are not physical for these surfaces: HV is close to or above HH in every
+  class, water included (median HV − HH +0.5 dB on cropland and +1.5 dB on water; water HV −19 … 0 dB), and all classes
+  move together from date to date by up to ~10 dB.
+- Control lake (`experiments/k_diag.py`): open water of Lake Balaton (Hungary), box 17.72–17.78 E, 46.84–46.88 N,
+  three band B scenes Jul 2026, same product type: water HH −15.4 / −19.2 / −16.0 dB, HV −22.3 / −23.7 / −23.2 dB,
+  HV − NEB_HV +2.2 … +3.2 dB. There the physics holds (HV well below HH, close to the stated floor). Central Valley
+  cropland (test GC) also sat at HV ≈ −20 dB.
+- The cause was not investigated. Confound noted: the A42 winter dates were processed as X05009/X05010, the others as
+  P05023/P05036.
+- **Consequence:** K1–K4 here say nothing about the surfaces, fails or pass (the K2b pass included). The surface tests
+  move to the Wisconsin site (planned, not run yet) with the same code and thresholds. The K0 audit stands: it describes the public
+  product, not the site.
+- Code note (2026-11-14, review of PR #4): the K4 date filter now matches the text (2025-11-01 … 2026-03-31); the K4
+  result is unchanged.
