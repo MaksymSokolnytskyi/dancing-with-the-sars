@@ -36,7 +36,7 @@ Each plate also says how sure it is.
 ## Commands
 
 ```bash
-uv sync                                   # + --group ml (PyTorch, zuko) / --group research (shapely, osmium); name all groups you need in one call
+uv sync                                   # + --group ml (PyTorch, zuko) / --group research (shapely, osmium, pyproj, scikit-fem); name all groups you need in one call
 uv run sars doctor                        # environment, token, network, path length
 uv run sars fetch <plate> --dry-run       # what would be downloaded
 uv run sars fetch <plate>                 # DEM, NISAR windows (pinned by the lock), OSM, WorldCover, context, GNSS

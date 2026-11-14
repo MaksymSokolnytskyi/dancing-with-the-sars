@@ -14,7 +14,7 @@ Claude Code sessions start from [CLAUDE.md](CLAUDE.md). Ukrainian onboarding: [d
 
 1. Install [uv](https://docs.astral.sh/uv/) and clone the repo. On Windows clone into a short folder (e.g. `C:\sars`):
    NISAR file names are ~125 characters and Windows stops at 260 per path unless long paths are enabled.
-2. `uv sync`. Optional groups: `--group ml` (PyTorch, zuko) for the GPU/ML experiments, `--group research` (shapely, osmium)
+2. `uv sync`. Optional groups: `--group ml` (PyTorch, zuko) for the GPU/ML experiments, `--group research` (shapely, osmium, pyproj, scikit-fem)
    for `scripts/reykjanes/`. Name every group you need in one call: `uv sync` removes packages of groups you leave out.
 3. Earthdata token, once: log in at https://urs.earthdata.nasa.gov, Generate Token, and save it as **one line** in
    `~/.edl_token` (Windows: `C:\Users\<you>\.edl_token`) or in the env var `EARTHDATA_TOKEN`.
