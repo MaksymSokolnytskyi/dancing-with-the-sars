@@ -58,7 +58,7 @@ All site keys, layer kinds, themes and the page format are in [web/README.md](we
 | `src/hachure/` | the engine: NISAR access (`nisar.py` GUNW, `gcov.py` backscatter), hachures (`field.py`, `trace.py`), layers for the web (`engine.py`), CLI (`cli.py`) |
 | `sites/` | one JSON per plate, its pages (`.story.json`) and pinned pairs (`.lock.json`) |
 | `scripts/` | pipeline steps the CLI calls (build, story, pack, OSM, WorldCover, quake card) |
-| `web/` | the map app (MapLibre + deck.gl, no build step); `web/data/` holds built plates |
+| `web/` | the map app (MapLibre + deck.gl, no build step); `web/data/` holds built plates; `web/reykjanes-scroll.html` is the packed Reykjanes plate (open the file; rebuild with `scripts/build_reykjanes_scroll.py --src <folder with the Reykjanes products>`) |
 | `experiments/` | one-off tests behind the numbers in `notes/experiments.md` (pre-registered thresholds, results) |
 | `notes/` | research notes and the experiment log (index: `notes/README.md`) |
 | `docs/` | data guide (datasets, licences, formats, what each plate needs); `docs/uk/` Ukrainian onboarding |
@@ -73,7 +73,10 @@ All site keys, layer kinds, themes and the page format are in [web/README.md](we
 - ESA WorldCover 10 m 2021 (CC BY 4.0): © ESA WorldCover project / contains modified Copernicus Sentinel data (2021).
 - OpenStreetMap (ODbL): © OpenStreetMap contributors.
 - Mexico City context (lakebed zone, mapped cracks): Atlas de Riesgos de la Ciudad de México.
-- GNSS station series (Mexico): Nevada Geodetic Laboratory.
+- GNSS station series (Mexico, Reykjanes): Nevada Geodetic Laboratory.
+- Reykjanes plate (`web/reykjanes-scroll.html`): Copernicus Sentinel-1 interferograms of November 2023 processed by ASF HyP3
+  (dike check only); NASA FIRMS VIIRS 375 m active fires; NASA HLS (LP DAAC) vents; reference values from Sigmundsson et al.
+  2024, Science 383:1228 (doi 10.1126/science.adn2838).
 
 NASA does not endorse any non-U.S. Government entity. Each non-NASA source is used under its own terms.
 
