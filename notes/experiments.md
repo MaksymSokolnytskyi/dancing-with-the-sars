@@ -1785,3 +1785,35 @@ Numbers come from `output/reykjanes/results.html` and `output/reykjanes/ml/*.jso
   the prior.
 - **R5c. Truly blind test on future NISAR pairs.** Model and hyper-parameters frozen at the commit that adds this line.
   Pass on a quiet pair: P(no dike) ≥ 0.8. Pass on a dike pair: trace within 2 km of the vents later mapped by IMO.
+
+## O. Ostrava–Karviná mining subsidence: log of tests, recorded 2026-11-14
+
+**Status of this block: post-hoc record.** The Ostrava–Karviná analysis (`scripts/ostrava/`) was run before this log
+existed, so its thresholds were **not** written here in advance. The notebook's settings (bowl threshold −15 cm/yr vertical,
+track confirmation −8 cm/yr LOS on ≥ 2 tracks, water share ≤ 0.30, watershed split at 10 cm/yr, Isolation Forest
+contamination 0.03) were chosen while developing the method on these same data, so every result below is **post-hoc**.
+Data: NISAR L2 GUNW PROVISIONAL, 17 Jun – 17 Oct 2026, vertical from A158_F027 + D152_F063, A057_F027 for confirmation.
+
+### O1. Bowls and what stands on them (results of the first run)
+- 22 bowls after the water mask and the watershed split: 18 in PL (14.86 km²), 4 in CZ (2.81 km²).
+- 10 "reliable" PL bowls (M01–M09, M18): 11.88 km², area-weighted vertical −39.5 cm/yr, 932 buildings, 30.3 km of roads,
+  4.4 km of rail. Fastest: M01 (Bzie Górne), mean −68.4, p10 −174.6 cm/yr.
+- Horizontal motion points to the bowl centre in 82 % of bowls (a physical consistency check).
+- Spoil heaps: where a heap covers part of a bowl, the heap sinks less than the ground next to it (M05, M08), so the strongest
+  sinking is not heap compaction.
+
+### O2. Post-hoc choices and open issues (said on any plate built from this)
+- **"Reliable" is a hand-picked list**, made by eye after the first run: M11, M12, M16, M17, M21, M22 are also confirmed by
+  3 tracks but were left as candidates. M16 is in CZ. So the headline "0 reliable bowls on the Czech side" depends on this
+  choice; with the plain rule "confirmed by 3 tracks" CZ would have 1 bowl (M16, 0.70 km², 2 buildings). The results page
+  now labels the set "hand-picked, post-hoc".
+- PROVISIONAL data, about 4 months: slow trends are not visible. The fastest centres (more than ~12 cm LOS in 12 days) are
+  near the limit of unambiguous L-band phase unwrapping, so the peak values (~−2 m/yr LOS) are provisional.
+- No validation against EGMS or mining-lease maps yet. Mine names and statuses are OSM labels, not checked at the source.
+
+### O3. Next tests, pre-registered 2026-11-14 (before running)
+- **O3a. Rule-based reliable set (a fixed rule, not a test).** Reliable = confirmed by 3 tracks AND no-data share < 0.6 AND
+  water share < 0.10, fixed now. It is written after seeing O1, so it is not a blind test: it only replaces the hand-picked
+  list. Any plate's PL-vs-CZ numbers will use this rule, whatever it gives.
+- **O3b. EGMS check.** For each bowl, the EGMS Ortho-Vertical (2019–2023) mean inside the polygon. Prediction: ≥ 8 of the 10
+  PL bowls of O1 have EGMS mean ≤ −2 cm/yr; ≤ 1 of the 4 CZ bowls does. Pass: both. Partial: one. Fail: neither.

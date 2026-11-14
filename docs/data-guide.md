@@ -58,6 +58,8 @@ web/data/<plate>/                                               the built plate:
 | USGS earthquake catalogue and finite faults | public domain | blind check of our fault estimates | `scripts/fetch_event.py`, `scripts/sbi_compare.py` |
 | Open-Meteo daily rain (historical) | CC BY 4.0 | test H9 (Central Valley) | `experiments/fetch_h9_context.py` |
 | GOES-19 water vapour, IGRA radiosondes | public | atmosphere tests (B6, E2, T2) | `experiments/fetch_goes.py`, `experiments/t2_radiosonde.py` |
+| NISAR L2 GUNW PROVISIONAL (Ostrava–Karviná, 17 Jun – 14 Nov 2026) | NASA open data (provisional product) | mining subsidence bowls (block O) | `scripts/ostrava/ostrava_karvina.ipynb` (earthaccess search, HTTPS window reads; Earthdata token) |
+| OpenStreetMap via the Overpass API and osmnx (Ostrava–Karviná) | ODbL | water and spoil-heap masks, buildings, roads, rail, land use, mines, borders per bowl | the notebook (osmnx) and `scripts/ostrava/ostrava_osm.mjs` (Overpass, cached in `data/ostrava/osm_cache/`) |
 | Sentinel-1 interferograms, Nov 2023 – Jul 2024 (Reykjanes) | Copernicus, free and open; processed by ASF HyP3 (INSAR_GAMMA) | real-dike check of the NPE (10 Nov 2023), null pairs, 2024 events, coherence loss | `scripts/reykjanes/run_s1_dike.py`, `scripts/reykjanes/hyp3_wait.py` (Earthdata token) |
 | GNSS daily series, Iceland (SENG, AUSV, GEVK, VOGC, NYLA, VOGS, REYK) | Nevada Geodetic Laboratory; free, cite Blewitt, Hammond & Kreemer (2018) | independent check of the uplift (R1), dike inversion (R3) | `.tenv3` files into `data/gnss/` (`scripts/fetch_ngl.py --name reykjanes --bbox -22.8 63.75 -22.0 64.05`, then copy) |
 | NASA FIRMS active fires (VIIRS 375 m, MODIS 1 km) | NASA, open (cite FIRMS) | eruption detection, blind check of the dike trace | `scripts/reykjanes/firms_hotspots.py` (key `FIRMS_MAP_KEY` in the environment) |
@@ -101,6 +103,11 @@ These two commands are reconstructed from the scripts' options and have not yet 
 5. `uv run python scripts/build_reykjanes_scroll.py` (add `--no-math` for a jury build) → `web/reykjanes-scroll.html`.
 
 Not yet checked on a clean clone. Extra packages used only here: `pyosmium` (OSM), `torch` (`uv sync --group ml`).
+
+**Ostrava–Karviná, research pipeline.** Not in the CLI yet. A notebook plus plain Node scripts in `scripts/ostrava/`
+(order and requirements in `scripts/ostrava/README.md`); outputs go to `output/ostrava_karvina/` (ignored by git). The
+Earthdata login comes from `EARTHDATA_TOKEN`, `~/.edl_token` or `~/.netrc`. EGMS (Copernicus, free after registration) is
+the planned validation (O3b) and is not used yet.
 
 ## File formats
 
