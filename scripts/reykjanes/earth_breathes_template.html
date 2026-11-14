@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Земля дихає</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{--bg:#f6f5f1;--panel:#ffffff;--ink:#1c1c1a;--muted:#67655e;--line:#e1ded5;--accent:#b2182b;--accent2:#2f5f8f;--chip:#efece4;--ok:#2f6f4f;--bad:#b3412f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141413;--panel:#1c1c1a;--ink:#ecebe6;--muted:#a19f96;--line:#2f2e2a;--accent:#e07a62;--accent2:#7fb0e0;--chip:#2a2926;--ok:#6fbf94;--bad:#e07a62}}
+:root[data-theme="dark"]{--bg:#141413;--panel:#1c1c1a;--ink:#ecebe6;--muted:#a19f96;--line:#2f2e2a;--accent:#e07a62;--accent2:#7fb0e0;--chip:#2a2926;--ok:#6fbf94;--bad:#e07a62}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{display:grid;grid-template-columns:1fr 400px;height:100vh}
+.mapwrap{position:relative;min-height:0}
+#map{position:absolute;inset:0;background:var(--chip)}
+#section{position:absolute;z-index:500;left:12px;right:12px;bottom:12px;max-width:760px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+#section.hidden{display:none}
+#section .head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+#section svg{width:100%;height:auto;display:block}
+aside{background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;padding:16px 16px 40px}
+h1{font:700 22px/1.2 Georgia,"Times New Roman",serif;margin:0}
+.sub{color:var(--muted);margin:4px 0 10px}
+.badge{display:inline-block;padding:2px 8px;border:1px solid var(--ok);color:var(--ok);border-radius:99px;font-size:12px;font-weight:600}
+.headline{background:color-mix(in srgb,var(--accent) 9%,transparent);border-left:3px solid var(--accent);padding:8px 10px;border-radius:0 8px 8px 0;margin:10px 0}
+.headline b{font-size:16px}
+section{border-top:1px solid var(--line);padding:12px 0}
+h2{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:600}
+.date{font:700 24px/1.1 Georgia,serif}
+.days{color:var(--muted);font-size:12px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,select{font:inherit;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.on{outline:2px solid var(--accent2)}
+label.chk{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+label.chk input{margin-top:3px}
+.sw{display:inline-block;width:14px;height:4px;border-radius:2px;margin-top:8px;flex:none}
+.legend .bar{height:10px;border-radius:3px;margin:6px 0 2px}
+.legend .ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+#chart svg{width:100%;height:auto;display:block}
+.pt{color:var(--muted);font-size:12px;margin:2px 0 6px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600}
+td.good{color:var(--ok)} td.bad{color:var(--bad);font-weight:600}
+#btable td:not(:first-child),#btable th:not(:first-child){white-space:nowrap}
+#btable table,#cpinfo table{font-size:12px}
+#bcharts svg,#gpchart svg{width:100%;height:auto;display:block;margin-top:6px}
+.note{color:var(--muted);font-size:12px}
+.tri{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid #f2c200;filter:drop-shadow(0 0 1px #000)}
+.tri.ref{border-bottom-color:#888}
+.volc{width:100%;height:100%;background:#7a1f12;border:2px solid #fff;transform:rotate(45deg);box-shadow:0 0 2px #000}
+.volc.recent{background:#e34a33}
+.key{font:15px/22px system-ui,"Segoe UI Emoji",sans-serif;text-align:center;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid #222;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.place{background:transparent;border:0;box-shadow:none;font:600 12px system-ui,sans-serif;color:#222;text-shadow:0 0 3px #fff,0 0 3px #fff}
+.pick{width:14px;height:14px;border-radius:50%;border:3px solid #111;background:#fff;box-shadow:0 0 0 2px #fff}
+.star{font:20px/20px system-ui;color:#b2182b;text-shadow:0 0 3px #fff,0 0 3px #fff}
+@media (max-width:860px){.app{grid-template-columns:1fr;grid-template-rows:62vh auto;height:auto}aside{border-left:0;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="mapwrap"><div id="map"></div><div id="section" class="hidden"></div></div>
+  <aside>
+    <h1>Земля дихає</h1>
+    <div class="sub">Ісландія здувається: магма накопичується під Свартсенгі, і земля росте. NISAR L-band, два треки, листопад 2025 – жовтень 2026.</div>
+    <span class="badge" id="badge">незалежна перевірка GPS</span>
+    <div class="headline" id="headline"></div>
+
+    <section>
+      <h2>Час</h2>
+      <div class="date" id="date">—</div>
+      <div class="days" id="days"></div>
+      <input type="range" id="slider" min="0" max="1" value="0" aria-label="Дата">
+      <div class="row">
+        <button class="primary" id="play">▶ Відтворити</button>
+        <select id="speed" aria-label="Швидкість"><option value="700">повільно</option><option value="350" selected>звичайно</option><option value="150">швидко</option></select>
+      </div>
+    </section>
+
+    <section>
+      <h2>Що показати</h2>
+      <label class="chk"><input type="radio" name="field" value="up" checked> Накопичене піднімання / опускання (NISAR)</label>
+      <label class="chk"><input type="radio" name="field" value="rate"> Швидкість за рік, см/рік</label>
+      <label class="chk"><input type="radio" name="field" value="sigma"> Похибка швидкості σ, см/рік</label>
+      <label class="chk"><input type="radio" name="field" value="snr"> Довіра: сигнал / шум</label>
+      <label class="chk"><input type="radio" name="field" value="east"> Зсув схід–захід (NISAR)</label>
+      <label class="chk"><input type="radio" name="field" value="model"> Модель: видовжений резервуар</label>
+      <label class="chk"><input type="radio" name="field" value="gp"> ML · GP: піднімання без атмосфери</label>
+      <label class="chk"><input type="radio" name="field" value="screen"> ML · GP: атмосферний екран дати</label>
+      <label class="chk"><input type="radio" name="field" value="cpstep"> ML · стрибки (байєсівський фактор > 20)</label>
+      <label class="chk"><input type="radio" name="field" value="cphinge"> ML · зміна швидкості (фактор > 20)</label>
+      <label class="chk"><input type="radio" name="field" value="none"> нічого (лише штрихи)</label>
+      <div class="legend" id="legend"></div>
+      <div class="row" style="margin-top:6px"><span class="note">прозорість</span><input type="range" id="opacity" min="0" max="100" value="75" style="flex:1" aria-label="Прозорість"></div>
+      <div class="row" style="margin-top:6px"><span class="note">довіра</span>
+        <select id="trust" aria-label="Довіра">
+          <option value="fade" selected>слабкі сигнали бліді</option>
+          <option value="strong">лише надійні (≥ 3σ)</option>
+          <option value="all">усі, без довіри</option></select></div>
+    </section>
+
+    <section>
+      <h2>Графік точки</h2>
+      <div class="pt" id="ptinfo">Клікніть на карті будь-яку точку.</div>
+      <div id="chart"></div>
+      <div class="note" id="chartnote"></div>
+    </section>
+
+    <section>
+      <h2>Розріз</h2>
+      <div class="row">
+        <select id="secpreset" aria-label="Лінія розрізу"></select>
+        <button id="secdraw">Своя лінія</button>
+        <button id="secoff">Сховати</button>
+      </div>
+      <div class="note" id="sechint" style="margin-top:4px">Профіль піднімання вздовж лінії на вибрану дату, зі смугою ±σ і станціями GPS поблизу.</div>
+    </section>
+
+    <section id="bayes">
+      <h2>Байєсівські моделі джерела (ML)</h2>
+      <div class="row">
+        <select id="bmodel" aria-label="Модель"><option value="ellipsoid">видовжений резервуар</option><option value="mogi">точкове джерело (Моґі)</option></select>
+        <select id="bdata" aria-label="Дані"><option value="NISAR + GNSS">NISAR + GPS</option><option value="NISAR only">лише NISAR</option></select>
+        <select id="bmethod" aria-label="Метод виводу"><option value="mcmc_screens">MCMC, справжні екрани атмосфери (еталон)</option><option value="npe_flow">NPE-потік, конкурентний з MCMC (лише NISAR + GPS)</option><option value="npe_raw">NPE, справжні екрани атмосфери</option><option value="npe_gp">NPE, екрани за GP</option><option value="mcmc">MCMC, гауссів шум</option><option value="npe">NPE, гауссів шум (перша версія)</option></select>
+      </div>
+      <div id="bmethods" style="margin-top:6px"></div>
+      <div class="note" style="margin-top:6px">Показати їх на карті: «Шари» → «ML: можливі центри джерела» (точки) і «ML: можливі осі резервуару» (смуги).</div>
+      <div id="btable" style="margin-top:6px"></div>
+      <div id="bcharts"></div>
+      <div class="note" id="bnote"></div>
+    </section>
+
+    <section id="expensive">
+      <h2>Дорога фізика і реальний час (ML)</h2>
+      <div id="xfem"></div>
+      <div id="xdike" style="margin-top:10px"></div>
+      <div id="xs1" style="margin-top:10px"></div>
+      <div id="xtephra" style="margin-top:10px"></div>
+      <div id="xpol" style="margin-top:10px"></div>
+    </section>
+
+    <section id="gpbox">
+      <h2>Гаусівські процеси і виявлення змін (ML)</h2>
+      <div id="gpinfo" class="note"></div>
+      <div id="gpchart"></div>
+      <div id="cpinfo"></div>
+    </section>
+
+    <section>
+      <h2>Шари</h2>
+      <div id="layers"></div>
+      <div class="row" style="margin-top:8px"><span class="note">підкладка</span>
+        <select id="base" aria-label="Підкладка"><option value="street">Карта (Esri)</option><option value="topo">Рельєф (Esri)</option><option value="sat">Супутник (Esri)</option><option value="osm">OpenStreetMap (лише через http)</option></select></div>
+    </section>
+
+    <section>
+      <h2>Незалежна перевірка GPS</h2>
+      <table id="val"></table>
+      <div class="note" style="margin-top:6px" id="valnote"></div>
+    </section>
+
+    <section class="note" id="method"></section>
+  </aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/*__DATA__*/
+(function(){
+const dec = (b, T) => { const s = atob(b), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new T(u.buffer); };
+const IDX = dec(DATA.idx, Int32Array), UP = dec(DATA.up, Int16Array), EAST = dec(DATA.east, Int16Array);
+const MODEL = dec(DATA.model, Int16Array), RATE = dec(DATA.rate, Int16Array), SIG = dec(DATA.sigma, Int16Array);
+const LON = dec(DATA.lon, Float32Array), LAT = dec(DATA.lat, Float32Array);
+const opt = (b, T) => b ? dec(b, T) : null;
+const GPC = opt(DATA.gp_clean, Int16Array), GPS_ = opt(DATA.gp_screen, Int16Array);
+const CPS = opt(DATA.cp_step, Int16Array), CPH = opt(DATA.cp_hinge, Int16Array);
+const MLM = DATA.ml || {};
+const NC = DATA.nx * DATA.ny, ND = DATA.dates.length, SNR = DATA.snr;
+const T0 = new Date(DATA.dates[0]), T1 = new Date(DATA.dates[ND - 1]);
+const yrs = k => (new Date(DATA.dates[k]) - T0) / 3.15576e10;
+const fmtD = s => new Date(s).toLocaleDateString('uk-UA', {day:'numeric', month:'long', year:'numeric'});
+const sgn = v => (v > 0 ? '+' : '') + v;
+let field = 'up', k = ND - 1, picked = null, trustMode = 'fade';
+
+const mm = (A, i) => { const a = A[i]; return a === -32768 ? NaN : a / 10; };
+const cellSNR = c => { const r = mm(RATE, c), s = mm(SIG, c); return isFinite(r) && isFinite(s) && s > 0 ? Math.abs(r) / s : NaN; };
+function value(f, kk, c){
+  if (c < 0) return NaN;
+  if (f === 'model') { const m = mm(MODEL, c); return m * yrs(kk); }
+  if (f === 'rate') return mm(RATE, c);
+  if (f === 'sigma') return mm(SIG, c);
+  if (f === 'snr') return cellSNR(c);
+  if (f === 'gp') return GPC ? mm(GPC, kk * NC + c) : NaN;
+  if (f === 'screen') return GPS_ ? mm(GPS_, kk * NC + c) : NaN;
+  if (f === 'cpstep') return CPS ? mm(CPS, c) : NaN;
+  if (f === 'cphinge') return CPH ? mm(CPH, c) : NaN;
+  return mm(f === 'east' ? EAST : UP, kk * NC + c);
+}
+const DIV = [[-1,[33,102,172]],[-.5,[103,169,207]],[0,[247,247,247]],[.5,[239,138,98]],[1,[178,24,43]]];
+const SEQ = [[0,[255,255,229]],[.35,[254,196,79]],[.7,[217,95,14]],[1,[102,37,6]]];
+const TRU = [[0,[220,220,220]],[.33,[189,215,231]],[.66,[107,174,214]],[1,[8,81,156]]];
+const ramp = (S, x) => { x = Math.max(S[0][0], Math.min(S[S.length-1][0], x)); for (let i = 1; i < S.length; i++) if (x <= S[i][0]) {
+  const [a, ca] = S[i-1], [b, cb] = S[i], w = (x - a) / (b - a); return ca.map((v, j) => v + (cb[j] - v) * w); } return S[S.length-1][1]; };
+const STYLE = {
+  up:    {stops:DIV, lo:-25, hi:25, label:'накопичене піднімання (+) / опускання (−), см', div:true},
+  rate:  {stops:DIV, lo:-25, hi:25, label:'швидкість, см/рік', div:true},
+  sigma: {stops:SEQ, lo:0, hi:8, label:'похибка σ, см/рік', div:false},
+  snr:   {stops:TRU, lo:0, hi:6, label:'сигнал / шум (3 = надійно)', div:false},
+  east:  {stops:DIV, lo:-10, hi:10, label:'зсув на схід (+) / захід (−), см', div:true},
+  model: {stops:DIV, lo:-25, hi:25, label:'модель: піднімання, см', div:true},
+  gp:    {stops:DIV, lo:-25, hi:25, label:'GP: піднімання без атмосфери дат, см', div:true},
+  screen:{stops:[[-1,[84,39,136]],[-.5,[153,142,195]],[0,[247,247,247]],[.5,[241,163,64]],[1,[179,88,6]]], lo:-4, hi:4, label:'атмосферний екран цієї дати, см', div:true},
+  cpstep:{stops:DIV, lo:-6, hi:6, label:'значущий стрибок, см (лише де фактор > 20)', div:true},
+  cphinge:{stops:DIV, lo:-30, hi:30, label:'значуща зміна швидкості, см/рік', div:true}};
+
+// ---- map and raster
+const map = L.map('map', {preferCanvas: true}).setView([63.88, -22.43], 11);
+const bases = {
+  street: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {maxZoom:18, attribution:'Tiles © Esri'}),
+  topo: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {maxZoom:18, attribution:'Tiles © Esri'}),
+  sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:18, attribution:'Imagery © Esri, Maxar, Earthstar Geographics'}),
+  osm: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'© OpenStreetMap contributors'})};
+let base = bases.street.addTo(map);
+document.getElementById('base').onchange = e => { map.removeLayer(base); base = bases[e.target.value].addTo(map); base.bringToBack(); };
+map.attributionControl.addAttribution('NISAR (NASA/ISRO, ASF) · GNSS NGL · об’єкти © OpenStreetMap contributors');
+const B = DATA.box, bounds = [[B[1], B[0]], [B[3], B[2]]];
+const cv = document.createElement('canvas'); cv.width = DATA.nlon; cv.height = DATA.nlat;
+const ctx = cv.getContext('2d'), img = ctx.createImageData(cv.width, cv.height);
+const raster = L.imageOverlay(cv.toDataURL(), bounds, {opacity: .75, interactive: false}).addTo(map);
+function drawRaster(){
+  const px = img.data;
+  if (field === 'none') { px.fill(0); }
+  else {
+    const S = STYLE[field];
+    for (let p = 0; p < IDX.length; p++){
+      const c = IDX[p], v = value(field, k, c), o = p * 4;
+      if (!isFinite(v)) { px[o+3] = 0; continue; }
+      let a = 255;
+      if (['up','rate'].includes(field) && trustMode !== 'all') { const q = cellSNR(c);
+        if (!(q >= SNR.weak)) a = trustMode === 'strong' ? 0 : 50; else if (q < SNR.strong) a = trustMode === 'strong' ? 0 : 140; }
+      const x = S.div ? v / S.hi : (v - S.lo) / (S.hi - S.lo);
+      const col = ramp(S.stops, S.div ? x : x); px[o] = col[0]; px[o+1] = col[1]; px[o+2] = col[2]; px[o+3] = a;
+    }
+  }
+  ctx.putImageData(img, 0, 0); raster.setUrl(cv.toDataURL());
+  const S = STYLE[field], lg = document.getElementById('legend');
+  if (!S) { lg.innerHTML = ''; return; }
+  const grad = S.stops.map(([x, c]) => `rgb(${c.join(',')}) ${((x - S.stops[0][0]) / (S.stops[S.stops.length-1][0] - S.stops[0][0]) * 100).toFixed(0)}%`).join(',');
+  lg.innerHTML = `<div class="bar" style="background:linear-gradient(90deg,${grad})"></div><div class="ticks"><span>${S.div ? '−' + S.hi : S.lo}</span><span>${S.label}</span><span>${S.div ? '+' + S.hi : S.hi}</span></div>`
+    + (['up','rate'].includes(field) && trustMode === 'fade' ? '<div class="note">бліді місця: сигнал нижчий за 3σ</div>' : '');
+}
+
+// ---- hachures that grow with time, styled by trust
+const hachLayer = L.layerGroup().addTo(map);
+const strokes = DATA.hach.map(h => {
+  const up = h.level > 0;
+  const w = 0.7 + Math.min(h.slope / 6, 1) * 2.2;
+  const pl = L.polyline([[h.a[1], h.a[0]], [h.a[1], h.a[0]]], {color: up ? '#b2182b' : '#2166ac', weight: w, lineCap: 'butt', interactive: false});
+  return {h, pl, up};
+});
+function drawHach(){
+  hachLayer.clearLayers();
+  if (!document.getElementById('lay-hach')?.checked) return;
+  const step = DATA.step;
+  for (const s of strokes){
+    const h = s.h;
+    if (h.trust === 'below' && trustMode !== 'all') continue;
+    if (h.trust === 'weak' && trustMode === 'strong') continue;
+    // a stroke grows with the share of this place's total motion reached by the selected date
+    const tk = h.t[k], tN = h.t[h.t.length - 1]; if (tk == null || tN == null || tN === 0) continue;
+    const f = Math.max(0, Math.min(1, tk / tN));
+    if (f <= 0.02) continue;
+    s.pl.setLatLngs([[h.a[1], h.a[0]], [h.a[1] + (h.b[1] - h.a[1]) * f, h.a[0] + (h.b[0] - h.a[0]) * f]]);
+    const weak = h.trust !== 'strong' && trustMode === 'fade';
+    s.pl.setStyle({opacity: weak ? .35 : .95, dashArray: weak ? '2 3' : null});
+    hachLayer.addLayer(s.pl);
+  }
+}
+
+// ---- time
+function draw(){ drawRaster(); drawHach(); drawGP();
+  document.getElementById('date').textContent = fmtD(DATA.dates[k]);
+  document.getElementById('days').textContent = `від ${fmtD(DATA.dates[0])}: ${Math.round(yrs(k) * 365.25)} днів`;
+  if (picked) chart(picked); if (sec) drawSection(); }
+document.getElementById('opacity').oninput = e => raster.setOpacity(e.target.value / 100);
+document.querySelectorAll('input[name=field]').forEach(r => r.onchange = e => { field = e.target.value; draw(); });
+document.getElementById('trust').onchange = e => { trustMode = e.target.value; draw(); };
+const slider = document.getElementById('slider'); slider.max = ND - 1; slider.value = k;
+slider.oninput = e => { k = +e.target.value; draw(); };
+let timer = null; const play = document.getElementById('play');
+const stop = () => { clearInterval(timer); timer = null; play.textContent = '▶ Відтворити'; };
+play.onclick = () => { if (timer) return stop(); if (k >= ND - 1) k = 0; play.textContent = '❚❚ Пауза';
+  timer = setInterval(() => { k++; if (k >= ND) { k = ND - 1; stop(); } slider.value = k; draw(); }, +document.getElementById('speed').value); };
+document.getElementById('speed').onchange = () => { if (timer) { stop(); play.click(); } };
+
+// ---- point chart
+function nearest(lat, lon){ let best = -1, bd = 1e9; const c = Math.cos(lat * Math.PI / 180);
+  for (let i = 0; i < NC; i++){ const d = (LAT[i] - lat) ** 2 + ((LON[i] - lon) * c) ** 2; if (d < bd) { bd = d; best = i; } } return [best, Math.sqrt(bd) * 111.2]; }
+const pickMarker = L.marker([0, 0], {icon: L.divIcon({className:'', html:'<div class="pick"></div>', iconSize:[14,14], iconAnchor:[7,7]}), interactive:false});
+function select(lat, lon, label){
+  const [c, dist] = nearest(lat, lon);
+  if (dist > 0.4) { document.getElementById('ptinfo').textContent = 'Тут немає даних NISAR (море або край кадру).'; return; }
+  let st = null; for (const [s, g] of Object.entries(DATA.gnss)) { if (Math.hypot(g.lat - lat, (g.lon - lon) * Math.cos(lat * Math.PI / 180)) * 111.2 < 1.0) st = s; }
+  picked = {c, lat, lon, label, st}; pickMarker.setLatLng([lat, lon]).addTo(map); chart(picked);
+}
+function svgAxes(W, H, m, lo, hi, X, Y){
+  let s = ''; const step = (hi - lo) > 30 ? 10 : (hi - lo) > 12 ? 5 : 2;
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l - 4}" y="${Y(v) + 4}" text-anchor="end" font-size="10" fill="var(--muted)">${v}</text>`;
+  return s + `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)" stroke-width=".8"/>`;
+}
+function chart(P){
+  const W = 360, H = 210, m = {l:34, r:8, t:10, b:24};
+  const ys = [...Array(ND).keys()].map(i => value('up', i, P.c)), mod = [...Array(ND).keys()].map(i => value('model', i, P.c));
+  const r = mm(RATE, P.c), s = mm(SIG, P.c), g = P.st ? DATA.gnss[P.st] : null;
+  const band = [...Array(ND).keys()].map(i => [r * yrs(i) - 2 * s * yrs(i), r * yrs(i) + 2 * s * yrs(i)]);
+  const all = ys.concat(mod).concat(g ? g.up : []).concat(band.flat()).filter(isFinite);
+  let lo = Math.min(0, ...all), hi = Math.max(0, ...all); const pad = Math.max(1, (hi - lo) * .08); lo -= pad; hi += pad;
+  const X = d => m.l + (new Date(d) - T0) / (T1 - T0) * (W - m.l - m.r), Y = v => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
+  const path = (ts, vs) => { let q = '', pen = false; ts.forEach((t, i) => { if (!isFinite(vs[i])) { pen = false; return; } q += (pen ? 'L' : 'M') + X(t).toFixed(1) + ',' + Y(vs[i]).toFixed(1); pen = true; }); return q; };
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Графік зміщення точки">` + svgAxes(W, H, m, lo, hi, X, Y);
+  for (let mo = 0; mo < 13; mo += 2){ const d = new Date(T0.getFullYear(), T0.getMonth() + mo, 1); if (d < T0 || d > T1) continue;
+    svg += `<text x="${X(d)}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--muted)">${d.toLocaleDateString('uk-UA', {month:'short'})}</text>`; }
+  if (isFinite(r) && isFinite(s)) svg += `<path d="${path(DATA.dates, band.map(b => b[1]))}L${X(DATA.dates[0])},${Y(band[0][0])}${path(DATA.dates.slice().reverse(), band.map(b => b[0]).reverse()).replace('M','L')}Z" fill="var(--accent)" opacity=".12"/>`;
+  svg += `<line x1="${X(DATA.dates[k])}" x2="${X(DATA.dates[k])}" y1="${m.t}" y2="${H - m.b}" stroke="var(--accent2)" stroke-dasharray="3 3"/>`;
+  if (g) svg += `<path d="${path(g.t, g.up)}" fill="none" stroke="#8a8a8a" stroke-width="1"/>`;
+  svg += `<path d="${path(DATA.dates, mod)}" fill="none" stroke="var(--ink)" stroke-width="1.1" stroke-dasharray="5 4"/>`;
+  const gpv = GPC ? [...Array(ND).keys()].map(i => value('gp', i, P.c)) : null;
+  svg += `<path d="${path(DATA.dates, ys)}" fill="none" stroke="var(--accent)" stroke-width="${gpv ? 1.2 : 2}" opacity="${gpv ? .6 : 1}"/>`;
+  ys.forEach((v, i) => { if (isFinite(v)) svg += `<circle cx="${X(DATA.dates[i])}" cy="${Y(v)}" r="${i === k ? 4 : 2}" fill="var(--accent)" opacity="${gpv ? .6 : 1}"/>`; });
+  if (gpv) svg += `<path d="${path(DATA.dates, gpv)}" fill="none" stroke="#6a3d9a" stroke-width="2.2"/>`;
+  document.getElementById('chart').innerHTML = svg + '</svg>';
+  const q = cellSNR(P.c), tr = q >= SNR.strong ? 'надійно' : q >= SNR.weak ? 'слабкий сигнал' : 'на рівні шуму';
+  document.getElementById('ptinfo').innerHTML = `${P.label ? '<b>' + P.label + '</b> · ' : ''}${P.lat.toFixed(4)}° пн. ш., ${Math.abs(P.lon).toFixed(4)}° зх. д.<br>швидкість <b>${isFinite(r) ? sgn(r.toFixed(1)) : '—'} ± ${isFinite(s) ? s.toFixed(1) : '—'} см/рік</b> (${isFinite(q) ? q.toFixed(1) : '—'}σ, ${tr})`;
+  document.getElementById('chartnote').innerHTML = `<span style="color:var(--accent)">━</span> NISAR вертикаль${GPC ? ' · <span style="color:#6a3d9a">━</span> NISAR без атмосфери дат (GP)' : ''} · смуга ±2σ навколо тренду · <span>╌</span> модель${g ? ` · <span style="color:#8a8a8a">━</span> GPS ${P.st} (не використаний в обробці)` : ''}`;
+}
+
+// ---- cross-section
+const secBox = document.getElementById('section'), secLine = L.polyline([], {color:'#111', weight:2, dashArray:'6 4'});
+const secLabels = L.layerGroup();
+let sec = null, drawing = null;
+const pre = document.getElementById('secpreset');
+DATA.sections.forEach((s, i) => { const o = document.createElement('option'); o.value = i; o.textContent = s.name; pre.appendChild(o); });
+pre.onchange = () => setSection(DATA.sections[+pre.value].a, DATA.sections[+pre.value].b);
+document.getElementById('secoff').onclick = () => { sec = null; secBox.classList.add('hidden'); map.removeLayer(secLine); map.removeLayer(secLabels); };
+document.getElementById('secdraw').onclick = e => { drawing = []; e.target.classList.add('on'); document.getElementById('sechint').textContent = 'Клікніть на карті початок (A), потім кінець (B) лінії.'; };
+function setSection(a, b){ sec = {a, b}; secLine.setLatLngs([[a[1], a[0]], [b[1], b[0]]]).addTo(map);
+  secLabels.clearLayers().addTo(map);
+  [['A', a], ['B', b]].forEach(([t, p]) => secLabels.addLayer(L.marker([p[1], p[0]], {opacity:0}).bindTooltip(t, {permanent:true, direction:'center', className:'place'})));
+  secBox.classList.remove('hidden'); drawSection(); }
+function drawSection(){
+  const {a, b} = sec, N = 160, kx = 111.32 * Math.cos(63.88 * Math.PI / 180), ky = 111.2;
+  const L_km = Math.hypot((b[0] - a[0]) * kx, (b[1] - a[1]) * ky);
+  const xs = [], ys = [], lo_ = [], hi_ = [], mod = [];
+  const t = yrs(k);
+  for (let i = 0; i <= N; i++){
+    const f = i / N, lon = a[0] + (b[0] - a[0]) * f, lat = a[1] + (b[1] - a[1]) * f;
+    const [c, dist] = nearest(lat, lon); xs.push(f * L_km);
+    if (dist > 0.4) { ys.push(NaN); lo_.push(NaN); hi_.push(NaN); mod.push(NaN); continue; }
+    const v = value('up', k, c), s = mm(SIG, c), r = mm(RATE, c);
+    ys.push(v); mod.push(value('model', k, c)); lo_.push(r * t - 2 * s * t); hi_.push(r * t + 2 * s * t);
+  }
+  // GNSS stations within 2 km of the line, projected on it
+  const ux = (b[0] - a[0]) * kx / L_km, uy = (b[1] - a[1]) * ky / L_km, near = [];
+  for (const [s, g] of Object.entries(DATA.gnss)){
+    const px = (g.lon - a[0]) * kx, py = (g.lat - a[1]) * ky, along = px * ux + py * uy, off = Math.abs(-px * uy + py * ux);
+    if (off < 2 && along > 0 && along < L_km){
+      let best = null, bd = 1e12; g.t.forEach((d, i) => { const dd = Math.abs(new Date(d) - new Date(DATA.dates[k])); if (dd < bd) { bd = dd; best = g.up[i]; } });
+      near.push({s, along, off, v: best});
+    }
+  }
+  const W = 720, H = 200, m = {l:34, r:10, t:10, b:24};
+  const all = ys.concat(mod, lo_, hi_, near.map(n => n.v)).filter(isFinite);
+  let lo = Math.min(0, ...all), hi = Math.max(0, ...all); const pad = Math.max(1, (hi - lo) * .08); lo -= pad; hi += pad;
+  const X = v => m.l + v / L_km * (W - m.l - m.r), Y = v => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
+  const path = vs => { let q = '', pen = false; vs.forEach((v, i) => { if (!isFinite(v)) { pen = false; return; } q += (pen ? 'L' : 'M') + X(xs[i]).toFixed(1) + ',' + Y(v).toFixed(1); pen = true; }); return q; };
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Розріз">` + svgAxes(W, H, m, lo, hi, X, Y);
+  for (let km = 0; km <= L_km; km += 2) svg += `<text x="${X(km)}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--muted)">${km}</text>`;
+  // ±2σ band drawn as vertical bars where finite
+  xs.forEach((x, i) => { if (isFinite(lo_[i]) && isFinite(hi_[i])) svg += `<line x1="${X(x)}" x2="${X(x)}" y1="${Y(hi_[i])}" y2="${Y(lo_[i])}" stroke="var(--accent)" stroke-opacity=".13" stroke-width="${(W - m.l - m.r) / N + .5}"/>`; });
+  svg += `<path d="${path(mod)}" fill="none" stroke="var(--ink)" stroke-width="1.1" stroke-dasharray="5 4"/>`;
+  svg += `<path d="${path(ys)}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+  near.sort((p, q) => p.along - q.along).forEach((n, i) => { if (isFinite(n.v)) svg += `<path d="M${X(n.along)},${Y(n.v) - 7}l6,11h-12z" fill="#f2c200" stroke="#111"/><text x="${X(n.along) + 8}" y="${Y(n.v) - 6 - (i % 2) * 13}" font-size="11" fill="var(--ink)">${n.s} GPS ${sgn(n.v.toFixed(1))} (${n.off.toFixed(1)} км від лінії)</text>`; });
+  svg += `<text x="${m.l}" y="${H - 6}" font-size="11" fill="var(--ink)" font-weight="600">A</text><text x="${W - m.r}" y="${H - 6}" font-size="11" fill="var(--ink)" font-weight="600" text-anchor="end">B · км</text></svg>`;
+  secBox.innerHTML = `<div class="head"><b>Розріз A–B на ${fmtD(DATA.dates[k])}</b><span class="note"><span style="color:var(--accent)">━</span> NISAR · смуга ±2σ · <span>╌</span> модель · ▲ GPS</span></div>` + svg;
+}
+map.on('click', e => {
+  if (drawing){ drawing.push([e.latlng.lng, e.latlng.lat]);
+    if (drawing.length === 2){ setSection(drawing[0], drawing[1]); drawing = null; document.getElementById('secdraw').classList.remove('on');
+      document.getElementById('sechint').textContent = 'Профіль піднімання вздовж лінії на вибрану дату, зі смугою ±σ і станціями GPS поблизу.'; }
+    return; }
+  select(e.latlng.lat, e.latlng.lng, null);
+});
+
+// ---- vector layers
+const V = DATA.layers.volcanic, LY = DATA.layers.layers;
+const val = p => `модельне здіймання <b>${p.up ?? '—'}</b> см/рік, нахил <b>${p.tilt ?? '—'}</b> мкрад/рік`;
+const dot = (cls, s) => L.divIcon({className:'', html:`<div class="${cls}"></div>`, iconSize:[s, s], iconAnchor:[s / 2, s / 2]});
+const icon = {town:'🏘', resort:'♨', 'power plant':'⚡', airport:'✈'};
+const H = DATA.headline;
+const defs = [
+  ['hach', 'Штрихи руху (ростуть з часом)', '#b2182b', true, null],
+  ['head', 'Головна цифра на карті', '#b2182b', true, () => L.marker([H.lat, H.lon], {icon: L.divIcon({className:'', html:'<div class="star">★</div>', iconSize:[20,20], iconAnchor:[10,10]})})
+     .bindTooltip(`${sgn(H.rate)} ± ${H.sigma} см/рік`, {permanent:true, direction:'right', className:'place'})],
+  ['key', "Ключові об'єкти", '#222', true, () => L.layerGroup([
+     ...V.key.filter(x => x.kind !== 'substation').map(x => L.marker([x.lat, x.lon], {icon: L.divIcon({className:'', html:`<div class="key">${icon[x.kind] || '●'}</div>`, iconSize:[22,22], iconAnchor:[11,11]})})
+       .bindTooltip(x.name, {permanent: ['town','resort','power plant'].includes(x.kind), direction:'right', className:'place'}).on('click', () => select(x.lat, x.lon, x.name))),
+     L.geoJSON(LY.keyroads, {style:{color:'#1a1a1a', weight:3.5, opacity:.8}, onEachFeature:(f, l) => l.bindPopup(`<b>${f.properties.name}</b><br>${val(f.properties)}`)})])],
+  ['fiss', 'Тріщини: ряд Сундгнукур', '#d7191c', true, () => L.layerGroup([
+     ...(V.row.length > 1 ? [L.polyline(V.row, {color:'#d7191c', weight:4, dashArray:'8 5'}).bindPopup('<b>Ряд кратерів Сундгнукур</b><br>інтрузії та виверження 2023–2025; за IMO — найімовірніше місце наступного прориву').bindTooltip('Сундгнукур', {permanent:true, direction:'right', className:'place'})] : []),
+     ...V.vents.map(v => L.circleMarker(v, {radius:3, color:'#d7191c', weight:1, fillColor:'#fdae61', fillOpacity:1}))])],
+  ['volc', 'Вулкани й місця вивержень', '#e34a33', false, () => L.layerGroup(V.volcanoes.map(v => L.marker([v.lat, v.lon], {icon: dot(v.recent ? 'volc recent' : 'volc', v.recent ? 15 : 10)})
+     .bindPopup(`<b>${v.name}</b>${v.en ? ' (' + v.en + ')' : ''}${v.status ? '<br>стан: ' + v.status : ''}<br>${val(v)}`)))],
+  ['gnss', 'Станції GPS (клік — графік)', '#f2c200', true, () => L.layerGroup([
+     ...Object.entries(DATA.gnss).map(([s, g]) => L.marker([g.lat, g.lon], {icon: L.divIcon({className:'', html:'<div class="tri"></div>', iconSize:[14,12]})})
+       .bindTooltip(s, {permanent:true, direction:'right', className:'place'}).on('click', () => select(g.lat, g.lon, 'GPS ' + s))),
+     ...(DATA.layers.gnss || []).filter(g => g.ref).map(g => L.marker([g.lat, g.lon], {icon: L.divIcon({className:'', html:'<div class="tri ref"></div>', iconSize:[14,12]})})
+       .bindTooltip(g.name + ' (нуль)', {permanent:true, direction:'right', className:'place'}))])],
+  ['bpts', 'ML: можливі центри джерела (точки)', '#b2182b', false, () => bPts],
+  ['baxes', 'ML: можливі осі резервуару (смуги)', '#b2182b', false, () => bAxes],
+  ['src', 'Джерело: видовжений резервуар', '#000', false, () => L.polygon(DATA.layers.sources.ellipsoid, {color:'#000', weight:2, fillOpacity:.08}).bindPopup('Видовжений резервуар ~5.7 км, вісь NE–SW, центр на ~2.9 км')],
+  ['pipe', 'Трубопроводи (пара, гаряча вода)', '#d95f02', true, () => L.geoJSON(LY.pipelines, {style: f => ({color: f.properties.sub === 'steam' ? '#d95f02' : f.properties.sub === 'hot_water' ? '#e7298a' : '#7570b3', weight:2.5}), onEachFeature:(f, l) => l.bindPopup(`<b>Трубопровід</b> ${f.properties.sub || ''} ${f.properties.op || ''}<br>${val(f.properties)}`)})],
+  ['power', 'ЛЕП', '#111', false, () => L.geoJSON(LY.power, {style:{color:'#111', weight:1.5, dashArray:'6 4'}, onEachFeature:(f, l) => l.bindPopup(`<b>ЛЕП</b><br>${val(f.properties)}`)})],
+  ['barr', 'Захисні вали', '#3b2a1a', true, () => L.geoJSON(LY.barriers, {style:{color:'#3b2a1a', weight:4}, onEachFeature:(f, l) => l.bindPopup(`<b>Захисний вал</b><br>${val(f.properties)}`)})],
+  ['bld', 'Будівлі (колір — модельне здіймання)', '#ef8a62', false, () => L.layerGroup(DATA.layers.buildings.map(([la, lo, u]) => L.circleMarker([la, lo], {radius:2.5, weight:0, fillOpacity:.9,
+     fillColor: u == null ? '#999' : u > 20 ? '#67001f' : u > 10 ? '#b2182b' : u > 5 ? '#ef8a62' : u > 2 ? '#fddbc7' : '#d1e5f0'})))],
+];
+const box = document.getElementById('layers'), built = {};
+defs.forEach(([id, label, color, on, make]) => {
+  const el = document.createElement('label'); el.className = 'chk';
+  el.innerHTML = `<input type="checkbox" id="lay-${id}" ${on ? 'checked' : ''}><span class="sw" style="background:${color}"></span><span>${label}</span>`;
+  const cb = el.querySelector('input');
+  const sync = () => { if (!make) { drawHach(); return; } if (cb.checked) { built[id] = built[id] || make(); built[id].addTo(map); } else if (built[id]) map.removeLayer(built[id]); };
+  cb.onchange = sync; box.appendChild(el); sync();
+});
+
+// ---- headline, independent check, method
+const TC = DATA.trust_counts;
+document.getElementById('headline').innerHTML = `Де ми певні, що земля росте найшвидше: <b>${sgn(H.rate)} ± ${H.sigma} см/рік</b> (щонайменше ${sgn(H.at_least)}). 1% надійних клітинок піднімається швидше за ${sgn(H.p99)} см/рік; надійне здіймання понад 5 см/рік охоплює ~${H.area_km2} км².
+  <div class="note" style="margin-top:4px">Правило: серед околиць 3 × 3 клітинки по 240 м (~0.7 км) з даними хоча б у 8 із 9 клітинок береться та, де «швидкість − 2σ» найбільша. σ не зменшується усередненням, бо похибки сусідніх клітинок пов'язані. Вертикаль з двох треків.</div>`;
+const vt = document.getElementById('val');
+const gpr = MLM.gp?.station_rate || {};
+vt.innerHTML = '<tr><th>Станція</th><th>NISAR</th>' + (MLM.gp ? '<th>NISAR + GP</th>' : '') + '<th>GPS</th><th>різниця</th></tr>' + Object.entries(DATA.gnss).map(([s, g]) => {
+  const v = g.val, ok = Math.abs(v.z) <= 2;
+  return `<tr><td><a href="#" data-s="${s}">${s}</a></td><td>${sgn(v.nisar)} ± ${v.nisar_sigma}</td>${MLM.gp ? `<td>${gpr[s] != null ? sgn(gpr[s]) : '—'}</td>` : ''}<td>${sgn(v.gnss)} ± ${v.gnss_sigma}</td><td class="${ok ? 'good' : 'bad'}">${sgn(v.diff)} (${Math.abs(v.z)}σ)</td></tr>`; }).join('');
+vt.querySelectorAll('a').forEach(a => a.onclick = e => { e.preventDefault(); const g = DATA.gnss[a.dataset.s]; map.setView([g.lat, g.lon], 12); select(g.lat, g.lon, 'GPS ' + a.dataset.s); });
+document.getElementById('valnote').innerHTML = `Вертикальна швидкість, см/рік, за період. NISAR — медіана околиці 3 × 3 клітинки біля станції, ±1σ. Зелене — різниця в межах 2σ. Жодна з цих станцій не використана ні у відліку, ні в поправках (модель для поправок підігнана лише за NISAR), тож це чесна перевірка.`;
+document.getElementById('method').innerHTML = `<h2>Як це пораховано</h2>
+<p><b>Дані.</b> Когерентні пари NISAR GUNW із висхідного 159A і низхідного 082D треків, підсумовані в накопичене зміщення на кожну дату. Обидва треки зведені на спільну сітку через 12 днів і розкладені на вертикаль і схід–захід. Клітинки по 240 м.</p>
+<p><b>Нуль.</b> Станція GPS NYLA на мисі Рейк'янес (18 км на захід) — наша «Сьєрра-де-Гуадалупе».</p>
+<p><b>Поправки.</b> Іоносфера з продуктів NISAR. Зимові пари з низькою когерентністю замінені середньою швидкістю пікселя. Нахил кожного треку і рух північ–південь віднято за моделлю джерела, підігнаною <b>лише за NISAR</b> (${DATA.model_file}).</p>
+<p><b>Довіра.</b> Для кожної клітинки — лінійна швидкість і її похибка σ з розкиду точок навколо тренду, збільшена на автокореляцію сусідніх дат. Штрих чи клітинка надійні, коли |швидкість| ≥ 3σ, слабкі при 1–3σ, а нижче 1σ це шум. Штрихів: надійних ${TC.strong}, слабких ${TC.weak}, шумових ${TC.below}.</p>
+<p><b>Штрихи.</b> Один ряд на кожні ${DATA.step} см руху за весь період; штрих іде вниз по схилу поля руху, і чим товщий, тим різкіше змінюється рух. З часом кожен штрих видовжується пропорційно тому, яку частку свого річного руху це місце вже набрало.</p>
+<p><b>Обмеження.</b> Окремі дати несуть 2–7 см атмосферного шуму, особливо остання (11.10.2026 на 159A). Біля Гріндавіка NISAR бачить місцеве опускання, якого немає на станції GEVK. Північ кадру має залишковий нахил.</p>`;
+
+// ---- ML: Bayesian source models (neural posterior estimation)
+const NPE = MLM.npe || {};
+// posterior samples on the map: off by default, switched in the layer list
+const bPts = L.layerGroup(), bAxes = L.layerGroup();
+const PNAME = {east:'схід, км', north:'північ, км', depth:'глибина центру, км', volume:'об’єм, млн м³/рік',
+  half_length:'напівдовжина a, км', strike:'вісь, ° від півночі', sill_share:'частка горизонтального розкриття'};
+const PIDX = {mogi:{east:0, north:1, depth:2, volume:3}, ellipsoid:{east:0, north:1, depth:2, half_length:3, strike:4, volume:5, sill_share:6}};
+const COL = {'NISAR + GNSS':'#b2182b', 'NISAR only':'#2166ac'};
+const LAB = {'NISAR + GNSS':'NISAR + GPS', 'NISAR only':'лише NISAR'};
+function histSVG(sets, lo, hi, bins, title, mark){
+  const W = 360, H = 120, m = {l:8, r:8, t:16, b:20}, bw = (hi - lo) / bins;
+  const hs = sets.map(s => { const h = new Array(bins).fill(0); s.v.forEach(x => { const b = Math.floor((x - lo) / bw); if (b >= 0 && b < bins) h[b]++; });
+    const tot = s.v.length || 1; return h.map(c => c / tot / bw); });
+  const top = Math.max(...hs.flat(), 1e-9);
+  const X = x => m.l + (x - lo) / (hi - lo) * (W - m.l - m.r), Y = y => H - m.b - y / top * (H - m.t - m.b);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}"><text x="${m.l}" y="11" font-size="11" fill="var(--ink)" font-weight="600">${title}</text>`;
+  if (mark) svg += `<rect x="${X(mark[0])}" y="${m.t}" width="${X(mark[1]) - X(mark[0])}" height="${H - m.t - m.b}" fill="var(--chip)"/><text x="${X(mark[1]) + 3}" y="${m.t + 10}" font-size="9" fill="var(--muted)">${mark[2]}</text>`;
+  hs.forEach((h, i) => { let p = `M${X(lo)},${Y(0)}`; h.forEach((y, b) => { p += `L${X(lo + b * bw)},${Y(y)}L${X(lo + (b + 1) * bw)},${Y(y)}`; }); p += `L${X(hi)},${Y(0)}`;
+    svg += `<path d="${p}" fill="${sets[i].c}" fill-opacity="${sets[i].main ? .18 : 0}" stroke="${sets[i].c}" stroke-width="${sets[i].main ? 1.6 : 1}" stroke-opacity="${sets[i].main ? 1 : .55}"/>`; });
+  const step = niceStep(hi - lo);
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) svg += `<text x="${X(v)}" y="${H - 6}" font-size="9" text-anchor="middle" fill="var(--muted)">${+v.toFixed(2)}</text>`;
+  return svg + `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)" stroke-width=".6"/></svg>`;
+}
+function niceStep(span){ const r = span / 5, p = 10 ** Math.floor(Math.log10(r)); return [1, 2, 2.5, 5, 10].map(x => x * p).find(x => x >= r); }
+function scatterSVG(set, ix, iy, title, xl, yl){
+  const W = 360, H = 170, m = {l:34, r:8, t:16, b:22};
+  const xs = set.samples.map(s => s[ix]), ys = set.samples.map(s => s[iy]);
+  const q = (a, p) => { const b = [...a].sort((u, v) => u - v); return b[Math.floor(p * (b.length - 1))]; };
+  const x0 = q(xs, .005), x1 = q(xs, .995), y0 = 0, y1 = q(ys, .995);
+  const X = v => m.l + (v - x0) / (x1 - x0) * (W - m.l - m.r), Y = v => H - m.b - (v - y0) / (y1 - y0) * (H - m.t - m.b);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${title}"><text x="${m.l}" y="11" font-size="11" fill="var(--ink)" font-weight="600">${title}</text>`;
+  xs.slice(0, 1500).forEach((x, i) => { if (x >= x0 && x <= x1 && ys[i] <= y1) svg += `<circle cx="${X(x).toFixed(1)}" cy="${Y(ys[i]).toFixed(1)}" r="1.3" fill="${set.c}" fill-opacity=".25"/>`; });
+  const sx = niceStep(x1 - x0), sy = niceStep(y1 - y0);
+  for (let v = Math.ceil(x0 / sx) * sx; v <= x1; v += sx) svg += `<text x="${X(v)}" y="${H - 8}" font-size="9" text-anchor="middle" fill="var(--muted)">${+v.toFixed(1)}</text>`;
+  for (let v = 0; v <= y1; v += sy) svg += `<text x="${m.l - 3}" y="${Y(v) + 3}" font-size="9" text-anchor="end" fill="var(--muted)">${+v.toFixed(0)}</text>`;
+  return svg + `<text x="${W - m.r}" y="${H - 8}" font-size="9" text-anchor="end" fill="var(--muted)">${xl}</text><text x="${m.l}" y="${m.t + 10}" font-size="9" fill="var(--muted)">${yl}</text></svg>`;
+}
+const METH = MLM.methods || {};
+const MNAME = {npe:'NPE, гауссів шум', npe_gauss2:'NPE, гауссів шум (повтор)', mcmc:'MCMC, гауссів шум', mcmc_screens:'MCMC, справжні екрани',
+  npe_raw:'NPE, справжні екрани', npe_gp:'NPE, екрани за GP', npe_flow:'NPE-потік (вибілений, 2 раунди)'};
+function methodSet(mk, meth){ return meth === 'npe' ? NPE[mk] : (METH[mk] || {})[meth]; }
+function renderMethods(mk, ds){
+  const rows = ['mcmc_screens', 'npe_flow', 'npe_raw', 'npe_gp', 'mcmc', 'npe'].filter(m => methodSet(mk, m) && methodSet(mk, m)[ds]);
+  if (!rows.length) { document.getElementById('bmethods').innerHTML = ''; return; }
+  const f = v => (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1));
+  const cell = (S, p) => S && S.summary[p] ? `${f(S.summary[p][2])} <span class="note">[${f(S.summary[p][1])}…${f(S.summary[p][3])}]</span>` : '—';
+  const realCal = (m) => { const S = methodSet(mk, m)[ds]; const g = (METH[mk] || {}).npe_gauss2;
+    const c = S.calibration_real || (m === 'npe' && g && g[ds] ? g[ds].calibration_real : null);
+    if (!c && S.calibration_flow) return `${Math.min(...S.calibration_flow['68'])}–${Math.max(...S.calibration_flow['68'])} %*`;
+    return c ? `${Math.min(...c['68'])}–${Math.max(...c['68'])} %` : (S.mcmc ? `R̂ ${S.mcmc.rhat.toFixed(2)}` : '—'); };
+  const TM = ((MLM.timings || {})[mk] || {})[ds] || {};
+  const dur = s => s == null ? '—' : s < 1 ? s.toFixed(1) + ' с' : s < 90 ? Math.round(s) + ' с' : Math.round(s / 60) + ' хв';
+  const k = n => Math.round(n / 1000) + ' тис.';
+  const trainCell = m => { const x = TM[m]; if (!x) return '—'; return x.train_s ? `${dur(x.train_s)} <span class="note">(${k(x.n_sims)} симуляцій)</span>` : 'не потрібне'; };
+  const inferCell = m => { const x = TM[m]; if (!x) return '—'; return `${dur(x.infer_s)}${x.n_forward ? ` <span class="note">(${k(x.n_forward)} прогонів)</span>` : ''}`; };
+  let t = `<table><tr><th>метод</th><th>глибина, км</th><th>об’єм, млн м³/рік</th>${mk === 'ellipsoid' ? '<th>P(&gt;3 км)</th>' : ''}<th>68 % на справжніх екранах</th><th>навчання (один раз)</th><th>новий набір даних</th></tr>`;
+  rows.forEach(m => { const S = methodSet(mk, m)[ds];
+    t += `<tr><td>${MNAME[m]}</td><td>${cell(S, 'depth')}</td><td>${cell(S, 'volume')}</td>${mk === 'ellipsoid' ? `<td>${S.p_long != null ? Math.round(S.p_long * 100) + ' %' : '—'}</td>` : ''}<td>${realCal(m)}</td><td>${trainCell(m)}</td><td>${inferCell(m)}</td></tr>`; });
+  const mc = TM.mcmc_screens || TM.mcmc, nn = TM.npe_flow || TM.npe_raw || TM.npe;
+  const pay = mc && nn ? Math.max(1, Math.ceil(nn.train_s / Math.max(mc.infer_s - nn.infer_s, 1e-9))) : null;
+  document.getElementById('bmethods').innerHTML = t + '</table><div class="note" style="margin-top:4px">Та сама фізика (Моґі або видовжене тіло), різні способи виводу і моделі шуму. Остання колонка: як часто 68-відсоткові інтервали мережі містять правду на симуляціях зі справжніми, не баченими при навчанні екранами (ідеал 68 %); для MCMC — діагностика збіжності R̂; * NPE-потік перевірено на симуляціях з параметричною моделлю справжніх екранів.' +
+    (pay ? ` Час: MCMC не треба навчати, але кожен новий набір даних (наприклад, нова пара NISAR раз на 12 днів) — це повний прогін семплера. NPE навчається один раз, а потім відповідає за частку секунди; ${pay === 1 ? 'навчання тут коротше навіть за один прогін MCMC' : `навчання окупається з ${pay}-го набору даних`}. Швидкість не гарантує точності: перші NPE для видовженого тіла давали розподіли в 3–10 разів ширші за MCMC. NPE-потік (дані вибілені тією ж коваріацією, що й у MCMC, стиснені до головних компонент, другий раунд в околі відповіді) дає ту саму ширину, що й MCMC; для Моґі зсув медіан ≤ 0.5σ, для видовженого тіла ≤ 1.7σ (глибина на ~0.4 км менша). І NPE відповідає правильно лише для таких самих треків, геометрії та моделі шуму; для нового вікна чи нової моделі її треба перенавчати. Виміряно на одному ноутбуці (8 потоків)${mk === 'ellipsoid' && ds === 'NISAR only' ? '; MCMC тут ділив процесор з іншим розрахунком, тож час удвічі завищено' : ''}.` : '') + '</div>';
+}
+function renderBayes(){
+  const mk = document.getElementById('bmodel').value, ds = document.getElementById('bdata').value, meth = document.getElementById('bmethod').value;
+  renderMethods(mk, ds);
+  const B = methodSet(mk, meth) || NPE[mk];
+  bPts.clearLayers(); bAxes.clearLayers();
+  if (!B || !B[ds]) { document.getElementById('btable').innerHTML = '<div class="note">Немає результатів для цієї моделі.</div>'; document.getElementById('bcharts').innerHTML = ''; return; }
+  const cur = B[ds], oth = B[ds === 'NISAR + GNSS' ? 'NISAR only' : 'NISAR + GNSS'] || {samples: []}, I = PIDX[mk];
+  const fmt = v => (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(1));
+  let t = '<table><tr><th>параметр</th><th>медіана</th><th>68 %</th><th>95 %</th></tr>';
+  for (const p of Object.keys(I)) { const s = cur.summary[p]; t += `<tr><td>${PNAME[p]}</td><td>${fmt(s[2])}</td><td>${fmt(s[1])} … ${fmt(s[3])}</td><td>${fmt(s[0])} … ${fmt(s[4])}</td></tr>`; }
+  document.getElementById('btable').innerHTML = t + '</table>' + (cur.mcmc ? `<div class="note" style="margin-top:4px">MCMC: ${cur.mcmc.n_forward.toLocaleString('uk')} прямих розрахунків за ${cur.mcmc.seconds} с, R̂ ≤ ${cur.mcmc.rhat.toFixed(2)}, ефективних вибірок ≥ ${cur.mcmc.ess}.</div>` : '') + (cur.calibration_flow ? `<div class="note" style="margin-top:4px">На тестових симуляціях: 68-відсоткові інтервали містять правду в ${Math.min(...cur.calibration_flow['68'])}–${Math.max(...cur.calibration_flow['68'])} % випадків, 95-відсоткові — в ${Math.min(...cur.calibration_flow['95'])}–${Math.max(...cur.calibration_flow['95'])} %.</div>` : '') + (cur.calibration_real ? `<div class="note" style="margin-top:4px">На симуляціях зі справжніми екранами, не баченими при навчанні: 68-відсоткові інтервали містять правду в ${Math.min(...cur.calibration_real['68'])}–${Math.max(...cur.calibration_real['68'])} % випадків, 95-відсоткові — в ${Math.min(...cur.calibration_real['95'])}–${Math.max(...cur.calibration_real['95'])} %.</div>` : '') + (cur.calibration ? `<div class="note" style="margin-top:4px">Калібрування на 600 тестових симуляціях: 68-відсоткові інтервали містять правду в ${Math.min(...cur.calibration['68'])}–${Math.max(...cur.calibration['68'])} % випадків, 95-відсоткові — в ${Math.min(...cur.calibration['95'])}–${Math.max(...cur.calibration['95'])} %.</div>` : '');
+  const col = (set, label, main) => ({v: set.samples.map(s => s), c: COL[label], main});
+  const both = (ix) => [{v: oth.samples.map(s => s[ix]), c: COL[ds === 'NISAR + GNSS' ? 'NISAR only' : 'NISAR + GNSS'], main: false}, {v: cur.samples.map(s => s[ix]), c: COL[ds], main: true}];
+  let h = histSVG(both(I.depth), 0, 8, 40, 'глибина центру, км', [3.5, 4.5, 'IMO ~4 км']);
+  h += histSVG(both(I.volume), 0, 50, 50, 'об’єм, млн м³/рік');
+  if (mk === 'ellipsoid') {
+    const len = s => s.map(x => 2 * x);
+    h += histSVG([{v: oth.samples.map(s => 2 * s[I.half_length]), c: COL[ds === 'NISAR + GNSS' ? 'NISAR only' : 'NISAR + GNSS'], main: false},
+                  {v: cur.samples.map(s => 2 * s[I.half_length]), c: COL[ds], main: true}], 0, 12, 24, 'довжина тіла 2a, км (апріорі рівномірно 0.6–12)');
+    const longOnly = set => set.samples.filter(s => s[I.half_length] > 1.5).map(s => s[I.strike]);
+    h += histSVG([{v: longOnly(oth), c: COL[ds === 'NISAR + GNSS' ? 'NISAR only' : 'NISAR + GNSS'], main: false}, {v: longOnly(cur), c: COL[ds], main: true}], 0, 180, 36, 'вісь, ° від півночі (лише тіла довші за 3 км)');
+    h += histSVG(both(I.sill_share), 0, 1, 25, 'частка горизонтального розкриття (1 = лінза, 0 = дайка)');
+  }
+  h += scatterSVG({samples: cur.samples, c: COL[ds]}, I.depth, I.volume, 'глибина проти об’єму: компроміс', 'глибина, км', 'млн м³/рік');
+  document.getElementById('bcharts').innerHTML = h;
+  const isM = meth.startsWith('mcmc');
+  const pl = cur.p_long != null ? Math.round(cur.p_long * 100) : null;
+  const txt = mk === 'ellipsoid'
+    ? (meth === 'npe_flow' ? `NPE-потік: P(довше за 3 км) = ${pl} %, довжина ~6 км, ширина розподілів як у MCMC (×0.87–0.94). Залишкова розбіжність — глибина 3.2 км проти 3.6 км за MCMC (−1.7σ) і вісь 53° проти 59°. Перша версія потоку (48 компонент) губила інформацію про глибину; 192 компоненти виправили більшу частину.`
+       : isM ? `MCMC: тіло завдовжки ~6 км уздовж осі ~55–60° від півночі, P(довше за 3 км) = ${pl} %. Це стійко і з гауссовим шумом, і зі справжніми екранами (з GPS).`
+           : `NPE: P(довше за 3 км) = ${pl} %. Мережа дає розподіли в 3–10 разів ширші за MCMC: 40 000 симуляцій замало, щоб вивчити такий вузький розподіл для 7 параметрів. Тож «довжина не визначена» — обмеження мережі, а не даних; еталон — MCMC.`)
+    : (meth === 'npe_flow' ? 'NPE-потік збігається з MCMC: зсуви медіан ≤ 0.5σ, ширина інтервалів ×1.01–1.14, калібрований на симуляціях.'
+       : isM ? 'MCMC: глибина ~4 км, як в оцінці IMO; об’єм і глибина компенсують одне одного (витягнута хмара).'
+           : (meth === 'npe' ? 'Перша NPE навчена на надто песимістичному гауссовому шумі: справжні дані виявились поза навчальним розподілом, і мережа змістила глибину вгору (3.3 замість ~4.1 км за MCMC).'
+              : meth === 'npe_gp' ? 'NPE на GP-екранах калібрована на своєму шумі, але не на справжніх екранах (26–52 % замість 68 %): GP згладжує дрібномасштабну частину атмосфери, і шум недооцінено.'
+              : 'NPE на справжніх екранах збігається з MCMC (глибина 4.2 км, об’єм 17.5 млн м³/рік) і калібрована на не баченій атмосфері.'));
+  const how = meth === 'npe_flow'
+    ? 'Нормалізуючий потік (нейронні сплайни) на вибілених даних: та сама коваріація шуму, що й у MCMC, проєкція на головні компоненти (шум стає N(0, I)), свіжий шум щоепохи; другий раунд симуляцій лише в околі відповіді першого.'
+    : isM
+    ? 'MCMC (ансамблевий семплер Гудмана–Вера) обчислює ту саму фізичну модель сотні тисяч разів і безпосередньо вибирає з розподілу; зсув і нахил треків проінтегровано аналітично.'
+    : `Мережа (суміш гаусіан) навчена на ${mk === 'ellipsoid' ? '40 000' : '80 000'} симуляціях: джерело + випадкові зсув і нахил треків + ${meth === 'npe_raw' ? 'справжній атмосферний екран (різниця двох дат, випадково повернута)' : meth === 'npe_gp' ? 'GP-екран' : 'гауссів корельований шум'}. Розподіл для справжніх даних — за частку секунди.`;
+  document.getElementById('bnote').innerHTML = `<p>${txt}</p><p>${how} <span style="color:${COL['NISAR + GNSS']}">■</span> NISAR + GPS, <span style="color:${COL['NISAR only']}">■</span> лише NISAR.</p>`;
+  const what = `${mk === 'ellipsoid' ? 'видовжений резервуар' : 'точкове джерело'}, ${LAB[ds]}`;
+  cur.lon.slice(0, 1500).forEach((lo, i) => bPts.addLayer(L.circleMarker([cur.lat[i], lo], {radius: 1.8, weight: 0, fillColor: COL[ds], fillOpacity: .4})
+    .bindTooltip(`Одне з можливих положень центру резервуару (${what}).<br>Густота точок = ймовірність.`, {sticky: true})));
+  (cur.axes || []).slice(0, 120).forEach(a => bAxes.addLayer(L.polyline([[a[0], a[1]], [a[2], a[3]]], {color: COL[ds], weight: 1.2, opacity: .25})
+    .bindTooltip(`Одна з можливих осей видовженого резервуару: напрямок і довжина (${what}).<br>Віяло смуг = невизначеність форми.`, {sticky: true})));
+}
+['bmodel', 'bdata', 'bmethod'].forEach(id => document.getElementById(id).onchange = renderBayes);
+renderBayes();
+
+// ---- ML: expensive physics (layered-crust FE), real-time dike, tephra
+function drawExpensive(){
+  const X = MLM.expensive || {}, box = document.getElementById('expensive');
+  if (!X.fem_mcmc && !X.dike && !X.tephra_png) { box.style.display = 'none'; return; }
+  const f = v => (Math.abs(v) >= 10 ? v.toFixed(0) : v.toFixed(2));
+  const c = (s) => s ? `${f(s[2])} <span class="note">[${f(s[1])}…${f(s[3])}]</span>` : '—';
+  const dur = s => s < 1 ? s.toFixed(1) + ' с' : s < 90 ? Math.round(s) + ' с' : s < 5400 ? Math.round(s / 60) + ' хв' : (s / 3600).toFixed(1) + ' год';
+  if (X.fem_mcmc) {
+    const D = 'depth km b.s.l.', V = 'dV 1e6 m3/yr', T = X.fem_mcmc['layered + topography'], F = X.fem_mcmc['layered, flat'], N = X.fem_npe, ref = X.mogi_ref;
+    let t = `<h3 style="margin:4px 0">Шарувата кора і рельєф: скінченні елементи</h3><table><tr><th>модель і метод</th><th>глибина нижче рівня моря, км</th><th>об’єм, млн м³/рік</th><th>час</th></tr>`;
+    if (ref) t += `<tr><td>однорідний пружний півпростір (Моґі), MCMC</td><td>${c(ref[D])}</td><td>${c(ref[V])}</td><td>~40 с на набір даних</td></tr>`;
+    t += `<tr><td>шари + рельєф, MCMC на емуляторі МСЕ</td><td>${c(T.summary[D])}</td><td>${c(T.summary[V])}</td><td>${dur(T.seconds)} + таблиця з 91 розрахунку МСЕ</td></tr>`;
+    if (F) t += `<tr><td>шари без рельєфу, MCMC</td><td>${c(F.summary[D])}</td><td>${c(F.summary[V])}</td><td>${dur(F.seconds)}</td></tr>`;
+    if (N) { const tm = N.timing;
+      t += `<tr><td>шари + рельєф, NPE на прямих розрахунках МСЕ</td><td>${c(N.summary[D])}</td><td>${c(N.summary[V])}</td><td>${N.n_solves} розрахунків МСЕ ${dur(tm.sim1 + tm.sim2)}, навчання ${dur(tm.train1 + tm.train2)}; нові дані — ${tm.infer.toFixed(1)} с</td></tr>`; }
+    t += '</table>';
+    let note = 'Модель: осесиметрична задача пружності (P2-елементи) з профілем Vp за Růžek et al. 2023 до 2.5 км і типовою ісландською корою глибше (припущення), густина за Гарднером; рельєф NASA/METI ASTER GDEM v3 (30 м; NASADEM до 63.9° пн. ш. не сягає) у наближенні змінної глибини. NPE на прямих розрахунках МСЕ навчено ще з рельєфом Copernicus GLO-30 (різниця з ASTER у точках спостережень ~8 ± 11 м, на результат не впливає). ';
+    if (ref) note += `Шари роблять джерело на ~${(T.summary[D][2] - ref[D][2]).toFixed(1)} км глибшим, а об’єм на ~${Math.round((1 - T.summary[V][2] / ref[V][2]) * 100)} % меншим, ніж однорідний Моґі; рельєф майже нічого не змінює (${F ? (T.summary[D][2] - F.summary[D][2]).toFixed(2) : '—'} км). `;
+    if (N && N.compare) { const sh = Object.values(N.compare).map(v => Math.abs(v.shift_sd)), w = Object.values(N.compare).map(v => v.width_ratio);
+      note += `NPE на прямих розрахунках збігається з MCMC: зсуви медіан ≤ ${Math.max(...sh).toFixed(1)}σ, ширина ×${Math.min(...w).toFixed(2)}–${Math.max(...w).toFixed(2)}` +
+        (N.calibration ? `, калібрування на не бачених розрахунках МСЕ ${Math.round(Math.min(...N.calibration['0.68']) * 100)}–${Math.round(Math.max(...N.calibration['0.68']) * 100)} % (ідеал 68 %)` : '') +
+        `. Кожен розрахунок МСЕ дає форму поля для своєї глибини, а положення й об’єм її лише зсувають і масштабують, тож один розрахунок = ${N.per_solve} точних навчальних прикладів. MCMC прямо на МСЕ потребувало б ~256 000 розрахунків (~15 днів), тому для MCMC потрібен емулятор, а NPE — ні.`; }
+    document.getElementById('xfem').innerHTML = t + `<div class="note" style="margin-top:4px">${note}</div>`;
+  }
+  if (X.dike) { const d = X.dike, T = d.timing, e = d.median_abs_error, c68 = d.calibration['0.68'].map(v => Math.round(v * 100));
+    document.getElementById('xdike').innerHTML = `<h3 style="margin:4px 0">Дайка за секунди після нової пари NISAR</h3>` +
+      `<div class="note">Одна мережа, навчена раз (${dur(T.simulate + T.train)} на ${Math.round(d.n_sims / 1000)} тис. симуляцій Окади), відповідає на кожну нову пару за <b>${T.infer_one.toFixed(2)} с</b>; MCMC — ~${dur(T.mcmc_one)} на подію, ${d.mcmc_for_all_events_hours.toFixed(0)} год на ${d.n_events} подій. ` +
+      `Перевірено на ${d.n_events} синтетичних дайках зі справжньою атмосферою (повернуті екрани NISAR): медіанні похибки — простягання ${e['strike deg'].toFixed(1)}°, довжина ${e['length km'].toFixed(1)} км, розкриття ${e['opening m'].toFixed(2)} м; 68-відсоткові інтервали містять правду в ${Math.min(...c68)}–${Math.max(...c68)} % подій. Події синтетичні: справжньої дайки в наших парах NISAR немає.</div>` +
+      (X.dike_png ? `<img src="${X.dike_png}" alt="Інверсія дайки за секунди: приклад, 1000 подій, час" style="width:100%;margin-top:6px;border-radius:6px;background:#fff">` : '');
+  }
+  if (X.s1) { const s = X.s1, N = s.npe, Mc = s.mcmc, T = s.timing, q = v => `${v[1].toFixed(1)} <span class="note">[${v[0].toFixed(1)}…${v[2].toFixed(1)}]</span>`;
+    const c68 = s.calibration['0.68'].map(v => Math.round(v * 100));
+    document.getElementById('xs1').innerHTML = `<h3 style="margin:4px 0">Справжня дайка 10.11.2023 під Ґріндавіком (Sentinel-1)</h3>` +
+      `<div class="note">NISAR ще не бачив дайки (дані з листопада 2025 р.), тому для перевірки на справжній події взято дві інтерферограми Sentinel-1, оброблені в ASF HyP3: висхідний трек 16 (31.10→12.11.2023) і низхідний трек 155 (10.11 вранці, за години до дайки → 22.11). Модель: дайка за Окадою + джерело під Свартсенгі в шаруватій корі з рельєфом (МСЕ). Опубліковано (Sigmundsson et al. 2024, Science; EGU24-14829): довжина ~15 км, об’єм 130–139 млн м³, Свартсенгі −76…−82 млн м³.</div>` +
+      `<table><tr><th></th><th>NPE (${T.infer_real.toFixed(1)} с)</th><th>MCMC (${Math.round(T.mcmc / 60)} хв)</th><th>опубліковано</th></tr>` +
+      `<tr><td>довжина, км</td><td>${q(N['length km'])}</td><td>${q(Mc['length km'])}</td><td>~15</td></tr>` +
+      `<tr><td>об’єм дайки, млн м³</td><td>${q(s.npe_volume)}</td><td>${q(s.mcmc_volume)}</td><td>130–139</td></tr>` +
+      `<tr><td>розкриття, м</td><td>${q(s.opening_m)}</td><td>${q(Mc['log10 opening m'].map(v => 10 ** v))}</td><td>до ~8 (макс.)</td></tr>` +
+      `<tr><td>простягання, °</td><td>${q(N['strike deg'])}</td><td>${q(Mc['strike deg'])}</td><td>—</td></tr>` +
+      `<tr><td>лог-правдоподібність</td><td>${s.loglike.npe.toFixed(0)}</td><td>${s.loglike.mcmc.toFixed(0)}</td><td>—</td></tr></table>` +
+      `<div class="note" style="margin-top:4px">Чесний підсумок: NPE відповідає за секунди й на симуляціях відкалібрований (68-відсоткові інтервали містять правду в ${Math.min(...c68)}–${Math.max(...c68)} % випадків), а його довжина й об’єм близькі до опублікованих. Але MCMC знаходить кращу підгонку тієї ж моделі (і з власного старту, і зі старту з відповіді NPE): коротшу дайку на північ від Сундгнукура з меншим об’ємом. Тобто одна прямокутна дайка з однаковим розкриттям погано описує справжню (розкриття змінне, до ~8 м, частина під морем і в зоні грабену без когерентності), і на такій «невідповідній моделі» NPE і MCMC розходяться. Шарувата кора замість Моґі покращила узгодженість NPE з даними (лог-правдоподібність ${s.mogi_r1 ? s.mogi_r1.loglike.npe.toFixed(0) : '—'} → ${s.loglike.npe.toFixed(0)}). Наступний крок — дайка зі змінним розкриттям: для неї MCMC дорожчає в рази, а NPE — ні.</div>` +
+      (X.s1_png ? `<img src="${X.s1_png}" alt="Справжня дайка 10.11.2023: дані Sentinel-1, модель NPE, залишки, можливі дайки" style="width:100%;margin-top:6px;border-radius:6px;background:#fff">` : '');
+  }
+  if (X.tephra_png) document.getElementById('xtephra').innerHTML = `<h3 style="margin:4px 0">Кілауеа: тефра і нова лава в радарній яскравості (GCOV)</h3>` +
+    `<div class="note">Зміна яскравості між знімками до і після епізодів фонтанування 2026 р. (100 м, L-діапазон). Найтемніший напрям — на південний захід (187–262° у 8 з 10 пар), за вітром: тефра згладжує поверхню і зменшує розсіювання. Сильне затемнення видно лише в довгих парах (−2.2 і −1.2 дБ). Дно кальдери світлішає в 7 з 10 пар (+0.3…+0.9 дБ) — свіжа шорстка лава.</div>` +
+    `<img src="${X.tephra_png}" alt="Зміна радарної яскравості навколо Кілауеа після епізодів фонтанування" style="width:100%;margin-top:6px;border-radius:6px;background:#fff">`;
+  if (X.pol) { const P = X.pol, S = P.summary, sw = P.sw_change, L = P.span_days.map((d, i) => d >= 20 ? i : -1).filter(i => i >= 0);
+    const ch = ['HH', 'HV', 'HV/HH', 'HH+HV'], nm = {HH: 'HH', HV: 'HV', 'HV/HH': 'HV/HH', 'HH+HV': 'HH+HV'};
+    let t = '<table><tr><th>канал</th><th>шум фону, дБ</th><th>тефра (SW): зміна в довгих парах, дБ</th><th>кальдера: |CNR| · виявлено</th><th>контроль NE: виявлено</th></tr>';
+    ch.forEach(c => t += `<tr><td>${nm[c]}</td><td>${P.noise[c].toFixed(2)}</td><td>${L.map(i => (sw[c][i] > 0 ? '+' : '') + sw[c][i].toFixed(1)).join(' / ')}</td><td>${S[c].caldera.cnr_abs_median.toFixed(1)} · ${S[c].caldera.detect_median.toFixed(0)} %</td><td>${S[c].NE.detect_median.toFixed(0)} %</td></tr>`);
+    document.getElementById('xpol').innerHTML = `<h3 style="margin:4px 0">Які поляризації підкреслюють зміни</h3>` +
+      `<div class="note">Продукти GCOV над Кілауеа — дві поляризації (DH): HH (ко-поляризація: розсіяння поверхнею) і HV (крос-поляризація: об’ємне розсіяння). Порівнюємо HH, HV, їхнє відношення HV/HH і суму на тих самих 10 парах до/після.</div>` + t + '</table>' +
+      `<div class="note" style="margin-top:4px"><b>Тефра:</b> найсильніше видно в HH (−2.5 і −1.3 дБ у довгих парах), HV змінюється у 2–7 разів слабше. Тому відношення HV/HH <i>зростає</i> (+1.1 і +0.9 дБ): тефра пригнічує саме поверхневе розсіяння. Відношення має найменший шум (${P.noise['HV/HH'].toFixed(2)} дБ проти ~0.5 у HH/HV), бо зміни вологості й калібрування, що зсувають обидва канали, скорочуються, і на контрольному секторі NE воно майже нуль — це найчистіший індикатор саме тефри; HH — найпотужніший. <b>Нова лава в кальдері:</b> краще в HV (8 з 10 пар світлішають, |CNR| 0.6) — шорстка лава додає об’ємного розсіяння. У 12-денних парах зміни слабкі (|CNR| &lt; 1): тефра помітна лише в парах 24–36 днів, що охоплюють кілька фонтанувань. Інтерферометрія (GUNW) у NISAR — лише HH.</div>` +
+      (X.pol_png ? `<img src="${X.pol_png}" alt="Зміни HH, HV і HV/HH навколо Кілауеа" style="width:100%;margin-top:6px;border-radius:6px;background:#fff">` : ''); }
+}
+drawExpensive();
+
+// ---- ML: Gaussian processes and change points
+function drawGP(){
+  const G = MLM.gp; if (!G) { document.getElementById('gpbox').style.display = 'none'; return; }
+  const W = 360, H = 110, m = {l:24, r:6, t:14, b:18}, n = G.screen_std.length, top = Math.max(...G.screen_std);
+  const bw = (W - m.l - m.r) / n;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Сила атмосферного екрана по датах"><text x="${m.l}" y="10" font-size="11" fill="var(--ink)" font-weight="600">сила атмосферного екрана дати (σ, см)</text>`;
+  G.screen_std.forEach((v, i) => { const h = v / top * (H - m.t - m.b); svg += `<rect x="${m.l + i * bw + 1}" y="${H - m.b - h}" width="${bw - 2}" height="${h}" fill="${i === k ? 'var(--accent2)' : '#9e9ac8'}"><title>${DATA.dates[i]}: ${v} см</title></rect>`; });
+  [0, 1, 2].filter(v => v <= top).forEach(v => { svg += `<text x="${m.l - 3}" y="${H - m.b - v / top * (H - m.t - m.b) + 3}" font-size="9" text-anchor="end" fill="var(--muted)">${v}</text>`; });
+  svg += `<text x="${m.l}" y="${H - 4}" font-size="9" fill="var(--muted)">${DATA.dates[0]}</text><text x="${W - m.r}" y="${H - 4}" font-size="9" text-anchor="end" fill="var(--muted)">${DATA.dates[n - 1]}</text></svg>`;
+  document.getElementById('gpchart').innerHTML = svg;
+}
+(function gpText(){
+  const G = MLM.gp, C = MLM.cp;
+  if (G) document.getElementById('gpinfo').innerHTML = `<p><b>Гаусівські процеси.</b> Для кожної клітинки: тренд + плавний рух (σ ${G.sigma_f} см, масштаб ${G.length_days} днів) + шум (${G.white} см). Для кожної дати — атмосферний екран (σ ${G.screen_sigma} см, масштаб ~${G.screen_len_km} км), навчений лише поза куполом (далі 8 км від центру), щоб не стерти справжній рух; потім його віднято. На графіку точки фіолетова лінія — ряд без екранів. Найгірша дата — ${DATA.dates[G.screen_std.indexOf(Math.max(...G.screen_std))]}.</p>`;
+  if (C) {
+    let t = `<p><b>Виявлення змін.</b> Байєсівський фактор на тому ж GP: чи краще пояснює дані «стрибок» або «зміна швидкості», ніж плавний рух, з поправкою на пошук дати. Позначено (фактор > 20): стрибки — ${C.step_share} % клітинок, зміна швидкості — ${C.hinge_share} %.</p>
+      <table><tr><th>синтетичне вторгнення</th><th>знайдено?</th><th>оцінка</th><th>хибні тривоги</th></tr>`;
+    C.tests.forEach(x => { t += `<tr><td>−${x.amp} см, ${C.inj_date}</td><td class="${x.found ? 'good' : 'bad'}">${x.found ? 'так, ' + x.date : 'ні'}</td><td>${sgn(x.size)} см</td><td>${x.false_alarm} %</td></tr>`; });
+    t += `</table><div class="note" style="margin-top:4px">Великі вторгнення (~8 см і більше) детектор ловить точно в дату; дрібніші (1–4 см) пропускає. На справжніх даних він позначив «стрибок» −3 см у центрі купола 25.06.2026, але GPS (SENG +0.4 см) його не підтверджує: це атмосфера дати на треку 159A. Тривогу варто піднімати лише тоді, коли стрибок бачать обидва треки і GPS.</div>`;
+    document.getElementById('cpinfo').innerHTML = t;
+  }
+})();
+
+draw();
+const g0 = DATA.gnss.SENG; if (g0) select(g0.lat, g0.lon, 'GPS SENG');
+setSection(DATA.sections[0].a, DATA.sections[0].b);
+map.fitBounds([[63.80, -22.70], [63.98, -22.15]]);
+})();
+</script>
+</body>
+</html>

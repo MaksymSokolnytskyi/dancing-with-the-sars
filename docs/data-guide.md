@@ -58,6 +58,13 @@ web/data/<plate>/                                               the built plate:
 | USGS earthquake catalogue and finite faults | public domain | blind check of our fault estimates | `scripts/fetch_event.py`, `scripts/sbi_compare.py` |
 | Open-Meteo daily rain (historical) | CC BY 4.0 | test H9 (Central Valley) | `experiments/fetch_h9_context.py` |
 | GOES-19 water vapour, IGRA radiosondes | public | atmosphere tests (B6, E2, T2) | `experiments/fetch_goes.py`, `experiments/t2_radiosonde.py` |
+| Sentinel-1 interferograms, Nov 2023 – Jul 2024 (Reykjanes) | Copernicus, free and open; processed by ASF HyP3 (INSAR_GAMMA) | real-dike check of the NPE (10 Nov 2023), null pairs, 2024 events, coherence loss | `scripts/reykjanes/run_s1_dike.py`, `scripts/reykjanes/hyp3_wait.py` (Earthdata token) |
+| GNSS daily series, Iceland (SENG, AUSV, GEVK, VOGC, NYLA, VOGS, REYK) | Nevada Geodetic Laboratory; free, cite Blewitt, Hammond & Kreemer (2018) | independent check of the uplift (R1), dike inversion (R3) | `.tenv3` files into `data/gnss/` (`scripts/fetch_ngl.py --name reykjanes --bbox -22.8 63.75 -22.0 64.05`, then copy) |
+| NASA FIRMS active fires (VIIRS 375 m, MODIS 1 km) | NASA, open (cite FIRMS) | eruption detection, blind check of the dike trace | `scripts/reykjanes/firms_hotspots.py` (key `FIRMS_MAP_KEY` in the environment) |
+| NASA HLS S30 (Harmonized Landsat Sentinel-2) | NASA LP DAAC, open | new lava and vents 2023–2024 | `scripts/reykjanes/hls_timelapse.py`, `hls_dike_optical.py` (Earthdata token) |
+| ASTER GDEM v3 | NASA/METI, LP DAAC, open | topography for the layered-crust FE model | tile N63W023 into `data/dem/aster/` |
+| Geofabrik Iceland OSM extract | OSM contributors, ODbL | roads, geothermal pipes, power lines, lava barriers, places | `data/osm/iceland-latest.osm.pbf`, then `scripts/reykjanes/osm_extract.py` |
+| Sigmundsson et al. 2024, Science 383:1228 (doi 10.1126/science.adn2838) | journal article | reference values for the 2023 dike (R3) | cited; numbers typed in `docs/uk/reykjanes-math.html` |
 
 ## What each plate needs
 
@@ -67,6 +74,7 @@ web/data/<plate>/                                               the built plate:
 | `langtang-asc` | sudden change (debris flow) | NISAR (25 pairs), DEM, OSM | `sars fetch` + `sars build` (checked on a clean clone: same result) |
 | `central-valley-asc` | fields rhythm (coherence) | NISAR (25 pairs), plus a land-cover grid | **two extra steps**, see below |
 | `panama-quake` | earthquake card | quake windows, a trained network (GPU) | research pipeline: `scripts/fetch_event.py`, then `scripts/export_quake.py` with `uv sync --group ml` |
+| `reykjanes` (packed page `web/reykjanes-scroll.html`) | uplift + dike | NISAR GUNW 159A + 082D (also 010D, 087A, 111D), Copernicus DEM tile N63W023, GNSS (NGL), Sentinel-1 HyP3, FIRMS, HLS, OSM extract | research pipeline in `scripts/reykjanes/` (below), then `scripts/build_reykjanes_scroll.py` |
 
 **Central Valley, extra steps.** The `fields` layer clusters cropland pixels, so it needs WorldCover fractions on the
 plate's rate grid. Both files come from the research pipeline, not from `sars fetch` yet:
@@ -78,6 +86,21 @@ plate's rate grid. Both files come from the research pipeline, not from `sars fe
 
 These two commands are reconstructed from the scripts' options and have not yet been run on a clean clone.
 `sars fetch central-valley-asc` warns when either file is missing. Folding both steps into the CLI is open work.
+
+**Reykjanes, research pipeline.** Not in the CLI yet. All scripts live in `scripts/reykjanes/` and write to `data/` and
+`output/` at the repo root (both ignored by git). Secrets come from the environment only: `EARTHDATA_TOKEN` (or
+`~/.edl_token`) and `FIRMS_MAP_KEY`. Order, with what each step writes (details in `scripts/reykjanes/README.md`):
+
+1. `download_site.py reykjanes` → NISAR GUNW windows in `data/reykjanes/gunw/`.
+2. GNSS `.tenv3` into `data/gnss/`; the Copernicus DEM tile into `data/dem/`; FIRMS via `firms_hotspots.py` → `data/firms/`;
+   OSM via `osm_extract.py` → `data/osm/reykjanes_layers.json`.
+3. `reykjanes_ellipsoid.py`, `reykjanes_gnss.py` → source fits; `build_breathing_data.py` → `output/reykjanes/breathing_data.npz`,
+   `breathing_vectors.json`; `build_breathing_app.py` → `output/reykjanes/map_layers.json`.
+4. Sentinel-1 and ML: `run_s1_dike.py`, `s1_dike_npe_v3.py`, `s1_dike_npe_v4.py`, `coherence_fissures.py`, `results_v4_section.py`
+   → `output/reykjanes/ml/*.json`; `run_pipeline.py` runs the NISAR source, FE and real-time dike steps.
+5. `uv run python scripts/build_reykjanes_scroll.py` (add `--no-math` for a jury build) → `web/reykjanes-scroll.html`.
+
+Not yet checked on a clean clone. Extra packages used only here: `pyosmium` (OSM), `torch` (`uv sync --group ml`).
 
 ## File formats
 

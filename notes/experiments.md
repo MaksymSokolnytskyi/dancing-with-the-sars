@@ -1731,3 +1731,57 @@ Script: `scripts/iono_vs_tropo.py`, plus inline checks.
     row structure (an untested explanation).
   - For a plate: show per-field HH and HV curves or a change map, not one valley-wide curve. Say plainly that HH, not HV,
     carries most of the seasonal signal in this valley.
+
+## R. Reykjanes (Svartsengi uplift, 10 Nov 2023 dike): log of tests, recorded 2026-11-14
+
+**Status of this block: post-hoc record.** The Reykjanes tests below were run in a separate working folder before this
+log existed, so their predictions and thresholds were **not** written here in advance. What was fixed before each test is
+stated where the scripts (now in `scripts/reykjanes/`) show it; everything else is labelled **post-hoc**.
+Numbers come from `output/reykjanes/results.html` and `output/reykjanes/ml/*.json`. The plate is `web/reykjanes-scroll.html`.
+
+### R1. Independent GNSS check of the NISAR vertical rate (2025-11 → 2026-10)
+- Fixed before: stations SENG, AUSV, GEVK, VOGC are not used in the rate, the reference (NYLA) or any correction
+  (`build_breathing_data.py` docstring); the NISAR value is the median of 3 × 3 cells at the station.
+- Post-hoc: the agreement threshold |z| < 2 is written down only now.
+- Result: **1 of 4 agrees.** SENG 20.1 ± 1.7 vs 21.0 ± 1.2 cm/yr (z −0.4); AUSV 3.5 vs 7.6 (z −2.7); GEVK −0.3 vs 7.0
+  (z −4.0); VOGC 4.3 vs −1.8 (z +2.8). AUSV and GEVK are 4.4 and 5.5 km from SENG, by Grindavík. The per-cell σ
+  (1–1.7 cm/yr) is too small for these misfits: it does not hold systematic errors. Cause not found.
+
+### R2. Source of the uplift: MCMC vs NPE, homogeneous vs layered crust
+- Fixed before: MCMC with the NISAR screen covariance is the reference; NPE is judged by 68 % coverage on unseen
+  simulations (ideal 68 %) and by its shift from MCMC in σ.
+- Result: Mogi depth 4.1 [4.0–4.3] km, 18 [17–19] Mm³/yr; layered crust (FE) 4.7 [4.5–4.8] km, 15 [14–16] Mm³/yr. The NPE
+  flow matches MCMC for Mogi (shifts ≤ 0.5σ); for the elongated reservoir its depth is 1.7σ shallower (open issue).
+  NPE with GP screens is badly calibrated (27–52 %) and is not used.
+
+### R3. Dike of 10 Nov 2023 from two Sentinel-1 pairs + 4 GNSS, against Sigmundsson et al. 2024 (H1–H8)
+- Reference: Sigmundsson et al. 2024, Science 383:1228: dike 130–139 Mm³, Svartsengi −76…−82 Mm³, Mogi depth 4.0–4.2 km.
+- Fixed before running NPE v3: the model (variable opening, graben mask ±1 km, FE source), the 25 % no-dike class.
+  **Post-hoc:** the hierarchical noise range (0.1–40 cm²) was chosen after seeing ~30 cm² in Nov 2023; the 5 % GNSS error
+  and the 256 PCA components after the first inversions; v2 → v3 → v4 were each made after the previous one failed on
+  this event.
+- Verdicts (no thresholds were set in advance, so these are descriptive): H1 GNSS removes the dike ↔ chamber trade-off:
+  partly; H2 the NPE–MCMC gap comes from the model, not NPE: **no** (χ² of NPE samples 2787 vs 865); H3 the noise covariance
+  was too high: yes; H4 NPE does not invent dikes: yes (quiet pair P(no dike) 0.86); H5 calibrated (SBC): mostly (15 of 16);
+  H6 the signal is not from the prior: partly; H7 transfers to the 2024 events: partly (29 May 2024: 7 [3–14] vs 13–19 Mm³);
+  H8 layered crust vs the paper: deeper by ~1 km, as expected.
+- Result NPE v3: dike 150 [131–170] Mm³ (median above the paper's range; the interval covers 131–139 of it), Svartsengi
+  −77 [−92…−63] Mm³ (covers the paper's values), depth ~6 km (paper 4.0–4.2, Mogi).
+- v4 blind: trace 1.9–2.9 km from FIRMS hotspots (random points 5.1 km). "Almost blind": see the leakage table in the
+  math window (`docs/uk/reykjanes-math.html`, section 9).
+
+### R4. Plate choices made after looking (post-hoc)
+- The Hafnir row was left out of the score: −13.5 cm/yr at the west edge, judged an edge/plane artefact after seeing it.
+- FIRMS dots: one dot per 400 m cell with ≥ 8 VIIRS detections in the eruption windows; the threshold (first 1, then 4,
+  then 8) was raised after seeing single detections cover the map.
+- The σ colour ramp of the trust cells was softened after seeing it (display only, no number changed).
+- Coherence-loss enrichment: the plate quotes the measured ×4.9 for the 2023 dike only.
+
+### R5. Next tests, pre-registered 2026-11-14 (before running)
+- **R5a. v3 with Mogi instead of the FE source.** Prediction: Svartsengi depth median 5.0–6.0 km (H8 gave 5.5 with the
+  distributed model). Pass: median in 5.0–6.0. Fail: outside. The dike volume is reported, not judged.
+- **R5b. v4 kinematics + v3 corridor and mask.** Prediction: the v3/v4 gap in the dike centre (north) shrinks below 0.5 km
+  and the volume median falls to 130–160 Mm³. Pass: both. Partial: one. Fail: neither. This says how much of the gap is
+  the prior.
+- **R5c. Truly blind test on future NISAR pairs.** Model and hyper-parameters frozen at the commit that adds this line.
+  Pass on a quiet pair: P(no dike) ≥ 0.8. Pass on a dike pair: trace within 2 km of the vents later mapped by IMO.

@@ -35,9 +35,9 @@ from scipy.ndimage import distance_transform_edt, gaussian_filter
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
-MATH = Path(__file__).with_name("reykjanes_math.html")
+MATH = ROOT / "docs" / "uk" / "reykjanes-math.html"   # internal Ukrainian math window (kept in test builds)
 DST = WEB / "reykjanes-scroll.html"
-SRC = ROOT / "data" / "reykjanes-scroll"         # set by --src
+SRC = ROOT                                       # set by --src: folder holding output/reykjanes/ and data/
 OUT = SRC / "output" / "reykjanes"
 ML = OUT / "ml"
 
@@ -122,8 +122,8 @@ def engine():
     assert old, "getJSON line not found in app.js"
     js = js.replace(old.group(0), PACKED_GETJSON, 1)
     js = re.sub(r"^const THEMES = \[.*?\];", 'const THEMES = ["scroll"];', js, count=1, flags=re.M)
-    js = must(js, 'const lang = q.get("lang") || "en";', 'const lang = q.get("lang") || "uk";')   # internal page: Ukrainian first
-    js = must(js, "const T = (k) => (STR[lang] || STR.en)[k] ?? k;", "const T = (k) => (STR[lang] || STR.uk)[k] ?? k;")
+    # map labels may be {en, uk}, like every other label (the page opens in English; ?lang=uk for Ukrainian)
+    js = must(js, "s: letter(f.properties.name, f.properties.rank ?? 1)", "s: letter(label(f.properties.name), f.properties.rank ?? 1)")
     css = (WEB / "style.css").read_text(encoding="utf-8")
     css += "\n/* packed build: one place, one look */\n#panel section:has(#scene) { display: none; }\n"
     html = (WEB / "index.html").read_text(encoding="utf-8")
@@ -142,7 +142,7 @@ def must(s, old, new, count=1):
     return s.replace(old, new) if count == 0 else s.replace(old, new, count)
 
 
-def patch_app(app):
+def patch_app(app, with_math):
     uk = {
         'stroke: "кожне кільце штрихів = {b} см опускання"': 'stroke: "кожне кільце штрихів = {b} см підняття"',
         'sinks: "опускається ≈{v} см/рік"': 'sinks: "піднімається ≈{v} см/рік"',
@@ -159,7 +159,8 @@ def patch_app(app):
         'score_sound_t: "кожен дзвін — ще 2 см опускання: що швидше район сідає, то частіше дзвонить; нерухомі мовчать"':
             'score_sound_t: "кожен дзвін — ще 2 см підняття: що швидше місце здіймається, то частіше дзвонить; нерухомі мовчать"',
         'story_next: "що ще може NISAR"': 'story_next: "що ще може NISAR", story_exhale: "видих", story_math: "для команди"',
-        'story_open: "Читати таблицю ▸" }': 'story_open: "Читати таблицю ▸", math_open: "∑ Математика для команди" }',
+        'story_open: "Читати таблицю ▸" }': 'story_open: "Читати таблицю ▸", math_open: "∑ Математика для команди", '
+                                            'test_build: "ТЕСТОВА ВЕРСІЯ" }',
     }
     en = {
         'stroke: "each ring of strokes = {b} cm of sinking"': 'stroke: "each ring of strokes = {b} cm of uplift"',
@@ -175,7 +176,8 @@ def patch_app(app):
         'score_sound_t: "each chime = 2 more cm of sinking: the faster a district sinks, the more often it chimes; still ground stays silent"':
             'score_sound_t: "each chime = 2 more cm of uplift: the faster a place rises, the more often it chimes; still ground stays silent"',
         'story_next: "what else NISAR can do"': 'story_next: "what else NISAR can do", story_exhale: "exhale", story_math: "for the team"',
-        'story_open: "Read the plate ▸" }': 'story_open: "Read the plate ▸", math_open: "∑ Math for the team" }',
+        'story_open: "Read the plate ▸" }': 'story_open: "Read the plate ▸", math_open: "∑ Math for the team (Ukrainian)", '
+                                           'test_build: "TEST BUILD" }',
     }
     for k, v in {**uk, **en}.items():
         app = must(app, k, v)
@@ -194,17 +196,22 @@ def patch_app(app):
     app = must(app, "const lvl = Math.floor(-seriesAt(d.rows[i], days, state.day) / BELL_CM)",
                "const lvl = Math.floor(-SG(d) * seriesAt(d.rows[i], days, state.day) / BELL_CM)")
     # the math window: a link in every story card; arrows and Esc belong to the window while it is open
-    app = must(app, '`<div class="st-foot"><a href="#" id="st-explore">${T("story_explore")}</a></div>`',
-               '`<div class="st-foot"><a href="#" class="mathbtn">${T("math_open")}</a> · <a href="#" id="st-explore">${T("story_explore")}</a></div>`')
+    if with_math:
+        app = must(app, '`<div class="st-foot"><a href="#" id="st-explore">${T("story_explore")}</a></div>`',
+                   '`<div class="st-foot"><a href="#" class="mathbtn">${T("math_open")}</a> · <a href="#" id="st-explore">${T("story_explore")}</a></div>`')
     app = must(app, "if (!state.storyOn || /INPUT|SELECT|TEXTAREA/.test(",
                "if (document.body.classList.contains(\"math-open\") || !state.storyOn || /INPUT|SELECT|TEXTAREA/.test(")
     return app
 
 
-def patch_head(head):
-    head = re.sub(r"<title>.*?</title>", "<title>Reykjanes · Земля дихає</title>", head, count=1)
-    head = must(head, '<button id="story-open" class="hidden"></button>',
-                '<button id="story-open" class="hidden"></button>\n      <button class="mathbtn" id="math-open">∑ Математика для команди</button>')
+def patch_head(head, with_math):
+    head = re.sub(r"<title>.*?</title>", "<title>Reykjanes · The ground breathes</title>", head, count=1)
+    extra = '\n      <div class="testbuild" data-i18n="test_build">TEST BUILD</div>'
+    if with_math:
+        extra += '\n      <button class="mathbtn" id="math-open" data-i18n="math_open">∑ Math for the team (Ukrainian)</button>'
+    head = must(head, '<button id="story-open" class="hidden"></button>', '<button id="story-open" class="hidden"></button>' + extra)
+    head = must(head, "</head>", "<style>.testbuild{display:inline-block;margin:8px 6px 0 0;padding:2px 7px;border:1px dashed #8c2e1e;"
+                "color:#8c2e1e;font-size:11px;letter-spacing:.08em}</style>\n</head>")
     return head
 
 
@@ -488,7 +495,7 @@ def osm_layers():
     ell = [[round(b, 5), round(a, 5)] for a, b in s["ellipsoid"]]
     ell.append(ell[0])
     out["source"] = fc([line(ell), point(s["mogi"][1], s["mogi"][0], dot=1),
-                        point(s["mogi"][1] + 0.01, s["mogi"][0] - 0.0105, name="джерело: 4.7 км (шари) · 4.1 км (Моґі)", rank=1)])
+                        point(s["mogi"][1] + 0.01, s["mogi"][0] - 0.0105, name=L("джерело: 4.7 км (шари) · 4.1 км (Моґі)", "source: 4.7 km (layers) · 4.1 km (Mogi)"), rank=1)])
     return out
 
 
@@ -499,7 +506,7 @@ def dike_layers():
     v4 = I4["trace_v4"]
     a, b = local_to_ll(v3[0], v3[1]), local_to_ll(v3[2], v3[3])
     mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]
-    dike = fc([line([a, b]), point(mid[0] + 0.035, mid[1] - 0.004, name="дайка 10.11.2023 · NPE v3", rank=1)])
+    dike = fc([line([a, b]), point(mid[0] + 0.035, mid[1] - 0.004, name=L("дайка 10.11.2023 · NPE v3", "dike 10 Nov 2023 · NPE v3"), rank=1)])
     blind = fc([line([local_to_ll(v4[0], v4[1]), local_to_ll(v4[2], v4[3])])])
     row = fc([line([[round(x, 5), round(y, 5)] for x, y in C["crater_row"]])])
     bands = []
@@ -531,7 +538,42 @@ def dike_layers():
 
 
 # ------------------------------------------------------------------ story
-def story(head, V, dates):
+STATIONS_ORDER = ("SENG", "AUSV", "GEVK", "VOGC")
+
+
+def gnss_chart(V, lang):
+    """Small inline SVG for a story card: NISAR vs GPS vertical rate (±1σ) at the four independent stations."""
+    g = V["gnss"]
+    s0 = g["SENG"]
+    ink, red = "#3a2a1c", "#962c1a"
+    W, top, rh, x0, x1 = 300, 18, 24, 92, 270
+    lo, hi = -5.0, 25.0
+    X = lambda v: x0 + (x1 - x0) * (v - lo) / (hi - lo)
+    out = [f'<line x1="{X(0):.1f}" x2="{X(0):.1f}" y1="{top - 6}" y2="{top + 4 * rh - 6}" stroke="{ink}" stroke-width=".4" stroke-dasharray="2,2"/>']
+    for v in (0, 10, 20):
+        out.append(f'<text x="{X(v):.1f}" y="{top + 4 * rh + 6}" font-size="9" text-anchor="middle" fill="{ink}">{v}</text>')
+    unit = "см/рік" if lang == "uk" else "cm/yr"
+    out.append(f'<text x="{x1 + 26}" y="{top + 4 * rh + 6}" font-size="9" text-anchor="end" fill="{ink}">{unit}</text>')
+    km = "км" if lang == "uk" else "km"
+    for i, s in enumerate(STATIONS_ORDER):
+        v = g[s]["val"]
+        d = ((g[s]["lon"] - s0["lon"]) * 48.97) ** 2 + ((g[s]["lat"] - s0["lat"]) * 111.32) ** 2
+        y = top + i * rh
+        ok = abs(v["z"]) < 2
+        out.append(f'<text x="0" y="{y + 3}" font-size="10.5" fill="{ink}"{" font-weight=\"bold\"" if ok else ""}>{s}</text>'
+                   f'<text x="34" y="{y + 3}" font-size="9" fill="{ink}" opacity=".7">{d ** .5:.1f} {km}</text>')
+        for val, sg, col, dy, fill in ((v["nisar"], v["nisar_sigma"], red, -4, red), (v["gnss"], v["gnss_sigma"], ink, 4, "#e8dcbf")):
+            out.append(f'<line x1="{X(val - sg):.1f}" x2="{X(val + sg):.1f}" y1="{y + dy}" y2="{y + dy}" stroke="{col}" stroke-width="1.4"/>'
+                       f'<circle cx="{X(val):.1f}" cy="{y + dy}" r="3" fill="{fill}" stroke="{col}" stroke-width="1.2"/>')
+        out.append(f'<text x="{W}" y="{y + 3}" font-size="9.5" text-anchor="end" fill="{red if not ok else ink}">z {v["z"]:+.1f}</text>')
+    leg = ("● радар NISAR  ○ GPS  (±1σ); жирним — збіг |z| &lt; 2" if lang == "uk"
+           else "● NISAR radar  ○ GPS  (±1σ); bold — agreement |z| &lt; 2")
+    H = top + 4 * rh + 22
+    out.append(f'<text x="0" y="{H - 2}" font-size="9" fill="{ink}" opacity=".8">{leg}</text>')
+    return f'<svg viewBox="0 0 {W} {H}" width="100%" style="display:block;margin:4px 0">{"".join(out)}</svg>'
+
+
+def story(V, dates, with_math=True):
     H = V["headline"]
     cam_all = {"bbox": [-22.74, 63.80, -22.10, 63.995]}
     cam_dome = {"bbox": [-22.62, 63.815, -22.30, 63.93]}
@@ -547,7 +589,7 @@ def story(head, V, dates):
                          "and the dome drops.")],
               "facts": [{"value": f"+{H['rate']}", "unit": L("см/рік", "cm/yr"), "label": L(f"найшвидше підняття, ±{H['sigma']}", f"fastest uplift, ±{H['sigma']}")},
                         {"value": f"{H['area_km2']:.0f}", "unit": L("км²", "km²"), "label": L("надійно піднімається (≥ 3σ, > 5 см/рік)", "rises reliably (≥ 3σ, > 5 cm/yr)")},
-                        {"value": "4", "unit": L("мм", "mm"), "label": L("різниця з GPS SENG за рік: 225 проти 229 мм", "difference from GPS SENG over the year: 225 vs 229 mm")}],
+                        {"value": "4", "unit": L("мм", "mm"), "label": L("різниця з GPS SENG за рік (225 проти 229 мм); збігається 1 з 4 станцій", "difference from GPS SENG over the year (225 vs 229 mm); 1 of 4 stations agrees")}],
               "camera": cam_all, "layers": ["terrain", "velocity", "coast", "sea", "places", "peaks", "infra"], "day": "end"})
     P.append({"section": "what", "title": L("Дивіться, як здіймається купол", "Watch the dome rise"),
               "text": [L("Кожен червоний клин стоїть на схилі купола: товстий кінець там, де земля піднялась більше. Поки програється рік, "
@@ -593,31 +635,41 @@ def story(head, V, dates):
                          "Njarðvík is the zero of the map and silent by construction.")],
               "camera": cam_dome, "layers": ["terrain", "velocity", "rhythm", "coast", "sea", "places"], "day": "start"})
     P.append({"section": "sure", "title": L("Наскільки ми певні?", "How sure are we?"),
-              "text": [L("GPS-станція SENG у Свартсенгі: радар 20.1 ± 1.7, GPS 21.0 ± 1.2 см/рік — збіг у межах похибок (z = −0.4). "
-                         "За весь рік: NISAR 225 мм, GPS 229 мм, IMO ~230 мм. Жодна станція не брала участі в оцінці.",
-                         "GPS station SENG at Svartsengi: radar 20.1 ± 1.7, GPS 21.0 ± 1.2 cm/yr — agreement within errors (z = −0.4). "
-                         "Over the year: NISAR 225 mm, GPS 229 mm, IMO ~230 mm. No station was used in the estimate."),
-                       L("Чесно: на трьох далеких станціях (AUSV, GEVK, VOGC), де рух повільний, радар і GPS розходяться на 4–7 см/рік. "
-                         "Тому надійний висновок — центр купола, а не дрібні швидкості на краях. Сині клітинки — похибка σ, що лишилась.",
-                         "Honestly: at three far stations (AUSV, GEVK, VOGC), where motion is slow, radar and GPS differ by 4–7 cm/yr. "
-                         "So the firm result is the dome centre, not small rates at the edges. Blue cells show the remaining error σ.")],
+              "text": [L("Чотири GPS-станції, які не брали участі в оцінці. <b>Збігається одна з чотирьох:</b> SENG у Свартсенгі "
+                         "(радар 20.1 ± 1.7, GPS 21.0 ± 1.2 см/рік, z = −0.4; за рік 225 проти 229 мм). Три інші розходяться на 4–7 см/рік: "
+                         "AUSV і GEVK стоять лише за 4–5 км від SENG, біля Гріндавіка, де GPS ще показує 7–8 см/рік, а радар — 0–4.",
+                         "Four GPS stations that took no part in the estimate. <b>One of the four agrees:</b> SENG at Svartsengi "
+                         "(radar 20.1 ± 1.7, GPS 21.0 ± 1.2 cm/yr, z = −0.4; over the year 225 vs 229 mm). The other three differ by 4–7 cm/yr: "
+                         "AUSV and GEVK are only 4–5 km from SENG, by Grindavík, where GPS still shows 7–8 cm/yr and the radar 0–4."),
+                       L(gnss_chart(V, "uk"), gnss_chart(V, "en")),
+                       L("Отже, надійне число — центр купола. Похибка σ у клітинках (сині, 1–1.7 см/рік) замала поруч із розбіжностями 4–7 см/рік: "
+                         "вона рахує лише розкид ряду в часі, а не систематику (атмосфера на великих відстанях, точка відліку). Причину ми ще не знайшли.",
+                         "So the firm number is the dome centre. The per-cell error σ (blue, 1–1.7 cm/yr) is too small next to 4–7 cm/yr misfits: "
+                         "it counts only the scatter of the series in time, not systematic errors (long-range atmosphere, the reference point). "
+                         "We have not found the cause yet.")],
               "camera": cam_dome, "layers": ["terrain", "velocity", "grid", "coast", "sea", "places"], "day": "end",
               "modes": {"grid": "sigma_cm_yr"},
               "marks": [{"lon": -22.4338, "lat": 63.8823, "text": L("SENG: радар +20.1 · GPS +21.0 см/рік", "SENG: radar +20.1 · GPS +21.0 cm/yr"), "dx": 46, "dy": -34},
-                        {"lon": -22.4716, "lat": 63.8354, "text": L("GEVK: розбіжність 7 см/рік", "GEVK: 7 cm/yr apart"), "dx": -40, "dy": 30}]})
+                        {"lon": -22.4169, "lat": 63.8436, "text": L("AUSV: радар +3.5 · GPS +7.6", "AUSV: radar +3.5 · GPS +7.6"), "dx": 40, "dy": 30},
+                        {"lon": -22.4716, "lat": 63.8354, "text": L("GEVK: радар −0.3 · GPS +7.0", "GEVK: radar −0.3 · GPS +7.0"), "dx": -40, "dy": 34}]})
     P.append({"section": "exhale", "title": L("Видих: дайка 10 листопада 2023", "Breathing out: the dike of 10 November 2023"),
               "text": [L("Так виглядає видих. За кілька годин магма з-під Свартсенгі пішла тріщиною на ~15 км під Гріндавік, а купол "
                          "просів. NISAR тоді ще не літав, тож ми перевірили метод на двох радарних парах Sentinel-1.",
                          "This is what breathing out looks like. Within hours magma from under Svartsengi ran ~15 km along a crack under "
                          "Grindavík, and the dome dropped. NISAR was not flying yet, so we tested the method on two Sentinel-1 radar pairs."),
-                       L("Нейромережа (NPE), навчена на симуляціях, за 7 секунд дала об'єм дайки 150 млн м³ і просідання Свартсенгі "
-                         "−77 млн м³. Стаття в Science, що спиралась на ~20 станцій GPS і чотири супутники: 130–139 і −76…−82. "
-                         "Помаранчеві точки — місця, що горіли під час вивержень 2023–2025 рр. (NASA FIRMS): лава вийшла на кратерному ряду над знайденою дайкою і розтеклася.",
-                         "A neural network (NPE) trained on simulations gave, in 7 seconds, a dike volume of 150 million m³ and a Svartsengi "
-                         "drop of −77 million m³. The Science paper, with ~20 GPS stations and four satellites: 130–139 and −76…−82. "
+                       L("Нейромережа (NPE), навчена на симуляціях, за 7 секунд дала об'єм дайки <b>150 [131–170] млн м³</b> і просідання "
+                         "Свартсенгі <b>−77 [−92…−63] млн м³</b> (68-відсоткові інтервали). Стаття в Science (~20 станцій GPS, чотири супутники): "
+                         "130–139 і −76…−82. Інтервал просідання повністю покриває значення статті. Інтервал об'єму покриває майже весь її "
+                         "діапазон (131–139 із 130–139), але наша медіана вища за нього на 8–15 %: глибша камера в нашій моделі потребує "
+                         "більшої дайки.",
+                         "A neural network (NPE) trained on simulations gave, in 7 seconds, a dike volume of <b>150 [131–170] million m³</b> and a "
+                         "Svartsengi drop of <b>−77 [−92…−63] million m³</b> (68 % intervals). The Science paper (~20 GPS stations, four satellites): "
+                         "130–139 and −76…−82. Our drop interval covers the paper's values entirely. Our volume interval covers almost all of the "
+                         "paper's range (131–139 of 130–139), but our median is 8–15 % above it: a deeper chamber in our model needs a larger dike."),
+                       L("Помаранчеві точки — місця, що горіли під час вивержень 2023–2025 рр. (NASA FIRMS): лава вийшла на кратерному ряду над знайденою дайкою і розтеклася.",
                          "Orange dots are places that burned in the 2023–2025 eruptions (NASA FIRMS): lava came out on the crater row above the dike we found and spread.")],
-              "facts": [{"value": "150", "unit": L("млн м³", "Mm³"), "label": L("об'єм дайки, NPE v3 (стаття 130–139)", "dike volume, NPE v3 (paper 130–139)")},
-                        {"value": "−77", "unit": L("млн м³", "Mm³"), "label": L("Свартсенгі (стаття −76…−82)", "Svartsengi (paper −76…−82)")},
+              "facts": [{"value": "150", "unit": L("млн м³", "Mm³"), "label": L("об'єм дайки [131–170]; стаття 130–139", "dike volume [131–170]; paper 130–139")},
+                        {"value": "−77", "unit": L("млн м³", "Mm³"), "label": L("Свартсенгі [−92…−63]; стаття −76…−82", "Svartsengi [−92…−63]; paper −76…−82")},
                         {"value": "7", "unit": L("с", "s"), "label": L("відповідь NPE (MCMC: 7 хв)", "NPE answer (MCMC: 7 min)")}],
               "camera": {"bbox": [-22.58, 63.80, -22.28, 63.93]},
               "layers": ["terrain", "dike", "dike_blind", "crater_row", "lossband", "firms", "source", "walls", "coast", "sea", "places"],
@@ -625,25 +677,32 @@ def story(head, V, dates):
               "marks": [{"lon": -22.432, "lat": 63.842, "text": L("Гріндавік: евакуйовано 10.11.2023", "Grindavík: evacuated 10.11.2023"), "dx": -44, "dy": 26}]})
     P.append({"section": "next", "title": L("Що ще NISAR може розповісти тут", "What else NISAR can tell here"),
               "text": [L("Нова пара NISAR приходить кожні 12 днів. Мережа, навчена один раз, оцінює нову дайку за 0.35 с замість 49 с для MCMC "
-                         "(1000 подій: ~6 хв проти ~14 год). На тихих парах вона каже «дайки немає» з імовірністю 0.86.",
+                         "(1000 подій: ~6 хв проти ~14 год). На тихих парах вона каже «дайки немає» з імовірністю 0.86. "
+                         "<b>Поки це надійно лише для великих дайок:</b> на малих подіях 2024 р. мережа невпевнена або занижує "
+                         "(29.05.2024: 7 [3–14] млн м³ проти 13–19 у літературі).",
                          "A new NISAR pair arrives every 12 days. A network trained once sizes a new dike in 0.35 s instead of 49 s for MCMC "
-                         "(1000 events: ~6 min vs ~14 h). On quiet pairs it says 'no dike' with probability 0.86."),
+                         "(1000 events: ~6 min vs ~14 h). On quiet pairs it says 'no dike' with probability 0.86. "
+                         "<b>So far this is reliable for large dikes only:</b> on the small 2024 events the network is unsure or too low "
+                         "(29 May 2024: 7 [3–14] million m³ vs 13–19 in the literature)."),
                        L("Сліпа мережа, яка не знала, де шукати, знаходить дайку з точністю ~2 км (випадкова точка — 5.1 км). "
-                         "А втрата когерентності в тих самих радарних парах показує, де земля рветься: біля кратерного ряду вона трапляється в 5–10 разів частіше, ніж випадково.",
+                         "А втрата когерентності в тих самих радарних парах показує, де земля рветься: для дайки 2023 р. біля кратерного ряду "
+                         "вона трапляється в 4.9 раза частіше, ніж випадково.",
                          "A blind network that did not know where to look finds the dike within ~2 km (a random point: 5.1 km). "
-                         "And loss of coherence in the same radar pairs shows where the ground tears: near the crater row it happens 5–10 times more often than by chance.")],
-              "facts": [{"value": "0.35", "unit": L("с", "s"), "label": L("нова дайка після нової пари", "a new dike after a new pair")},
+                         "And loss of coherence in the same radar pairs shows where the ground tears: for the 2023 dike it is 4.9 times more "
+                         "frequent near the crater row than by chance.")],
+              "facts": [{"value": "0.35", "unit": L("с", "s"), "label": L("нова велика дайка після нової пари", "a new large dike after a new pair")},
                         {"value": "~2", "unit": L("км", "km"), "label": L("сліпий пошук дайки", "blind dike search")},
                         {"value": "0.86", "label": L("P(без дайки) на тихій парі", "P(no dike) on a quiet pair")}],
               "camera": cam_all, "layers": ["terrain", "velocity", "dike_blind", "firms", "coast", "sea", "places", "infra"], "day": "end"})
-    P.append({"section": "math", "title": L("Математика для команди", "Math for the team"),
-              "text": [L("Внутрішній розділ: як ми рахували, чому NPE і MCMC іноді розходяться, і головне — як наш NPE v3 порівнюється зі "
-                         "статтею Sigmundsson et al. 2024 (Science) по кожному числу.",
-                         "Internal section: how we computed, why NPE and MCMC sometimes disagree, and above all how our NPE v3 compares with "
-                         "Sigmundsson et al. 2024 (Science), number by number."),
-                       L('<button class="mathbtn bigbtn">∑ Відкрити математичне вікно</button>', '<button class="mathbtn bigbtn">∑ Open the math window</button>'),
-                       L("Клавіша M відкриває вікно з будь-якої сторінки; Esc закриває.", "Key M opens the window from any page; Esc closes it.")],
-              "camera": {"bbox": [-22.58, 63.80, -22.28, 63.93]}, "layers": ["terrain", "dike", "source", "coast", "sea", "places"], "day": "end"})
+    if with_math:
+        P.append({"section": "math", "title": L("Математика для команди", "Math for the team"),
+                  "text": [L("Тестова версія: внутрішній розділ для команди (українською). Як ми рахували, чому NPE і MCMC іноді розходяться, "
+                             "і як наш NPE v3 порівнюється зі статтею Sigmundsson et al. 2024 (Science) по кожному числу.",
+                             "Test build: an internal section for the team (in Ukrainian). How we computed, why NPE and MCMC sometimes disagree, "
+                             "and how our NPE v3 compares with Sigmundsson et al. 2024 (Science), number by number."),
+                           L('<button class="mathbtn bigbtn">∑ Відкрити математичне вікно</button>', '<button class="mathbtn bigbtn">∑ Open the math window (Ukrainian)</button>'),
+                           L("Клавіша M відкриває вікно з будь-якої сторінки; Esc закриває.", "Key M opens the window from any page; Esc closes it.")],
+                  "camera": {"bbox": [-22.58, 63.80, -22.28, 63.93]}, "layers": ["terrain", "dike", "source", "coast", "sea", "places"], "day": "end"})
     return {"title": L("Рейк'янес", "Reykjanes"), "pages": P,
             "note": "Pages of the Reykjanes plate, written for the Mexico City scroll engine; numbers from output/reykjanes/results.html."}
 
@@ -658,6 +717,7 @@ def main():
     ap = argparse.ArgumentParser(description="Build web/reykjanes-scroll.html")
     ap.add_argument("--src", default=str(SRC), help="folder with output/reykjanes/ and data/{dem,firms,osm}/")
     ap.add_argument("--out", default=str(DST))
+    ap.add_argument("--no-math", dest="math", action="store_false", help="leave out the internal math window (jury build)")
     a = ap.parse_args()
     configure(a.src)
     dst = Path(a.out)
@@ -733,7 +793,7 @@ def main():
             for s, g in V["gnss"].items()]
     gnss.append({"station": "NYLA", "lon": -22.7381068685, "lat": 63.9735443819, "note": "zero point of the map"})
     man = {"engine_version": 1, "id": SID, "title": L("Рейк'янес", "Reykjanes"),
-           "subtitle": "NISAR L-band GUNW, 159A + 082D → вертикаль", "bbox": BBOX, "center": [-22.43, 63.88], "dates": dates,
+           "subtitle": "NISAR L-band GUNW, tracks 159A + 082D → vertical motion", "bbox": BBOX, "center": [-22.43, 63.88], "dates": dates,
            "n_pairs": len(dates) - 1, "direction": "ASCENDING+DESCENDING",
            "reference": {"label": "GNSS NYLA (Njarðvík)"},
            "anchor": {"type": "radar-only", "gnss": gnss[:1] + [{k: v for k, v in g.items() if k != "nisar_cm_yr"} for g in gnss[1:]]},
@@ -742,8 +802,8 @@ def main():
                                   "headline": {"rate_cm_yr": f"+{H['rate']}", "sigma_cm_yr": H["sigma"], "at_least_cm_yr": H["at_least"],
                                                "lon": H["lon"], "lat": H["lat"], "cum_cm": H["cum"], "p1_cm_yr": f"+{H['p99']}",
                                                "rule": "~0.7 km neighbourhood (3x3 cells of 240 m) with the largest rate - 2 sigma"}}},
-           "layers": layers, "notes": [], "generated": date.today().isoformat(), "story": "story.json"}
-    pages = story(head, V, dates)
+           "layers": layers, "notes": [], "generated": f"data to {dates[-1]}", "story": "story.json"}
+    pages = story(V, dates, a.math)
     th = theme_for(theme)
 
     packs = {"data/scenes.json": {"scenes": [{"id": SID, "title": L("Рейк'янес", "Reykjanes"), "subtitle": man["subtitle"]}]},
@@ -752,8 +812,8 @@ def main():
         packs[f"data/{SID}/{f}"] = obj
     blocks = "\n".join(f'  <script type="text/plain" data-pack="{k}">{pack(v)}</script>' for k, v in packs.items())
 
-    math = MATH.read_text(encoding="utf-8")
-    html = patch_head(head) + blocks + "\n  <script type=\"module\">" + patch_app(app) + "</script>\n" + math + tail
+    math = MATH.read_text(encoding="utf-8") if a.math else ""
+    html = patch_head(head, a.math) + blocks + "\n  <script type=\"module\">" + patch_app(app, a.math) + "</script>\n" + math + tail
     dst.parent.mkdir(parents=True, exist_ok=True)
     dst.write_text(html, encoding="utf-8")
     print(f"saved {dst}: {dst.stat().st_size / 1e6:.1f} MB")

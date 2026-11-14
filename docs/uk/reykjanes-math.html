@@ -66,13 +66,15 @@
   <div class="eq">σ<sub>v</sub> = √( s² / Σ(t<sub>i</sub> − t̄)² ) · √( (1 + ρ) / (1 − ρ) ), &nbsp; ρ ∈ [0, 0.95]
    <small>s² — дисперсія залишків. Надійний штрих: SNR = |v|/σ ≥ 3; слабкий: 1–3; нижче 1 не малюємо.</small></div>
   <p><b>Заголовне число</b> не є максимумом. Беремо околицю 3×3 клітинки (~0.7 км), де <i>v̄ − 2σ̄</i> найбільше: +23.5 ± 1.0 см/рік, щонайменше +21.6. σ не ділимо на √9, бо похибки сусідніх клітинок скорельовані.</p>
-  <table><tr><th>станція</th><th>NISAR, см/рік</th><th>GPS, см/рік</th><th>різниця</th><th>z</th></tr>
-   <tr><td>SENG</td><td class="n">20.1 ± 1.7</td><td class="n">21.0 ± 1.2</td><td class="n">−0.9</td><td class="n">−0.4</td></tr>
-   <tr><td>AUSV</td><td class="n">3.5 ± 1.1</td><td class="n">7.6 ± 1.1</td><td class="n">−4.2</td><td class="n">−2.7</td></tr>
-   <tr><td>GEVK</td><td class="n">−0.3 ± 1.4</td><td class="n">7.0 ± 1.2</td><td class="n">−7.3</td><td class="n">−4.0</td></tr>
-   <tr><td>VOGC</td><td class="n">4.3 ± 1.7</td><td class="n">−1.8 ± 1.4</td><td class="n">+6.1</td><td class="n">+2.8</td></tr></table>
+  <table><tr><th>станція</th><th>від SENG, км</th><th>NISAR, см/рік</th><th>GPS, см/рік</th><th>різниця</th><th>z</th><th>вердикт</th></tr>
+   <tr><td>SENG</td><td class="n">0</td><td class="n">20.1 ± 1.7</td><td class="n">21.0 ± 1.2</td><td class="n">−0.9</td><td class="n">−0.4</td><td><span class="verdict">збіг</span></td></tr>
+   <tr><td>AUSV</td><td class="n">4.4</td><td class="n">3.5 ± 1.1</td><td class="n">7.6 ± 1.1</td><td class="n">−4.2</td><td class="n">−2.7</td><td><span class="verdict no">ні</span></td></tr>
+   <tr><td>GEVK</td><td class="n">5.5</td><td class="n">−0.3 ± 1.4</td><td class="n">7.0 ± 1.2</td><td class="n">−7.3</td><td class="n">−4.0</td><td><span class="verdict no">ні</span></td></tr>
+   <tr><td>VOGC</td><td class="n">11.9</td><td class="n">4.3 ± 1.7</td><td class="n">−1.8 ± 1.4</td><td class="n">+6.1</td><td class="n">+2.8</td><td><span class="verdict no">ні</span></td></tr></table>
+  <div id="m-gnss"></div>
   <div class="eq">z = (v<sub>NISAR</sub> − v<sub>GPS</sub>) / √(σ<sub>NISAR</sub>² + σ<sub>GPS</sub>²)<small>|z| &lt; 2 — збіг у межах похибок. Жодна станція не брала участі ні у відліку, ні в поправках.</small></div>
-  <p class="note">Висновок для історії: збіг є в центрі купола (SENG; за рік 225 мм проти 229 мм, rms 19 мм). На трьох далеких станціях розбіжність 4–7 см/рік має різний знак, і причини ми не знаємо (атмосферні залишки на великих відстанях, точка відліку, локальні рухи). На краях карти не цитуємо дрібних швидкостей.</p>
+  <p class="note">Висновок для історії: <b>збігається 1 з 4 станцій</b> — SENG у центрі купола (за рік 225 мм проти 229 мм, rms 19 мм). Три інші розходяться на 4–7 см/рік, і знак розбіжності різний. AUSV і GEVK — не «далекі»: вони за 4–5 км від SENG, біля Гріндавіка, де GPS ще показує 7–8 см/рік, а радар — 0–4. Отже, NISAR, ймовірно, занижує підняття на південному схилі купола. Причини ми не знаємо (атмосфера на великих відстанях, точка відліку NYLA, площина треку, локальні рухи станцій).</p>
+  <div class="mbox warn"><b>σ клітинок замала.</b> Похибка в клітинці (1–1.7 см/рік) рахує лише розкид ряду навколо прямої, з поправкою на автокореляцію. Систематики (атмосфера на відстані, відлік, площина) вона не бачить. Тому розбіжності 4–7 см/рік — це 3–4σ «по паперу». Чесніша оцінка похибки на відстані кількох кілометрів від центру — порядку 4–7 см/рік, доки ми не знайдемо причину.</div>
 
   <h2 id="m-fwd">2. Прямі моделі</h2>
   <div class="grid2"><div>
@@ -238,7 +240,7 @@
   const box = document.getElementById("math");
   const open = (on) => {
     box.classList.toggle("hidden", !on); document.body.classList.toggle("math-open", on);
-    if (on) { box.querySelector(".mw").focus(); draw(); }
+    if (on) { box.querySelector(".mw").focus(); draw(); drawGnss(); }
   };
   document.addEventListener("click", (e) => {
     const b = e.target.closest(".mathbtn"); if (b) { e.preventDefault(); open(true); return; }
@@ -262,6 +264,24 @@
   ];
   const P = [[130, 139], [4.0, 4.2], [-82, -76]];
   const AX = [["об'єм дайки, млн м³", 80, 250], ["глибина Свартсенгі, км", 3.5, 7.5], ["ΔV Свартсенгі, млн м³", -125, 0]];
+  // NISAR vs GPS vertical rate at the four independent stations, ±1σ, ordered by distance from SENG
+  const G = [["SENG", 0, 20.1, 1.7, 21.0, 1.2], ["AUSV", 4.4, 3.5, 1.1, 7.6, 1.1], ["GEVK", 5.5, -0.3, 1.4, 7.0, 1.2], ["VOGC", 11.9, 4.3, 1.7, -1.8, 1.4]];
+  function drawGnss() {
+    const el = document.getElementById("m-gnss"); if (!el || el.dataset.done) return;
+    const W = 940, lw = 170, x1 = W - 90, top = 22, rh = 34, H = top + G.length * rh + 34, lo = -6, hi = 26;
+    const X = (v) => lw + (x1 - lw) * (v - lo) / (hi - lo), ink = "#3a2a1c", red = "#962c1a";
+    let s = `<text x="${lw}" y="12" font-size="12" font-style="italic" fill="${ink}">вертикальна швидкість, см/рік (±1σ) · ● NISAR · ○ GPS</text>`;
+    for (let v = -5; v <= 25; v += 5) s += `<line x1="${X(v)}" x2="${X(v)}" y1="${top - 4}" y2="${top + G.length * rh - 8}" stroke="${ink}" stroke-width="${v ? .25 : .8}"/>` +
+      `<text x="${X(v)}" y="${top + G.length * rh + 6}" font-size="11" text-anchor="middle" fill="${ink}">${v}</text>`;
+    G.forEach(([n, d, a, sa, b, sb], i) => {
+      const y = top + i * rh + 6, z = (a - b) / Math.hypot(sa, sb), ok = Math.abs(z) < 2;
+      s += `<text x="0" y="${y + 4}" font-size="13" fill="${ink}"${ok ? ' font-weight="bold"' : ""}>${n}</text><text x="52" y="${y + 4}" font-size="11" fill="${ink}" opacity=".7">${d} км від SENG</text>` +
+        `<line x1="${X(a - sa)}" x2="${X(a + sa)}" y1="${y - 5}" y2="${y - 5}" stroke="${red}" stroke-width="2"/><circle cx="${X(a)}" cy="${y - 5}" r="4.5" fill="${red}"/>` +
+        `<line x1="${X(b - sb)}" x2="${X(b + sb)}" y1="${y + 6}" y2="${y + 6}" stroke="${ink}" stroke-width="2"/><circle cx="${X(b)}" cy="${y + 6}" r="4.5" fill="var(--paper)" stroke="${ink}" stroke-width="1.6"/>` +
+        `<text x="${W}" y="${y + 4}" font-size="12" text-anchor="end" fill="${ok ? ink : red}">z ${z >= 0 ? "+" : "−"}${Math.abs(z).toFixed(1)} · ${ok ? "збіг" : "ні"}</text>`;
+    });
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`; el.dataset.done = 1;
+  }
   function draw() {
     const el = document.getElementById("m-forest"); if (!el || el.dataset.done) return;
     const cs = getComputedStyle(document.documentElement), ink = cs.getPropertyValue("--ink").trim() || "#3a2a1c",

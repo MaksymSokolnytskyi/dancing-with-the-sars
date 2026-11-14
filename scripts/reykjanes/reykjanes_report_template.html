@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NISAR Reykjanes Report</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --bg:#f7f6f2;--surface:#ffffff;--ink:#1d1d1b;--muted:#64625b;--line:#e2dfd6;--accent:#b3412f;--accent2:#2f5f8f;
+  --ok:#2f6f4f;--warn:#a8741a;--bad:#b3412f;--chip:#efece4;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#141413;--surface:#1d1d1b;--ink:#ecebe6;--muted:#a19f96;--line:#2f2e2a;--accent:#e07a62;--accent2:#7fb0e0;
+  --ok:#6fbf94;--warn:#e0b45e;--bad:#e07a62;--chip:#2a2926;}}
+:root[data-theme="dark"]{--bg:#141413;--surface:#1d1d1b;--ink:#ecebe6;--muted:#a19f96;--line:#2f2e2a;--accent:#e07a62;
+  --accent2:#7fb0e0;--ok:#6fbf94;--warn:#e0b45e;--bad:#e07a62;--chip:#2a2926;}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Source Serif 4",Georgia,"Times New Roman",serif}
+main{max-width:1080px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:34px;line-height:1.15;margin:0 0 8px;letter-spacing:-.01em}
+h2{font-size:24px;margin:56px 0 12px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:28px 0 8px}
+p{margin:10px 0}
+.sans{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.lede{font-size:19px;color:var(--muted);max-width:760px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:28px 0}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi b{display:block;font:600 26px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--accent)}
+.kpi span{font:13px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--muted)}
+#map{height:620px;border-radius:10px;border:1px solid var(--line);margin:12px 0 6px;background:var(--chip)}
+.legend{font:12px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--surface);color:var(--ink);
+  padding:8px 10px;border-radius:8px;border:1px solid var(--line);min-width:180px}
+.legend .bar{height:10px;border-radius:3px;margin:4px 0}
+.leaflet-container{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.tri{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid #f2c200;
+  filter:drop-shadow(0 0 1px #000)}
+.tri.ref{border-bottom-color:#888}
+.volc{width:100%;height:100%;background:#7a1f12;border:2px solid #fff;transform:rotate(45deg);box-shadow:0 0 2px #000}
+.volc.recent{background:#e34a33}
+.key{font:16px/22px system-ui,"Segoe UI Emoji",sans-serif;text-align:center;width:22px;height:22px;border-radius:50%;
+  background:#fff;border:1.5px solid #222;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.place{background:transparent;border:0;box-shadow:none;font:600 12px system-ui,sans-serif;color:#222;
+  text-shadow:0 0 3px #fff,0 0 3px #fff}
+table{border-collapse:collapse;width:100%;font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;margin:10px 0}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tr.best td{background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.tbl{overflow-x:auto}
+figure{margin:18px 0}
+figure img{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+figcaption{font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--muted);margin-top:6px}
+.verdict{display:inline-block;font:600 12px system-ui,sans-serif;padding:2px 8px;border-radius:99px;border:1px solid}
+.v-ok{color:var(--ok);border-color:var(--ok)}.v-bad{color:var(--bad);border-color:var(--bad)}.v-warn{color:var(--warn);border-color:var(--warn)}
+.note{background:var(--surface);border-left:3px solid var(--accent2);padding:10px 14px;border-radius:0 8px 8px 0;margin:14px 0}
+ul{padding-left:22px}li{margin:4px 0}
+code{font:13px ui-monospace,Consolas,monospace;background:var(--chip);padding:1px 5px;border-radius:4px}
+.toc{font:14px system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-wrap:wrap;gap:6px 14px;margin:18px 0}
+.toc a{color:var(--accent2);text-decoration:none}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.two{grid-template-columns:1fr}#map{height:480px}h1{font-size:27px}}
+</style>
+</head>
+<body>
+<main>
+<p class="sans" style="color:var(--muted);font-size:13px;margin:0 0 6px">NASA Space Apps · Dancing with the SARs · NISAR L-band · листопад 2025 – жовтень 2026</p>
+<h1>Свартсенгі дихає: рік здіймання над магматичним резервуаром Рейк'янес</h1>
+<p class="lede">Ми взяли 84 пари інтерферограм NISAR GUNW над півостровом Рейк'янес, звірили їх з GNSS і перебрали шість моделей джерела. Найкраще дані пояснює видовжене тіло завдовжки ~6 км на глибині ~3 км, витягнуте на північний схід, яке роздувається на ~20 млн м³ на рік.</p>
+
+<div class="kpis">
+  <div class="kpi"><b>+21 см/рік</b><span>здіймання на станції SENG (GNSS), NISAR дає те саме в межах 2–3 см</span></div>
+  <div class="kpi"><b>1.6–2.3 см</b><span>розбіжність NISAR і GNSS по окремих датах біля Свартсенгі</span></div>
+  <div class="kpi"><b>~2.9 км</b><span>глибина центру видовженого резервуару; Моґі + GNSS: 3.8 км; IMO: ~4 км</span></div>
+  <div class="kpi"><b>~20 млн м³/рік</b><span>приріст об'єму джерела (0.64 м³/с); IMO: ~30 млн м³/рік магми</span></div>
+</div>
+
+<nav class="toc">
+  <a href="#map-sec">Карта</a><a href="#infra">Інфраструктура (OSM)</a><a href="#volc">Вулкани й тріщини</a><a href="#data">Дані</a><a href="#gnss">NISAR проти GNSS</a>
+  <a href="#models">Моделі джерела</a><a href="#hyp">Перевірка гіпотез</a><a href="#lessons">Уроки для калібрування</a>
+  <a href="#limits">Обмеження</a><a href="#sources">Джерела</a>
+</nav>
+
+<h2 id="map-sec">Інтерактивна карта</h2>
+<p><b>Штрихи</b> показують, як саме рухалась поверхня, у стилі старих гашурних карт (на зразок карти Дюфура). Кожен штрих іде вниз по схилу поля швидкості: від місця, що піднімається швидше, до місця, що піднімається повільніше. Червоні штрихи — здіймання, сині — опускання. Ряди штрихів стоять через кожні 2 см/рік, а товщина показує, наскільки різко змінюється рух (см/рік на км). Саме там споруди зазнають найбільшого нахилу. Штрихи NISAR побудовано зі згладженого (~0.5 км) поля вертикалі, прив'язаного до GNSS, лише в межах 12 км від Свартсенгі й від ±4 см/рік, щоб не малювати шум. Штрихи моделі гладкі за побудовою. Застереження: на треку 159A лишається широкий залишковий нахил (+6…+9 см/рік за 8–14 км від Свартсенгі, звідси й дрейф на VOGC), тож зовнішні ряди штрихів NISAR частково штучні.</p>
+<p>Підкладка — карта Esri; можна перемкнути на рельєф або супутник, де видно свіжі лавові поля. Усі об'єкти на карті (інфраструктура, вулкани, жерла) взято з OpenStreetMap. Шари вмикаються в правому верхньому куті: поля швидкостей NISAR, модель та її нахил, контури джерел, станції GNSS і інфраструктура з OSM. Клік по об'єкту показує модельне здіймання й нахил у цьому місці.</p>
+<div id="map"></div>
+<p class="sans" style="font-size:12px;color:var(--muted)">Карта потребує інтернету для підкладки й бібліотеки Leaflet. Власні тайли openstreetmap.org блокують сторінки, відкриті з диска (помилка «Access blocked»), тому типова підкладка — Esri; шар «OpenStreetMap» працює лише, якщо звіт відкрито через http-сервер. Растри NISAR та моделі вбудовані у файл. Вертикаль і схід–захід розкладено з двох геометрій (159A висхідна, 082D низхідна) за припущення, що рух північ–південь малий. Далеке поле на шарах NISAR виглядає трохи «рожевим» (+2…+5 см/рік): це залишок відліку й атмосфери, а не справжнє здіймання (GNSS на VOGC: −1.8 см/рік).</p>
+
+<h2 id="infra">Що показує OpenStreetMap</h2>
+<p>Саме по собі NISAR каже, <em>як</em> рухається земля. OSM додає, <em>що</em> там стоїть. Це дає змогу перейти від «здіймання 20 см/рік» до «які труби, дороги й будинки в зоні диференційного руху»:</p>
+<ul>
+  <li><b>Вплив на інфраструктуру.</b> Небезпечне для споруд не саме здіймання, а його <b>нерівномірність</b>: нахил і розтяг. Ми рахуємо модельний нахил (мкрад/рік) уздовж паропроводів HS Orka, мереж гарячої води HS Veitur, ЛЕП і доріг.</li>
+  <li><b>Захисні вали.</b> OSM містить вали навколо Свартсенгі та Гріндавіка. Вони стоять просто над резервуаром, тож самі піднімаються й нахиляються.</li>
+  <li><b>Інтерпретація когерентності.</b> Забудова й дороги тримають фазу (висока когерентність), а свіжі лавові поля, море й сніг її втрачають. OSM допомагає відрізнити «немає руху» від «немає даних».</li>
+  <li><b>Перевірка геоприв'язки.</b> Дороги, берегова лінія й кратери мають збігатися з рисунком на радарних знімках.</li>
+  <li><b>Сценарії.</b> Найімовірніший наступний крок, за IMO, — нова інтрузія вздовж ряду кратерів Сундгнукур. Карта показує, які об'єкти лежать між резервуаром і цим рядом.</li>
+</ul>
+<div id="infra-tables"></div>
+<p class="sans" style="font-size:13px;color:var(--muted)">Модельні значення беруться з найкращої моделі (видовжений еліпсоїд). Нахил рахується як градієнт модельного здіймання: 10 мкрад/рік — це 1 см/рік різниці на кілометр. Шум NISAR на окремому пікселі (~5 см/рік) поки занадто великий, щоб міряти нахил прямо з даних.</p>
+
+<h2 id="volc">Вулкани, тріщини та хронологія</h2>
+<p>З 2021 року на Рейк'янес прокинулись дві системи. Спершу Фаградальсф'ялль на сході кадру, потім, з листопада 2023-го, Свартсенгі: магма накопичується під Свартсенгі на глибині кількох кілометрів і періодично проривається на поверхню вздовж ряду кратерів Сундгнукур, на північний схід від Гріндавіка. На карті шар <b>«Тріщини»</b> показує цей ряд (лінія через жерла з OSM), шар <b>«Вулкани»</b> — вулканічні форми й місця вивержень 2021–2025 років, позначені в OSM, а <b>«Ключові об'єкти»</b> — місто, Блакитну лагуну, ГеоТЕС Свартсенгі, аеропорт і головні дороги.</p>
+<div class="tbl"><table>
+<tr><th>Дата початку</th><th>Подія</th><th>Де</th></tr>
+<tr><td>19.03.2021</td><td>виверження</td><td>Фаградальсф'ялль (Гельдінгадалір)</td></tr>
+<tr><td>03.08.2022</td><td>виверження</td><td>Фаградальсф'ялль (Мерадалір)</td></tr>
+<tr><td>10.07.2023</td><td>виверження</td><td>Літлі-Грутур</td></tr>
+<tr><td>10.11.2023</td><td>інтрузія дайки ~15 км під Гріндавіком, евакуація міста</td><td>Сундгнукур – Гріндавік</td></tr>
+<tr><td>18.12.2023</td><td>виверження</td><td>Сундгнукур</td></tr>
+<tr><td>14.01.2024</td><td>виверження, лава дійшла до околиць Гріндавіка</td><td>Сундгнукур / Гріндавік</td></tr>
+<tr><td>08.02.2024</td><td>виверження, лава перерізала гарячу магістраль</td><td>Сундгнукур</td></tr>
+<tr><td>16.03.2024</td><td>виверження</td><td>Сундгнукур</td></tr>
+<tr><td>29.05.2024</td><td>виверження</td><td>Сундгнукур</td></tr>
+<tr><td>22.08.2024</td><td>виверження</td><td>Сундгнукур</td></tr>
+<tr><td>20.11.2024</td><td>виверження, лава підійшла до Блакитної лагуни</td><td>Сундгнукур</td></tr>
+<tr><td>01.04.2025</td><td>короткочасне виверження</td><td>Сундгнукур</td></tr>
+<tr><td>16.07.2025</td><td>виверження: лава на захід і південний захід, до валів Гріндавіка й лагуни</td><td>Сундгнукур</td></tr>
+<tr><td>листопад 2025 – жовтень 2026</td><td><b>період NISAR у цьому звіті</b>: вивержень немає, триває накопичення магми, здіймання ~2 см/місяць</td><td>Свартсенгі</td></tr>
+</table></div>
+<div class="note sans" style="font-size:14px">Дати 2021–2025 подано з пам'яті за повідомленнями IMO. Перед використанням їх варто звірити з <a href="https://en.vedur.is/">vedur.is</a>. За звітами на основі IMO, на липень 2026 під Свартсенгі накопичилось ~28 млн м³ магми, більше, ніж перед попередніми виверженнями (17–23 млн м³). Наше здіймання ~20 см/рік — це і є це накопичення. Отже, вали, лагуна, ГеоТЕС і дороги з шару «Ключові об'єкти» лишаються в зоні ризику наступного прориву вздовж Сундгнукура.</div>
+<h2 id="data">Дані та обробка</h2>
+<div class="tbl"><table>
+<tr><th>Трек</th><th>Напрям</th><th class="num">Пар</th><th>Період</th><th>Використано</th></tr>
+<tr><td>159A</td><td>висхідний</td><td class="num">25</td><td>09.11.2025 – 11.10.2026</td><td>20 когерентних, 5 зимових відкинуто</td></tr>
+<tr><td>082D</td><td>низхідний</td><td class="num">26</td><td>03.11.2025 – 17.10.2026</td><td>ланцюжок із 24, усі когерентні</td></tr>
+<tr><td>087A, 010D, 111D</td><td>обидва</td><td class="num">25</td><td>червень – жовтень 2026</td><td>лише для літньої картини</td></tr>
+<tr><td>015A</td><td>висхідний</td><td class="num">8</td><td>червень – жовтень 2026</td><td><span class="verdict v-bad">непридатний</span> розгорнута фаза — самі нулі</td></tr>
+</table></div>
+<ul>
+  <li><b>Що бралося з архіву.</b> NISAR L2 GUNW з архіву ASF, лише вікно 37 × 29 км над Свартсенгі: розгорнута фаза (80 м), когерентність, острівці розгортки, іоносфера, а також згорнута інтерферограма 20 м і зсуви зіставленням.</li>
+  <li><b>Поправки.</b> Віднімання іоносферної поправки зменшує розкид фази в 1.5–3 рази. Тропосферна поправка з файлу майже нічого не дає.</li>
+  <li><b>Відлік.</b> Нуль — далеке поле, понад 14 км від Свартсенгі, з площиною. Для рядів часу центр міряється відносно кільця 8–14 км, що гасить широкі атмосферні смуги.</li>
+  <li><b>Зимові пари.</b> Пари з когерентністю нижче 0.35 (сніг, грудень–березень) мають густі іоносферні смуги через увесь кадр і в ряд не входять.</li>
+</ul>
+<figure><img src="__FIG_fringes__" alt="Wrapped interferograms of winter pairs on track 159A"><figcaption>Зимові 20-метрові інтерферограми 159A: смуги через увесь кадр (27.12–13.02) — це іоносфера при низькій когерентності, а не рух. Провал −11 см на 159A у лютому — саме такий артефакт.</figcaption></figure>
+<figure><img src="__FIG_timeseries__" alt="Cumulative uplift of Svartsengi by track"><figcaption>Свартсенгі відносно кільця 8–14 км, наростаючий підсумок по треках. Два незалежні довгі треки (159A, 082D) дають +11…+13 см уздовж променя. Хрестики — пари, замінені середньою швидкістю треку.</figcaption></figure>
+
+<h2 id="gnss">NISAR проти GNSS</h2>
+<p>Щоденні ряди GNSS Невадської геодезичної лабораторії (IGS20) порівнювались відносно станції NYLA (18 км), рух проєктувався на промінь кожного треку.</p>
+<div class="tbl"><table>
+<tr><th>Станція</th><th class="num">Від Свартсенгі</th><th class="num">159A NISAR / GNSS, см</th><th class="num">082D NISAR / GNSS, см</th><th class="num">Розбіжність по датах</th></tr>
+<tr><td>SENG</td><td class="num">0.5 км</td><td class="num">+23.2 / +19.7</td><td class="num">+11.8 / +16.3</td><td class="num">1.6–2.3 см</td></tr>
+<tr><td>AUSV</td><td class="num">4.0 км</td><td class="num">+9.3 / +7.6</td><td class="num">−5.1 / −0.4</td><td class="num">2.1–2.4 см</td></tr>
+<tr><td>GEVK</td><td class="num">5.2 км</td><td class="num">+5.5 / +3.6</td><td class="num">−3.6 / +1.7</td><td class="num">2.2–2.8 см</td></tr>
+<tr><td>VOGC</td><td class="num">12.6 км</td><td class="num">+11.3 / +0.8</td><td class="num">+1.6 / −2.2</td><td class="num">1.6–2.4 см</td></tr>
+</table></div>
+<figure><img src="__FIG_gnss__" alt="NISAR and GNSS time series at station pixels"><figcaption>Біля центру (SENG) NISAR іде за GNSS увесь рік. На VOGC (північний схід кадру) трек 159A «пливе» на +10 см — ймовірно, залишок ухилу або помилка розгортки, тож ця частина кадру ненадійна.</figcaption></figure>
+
+<h2 id="models">Моделі джерела</h2>
+<p>Усі моделі підганялись спільно на карти швидкості NISAR (159A, 082D) і швидкості GNSS чотирьох станцій. GNSS задає абсолютну амплітуду, бо NISAR відносний. Порівняння — за AIC: що менше, то краще, з поправкою на кількість параметрів.</p>
+<div class="tbl"><table>
+<tr><th>Модель</th><th class="num">AIC</th><th class="num">NISAR rms 159A / 082D</th><th class="num">GNSS rms</th><th>Глибина</th><th class="num">Об'єм, млн м³/рік</th></tr>
+<tr><td>Моґі (лише NISAR)</td><td class="num">—</td><td class="num">5.4 / 3.7</td><td class="num">2.9</td><td>3.3 км</td><td class="num">10.9</td></tr>
+<tr><td>Моґі (NISAR + GNSS)</td><td class="num">476</td><td class="num">5.5 / 3.8</td><td class="num">1.9</td><td>3.8 км</td><td class="num">15.5</td></tr>
+<tr><td>Пласка лінза (sill)</td><td class="num">496</td><td class="num">5.2 / 4.0</td><td class="num">2.4</td><td>5.1 км</td><td class="num">16.9</td></tr>
+<tr><td>Лінза без фонового руху плит</td><td class="num">486</td><td class="num">5.2 / 4.1</td><td class="num">2.2</td><td>5.1 км</td><td class="num">17.7</td></tr>
+<tr><td>Моґі + дайка Сундгнукур</td><td class="num">437</td><td class="num">5.2 / 3.8</td><td class="num">1.5</td><td>4.2 км</td><td class="num">19.3 (дайка закривається)</td></tr>
+<tr><td>Лінза + вільна дайка</td><td class="num">432</td><td class="num">5.2 / 3.7</td><td class="num">1.25</td><td>3.2 км</td><td class="num">16.3</td></tr>
+<tr class="best"><td><b>Видовжений еліпсоїд (CDM)</b></td><td class="num"><b>425</b></td><td class="num">—</td><td class="num">—</td><td><b>2.9 км</b></td><td class="num"><b>20.2</b></td></tr>
+<tr><td>«Сферичний» CDM (a = b = c)</td><td class="num">472</td><td class="num">—</td><td class="num">—</td><td>3.3 км</td><td class="num">23.4</td></tr>
+</table></div>
+<p class="sans" style="font-size:13px;color:var(--muted)">Для двох рядків CDM я записав лише AIC, тому розбіжності NISAR і GNSS тут не наведені.</p>
+<figure><img src="__FIG_ellipsoid__" alt="Ellipsoid model"><figcaption>Видовжений еліпсоїд: ~5.7 км завдовжки, вісь 61° (NE–SW), центр на ~2.9 км. Профіль праворуч: напрямок визначено добре (45° чи 75° уже помітно гірші, N–S і E–W виключені). Поперечний переріз упирається в мінімальну межу 0.4 км, тобто він нерозрізнений.</figcaption></figure>
+<figure><img src="__FIG_sources__" alt="Comparison of source models"><figcaption>Порівняння моделей: модельне здіймання, стрілки GNSS (чорні) і моделі (червоні), а нижче — залишки GNSS.</figcaption></figure>
+<div class="two">
+<figure><img src="__FIG_joint__" alt="Joint Mogi fit"><figcaption>Моґі спільно з GNSS: дані, модель і залишок для обох треків, а також профіль за глибиною.</figcaption></figure>
+<figure><img src="__FIG_mogi__" alt="Mogi fit to NISAR only"><figcaption>Моґі лише за NISAR: положення стабільне, але без GNSS амплітуда занижена на 25–30%.</figcaption></figure>
+</div>
+
+<h2 id="hyp">Перевірка гіпотез про рух Гріндавіка на схід</h2>
+<p>Модель Моґі лишала станціям AUSV і GEVK 3–4 см/рік зайвого руху на схід. Перевірили три пояснення:</p>
+<div class="tbl"><table>
+<tr><th>Гіпотеза</th><th>Перевірка</th><th>Висновок</th></tr>
+<tr><td>Розсування плит через рифт</td><td>Фон SENG відносно NYLA до неспокою (2015–2019): +0.3 см/рік на схід, −1.1 см/рік вниз. Віднімання майже не змінює підгонку.</td><td><span class="verdict v-bad">відкинуто</span></td></tr>
+<tr><td>Розкриття розлому Сундгнукур</td><td>Дайка на ряду кратерів дає не розкриття, а закриття (−20…−33 см/рік). У GNSS немає горизонтальних стрибків понад 1.5 см. IMO до 27.10.2026 нових інтрузій не повідомляє.</td><td><span class="verdict v-bad">відкинуто</span></td></tr>
+<tr><td>Видовжений резервуар</td><td>Вільна дайка сама переходить під Свартсенгі, паралельно лінзі. Еліпсоїд з віссю 61° має найкращий AIC (425), а залишок на схід зменшується до ~1–2 см/рік.</td><td><span class="verdict v-ok">підтримується</span></td></tr>
+</table></div>
+
+<h2 id="lessons">Уроки для калібрування алгоритмів</h2>
+<ul>
+  <li><b>Іоносфера.</b> На високих широтах взимку вона головний шум L-діапазону. Шар іоносфери з GUNW треба віднімати завжди, а пари з когерентністю нижче ~0.35 відкидати.</li>
+  <li><b>Погані дати.</b> Одна погана дата псує дві сусідні пари з протилежним знаком. Тому нахил ряду надійніший за підсумок «від першої до останньої дати».</li>
+  <li><b>Амплітуда.</b> Відносний InSAR занижує її на 25–30%, а глибину на ~0.5 км. Прив'язувати амплітуду треба хоча б до однієї станції GNSS.</li>
+  <li><b>Перевіряти продукти.</b> Трек 015A має порожню розгорнуту фазу, тож перевірку на «самі нулі» варто додати перед обробкою.</li>
+  <li><b>Доступ до даних.</b> Читання лише вікна з посиланням, розв'язаним один раз на файл, та окремими процесами замість потоків пришвидшило завантаження з ~0.5 до ~3 МБ/с, без завантаження цілих 2.3 ГБ гранул.</li>
+  <li><b>Невизначеність.</b> Бутстреп за парами нестабільний при шумі ±5 см на пару. Профіль похибки за параметром (глибиною, напрямком) показує невизначеність чесніше.</li>
+</ul>
+
+<h2 id="limits">Обмеження</h2>
+<ul>
+  <li><b>Однорідний півпростір.</b> Без рельєфу й шарів кори. Поперечний переріз резервуару нерозрізнений.</li>
+  <li><b>Не справжній еліпсоїд.</b> CDM лише наближає тиснутий еліпсоїд: розкриття трьох тріщин вільні, не прив'язані до тиску.</li>
+  <li><b>Об'єм.</b> Наш об'єм — зміна об'єму порожнини. Об'єм магми в IMO включає стисливість магми, тож розрив ~1.5 раза очікуваний.</li>
+  <li><b>Мало даних.</b> Один рік спостережень, а розклад на вертикаль і схід ігнорує рух північ–південь. Числа IMO взято з вторинних джерел.</li>
+</ul>
+
+<h2 id="sources">Джерела</h2>
+<ul class="sans" style="font-size:14px">
+  <li>NISAR L2 GUNW (NASA/ISRO), архів ASF DAAC: <code>NISAR_L2_GUNW_PROVISIONAL_V1</code>, <code>NISAR_L2_GUNW_V1</code>.</li>
+  <li>GNSS: Nevada Geodetic Laboratory, щоденні ряди IGS20 (SENG, AUSV, GEVK, VOGC, NYLA).</li>
+  <li>Інфраструктура: © OpenStreetMap contributors (Geofabrik, витяг для Ісландії від 09.11.2026), ліцензія ODbL.</li>
+  <li><a href="https://en.vedur.is/about-imo/news/2026">Icelandic Met Office, новини 2026</a> · <a href="https://watchers.news/2026/04/30/magma-accumulation-exceeds-25-million-m%C2%B3-beneath-svartsengi-iceland/">Watchers, 04.2026</a> · <a href="https://watchers.news/2026/03/17/magma-accumulation-beneath-svartsengi-now-largest-since-eruption-sequence-began-iceland/">Watchers, 03.2026</a></li>
+  <li>Okada (1985), BSSA 75; Nikkhoo et al. (2017), GJI 208 (CDM); Mogi (1958).</li>
+</ul>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/*__DATA__*/
+(function(){
+  const S = DATA.stats;
+  const fmt = (x,d=1)=> (x==null||!isFinite(x))?'—':x.toFixed(d);
+  // infrastructure tables
+  const ex = S.exposure;
+  const names = {steam:'пара (HS Orka)', hot_water:'гаряча вода (HS Veitur)', wastewater:'стічні', other:'інше'};
+  let h = '<h3>Інфраструктура в зоні руху (за моделлю)</h3><div class="tbl"><table><tr><th>Тип</th><th class="num">Об\'єктів</th><th class="num">Довжина, км</th><th class="num">Макс. здіймання, см/рік</th><th class="num">Макс. нахил, мкрад/рік</th><th class="num">Км із здійманням &gt; 10 см/рік</th></tr>';
+  const add = (label, rows)=>rows.forEach(r=>{ h += `<tr><td>${label}${rows.length>1?': '+(names[r.group]||r.group):''}</td><td class="num">${r.n}</td><td class="num">${fmt(r.km)}</td><td class="num">${fmt(r.up)}</td><td class="num">${fmt(r.tilt,0)}</td><td class="num">${fmt(r.km10)}</td></tr>`; });
+  add('Трубопроводи', ex.pipelines); add('ЛЕП', ex.power); add('Захисні вали', ex.barriers); add('Дороги', ex.roads);
+  h += '</table></div>';
+  h += `<h3>Будівлі</h3><p>У вікні ${S.n_buildings} будівель з OSM. Розподіл за модельним здійманням:</p><div class="tbl"><table><tr><th>Здіймання, см/рік</th><th class="num">Будівель</th></tr>`;
+  S.bstats.forEach(([lo,hi,n])=>{ const l = lo<-1e8?`&lt; ${hi}`:hi>1e8?`&gt; ${lo}`:`${lo}–${hi}`; h += `<tr><td>${l}</td><td class="num">${n}</td></tr>`; });
+  h += `</table></div><p>Гріндавік (${S.grind_n} будівель): модельне здіймання ${fmt(S.grind_up[0])}–${fmt(S.grind_up[1])} см/рік, нахил до ${fmt(S.grind_tilt,0)} мкрад/рік. NISAR по вертикалі там показує ${fmt(S.grind_obs[0])}…${fmt(S.grind_obs[1])} см/рік (10–90-й процентилі пікселів, з шумом).</p>`;
+  if (S.named_roads.length){ h += '<h3>Іменовані дороги</h3><div class="tbl"><table><tr><th>Дорога</th><th class="num">Км у вікні</th><th class="num">Макс. здіймання</th><th class="num">Макс. нахил</th></tr>';
+    S.named_roads.forEach(([n,v])=>{ h += `<tr><td>${n}</td><td class="num">${fmt(v.km)}</td><td class="num">${fmt(v.up)}</td><td class="num">${fmt(v.tilt,0)}</td></tr>`; }); h += '</table></div>'; }
+  document.getElementById('infra-tables').innerHTML = h;
+
+  if (typeof L === 'undefined'){ document.getElementById('map').innerHTML = '<p style="padding:16px">Leaflet не завантажився (немає інтернету?). Статичні рисунки нижче доступні.</p>'; return; }
+  const map = L.map('map', {preferCanvas:true}).setView([63.885,-22.43], 11);
+  // openstreetmap.org tiles refuse pages opened from disk (no Referer) and CARTO now watermarks keyless use,
+  // so the base maps are Esri's (OSM-independent, keyless); OSM's own tiles stay for http(s) hosting
+  const street = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {maxZoom:18, attribution:'Tiles © Esri'}).addTo(map);
+  const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {maxZoom:18, attribution:'Imagery © Esri, Maxar, Earthstar Geographics'});
+  const topo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {maxZoom:18, attribution:'Tiles © Esri'});
+  const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18, attribution:'© OpenStreetMap contributors'});
+  const b = DATA.box, bounds = [[b[1], b[0]], [b[3], b[2]]];
+  const legends = {
+    'NISAR vertical (asc + desc), cm/yr':['linear-gradient(90deg,#2166ac,#f7f7f7,#b2182b)','−20','+20','вертикальна швидкість, см/рік'],
+    'NISAR east-west (east +), cm/yr':['linear-gradient(90deg,#542788,#f7f7f7,#b35806)','−10 (захід)','+10 (схід)','схід–захід, см/рік'],
+    'NISAR LOS 159A ascending, cm/yr':['linear-gradient(90deg,#2166ac,#f7f7f7,#b2182b)','−20','+20','до супутника +, см/рік'],
+    'NISAR LOS 082D descending, cm/yr':['linear-gradient(90deg,#2166ac,#f7f7f7,#b2182b)','−20','+20','до супутника +, см/рік'],
+    'Model uplift (ellipsoid), cm/yr':['linear-gradient(90deg,#f7f7f7,#b2182b)','0','+20','модельне здіймання, см/рік'],
+    'Model tilt, microradian/yr':['linear-gradient(90deg,#fcfdbf,#fc8961,#b73779,#000004)','0','60','нахил, мкрад/рік'],
+    'Residual 159A (data - model), cm/yr':['linear-gradient(90deg,#2166ac,#f7f7f7,#b2182b)','−10','+10','залишок, см/рік']};
+  const ov = {};
+  Object.entries(DATA.overlays).forEach(([k,v],i)=>{ ov[k] = L.imageOverlay('data:image/png;base64,'+v, bounds, {opacity:0.85}); if(i===0) ov[k].addTo(map); });
+  // OSM infrastructure
+  const sty = {pipelines:f=>({color: f.properties.sub==='steam'?'#d95f02':f.properties.sub==='hot_water'?'#e7298a':'#7570b3', weight:2.5}),
+               power:()=>({color:'#111', weight:1.5, dashArray:'6 4'}), barriers:()=>({color:'#3b2a1a', weight:4}), roads:()=>({color:'#555', weight:1.2, opacity:.7})};
+  const lab = {pipelines:'Трубопроводи (OSM)', power:'ЛЕП (OSM)', barriers:'Захисні вали (OSM)', roads:'Дороги (OSM)'};
+  const infra = {};
+  ['pipelines','power','barriers','roads'].map(k=>[k,DATA.layers[k]]).forEach(([k,fc])=>{
+    infra[lab[k]] = L.geoJSON(fc, {style:sty[k], onEachFeature:(f,l)=>{ const p=f.properties;
+      l.bindPopup(`<b>${lab[k]}</b>${p.name?'<br>'+p.name:''}${p.sub?'<br>'+p.sub:''}${p.op?' · '+p.op:''}<br>модельне здіймання до <b>${p.up??'—'}</b> см/рік<br>нахил до <b>${p.tilt??'—'}</b> мкрад/рік`); }});
+    if (k!=='roads') infra[lab[k]].addTo(map);
+  });
+  const bcol = u => u==null?'#999':u>20?'#67001f':u>10?'#b2182b':u>5?'#ef8a62':u>2?'#fddbc7':'#d1e5f0';
+  const bl = L.layerGroup(DATA.buildings.map(([la,lo,u])=>L.circleMarker([la,lo],{radius:2.5,weight:0,fillOpacity:.9,fillColor:bcol(u)}).bindPopup(`Будівля (OSM)<br>модельне здіймання ${u??'—'} см/рік`)));
+  infra['Будівлі, колір = здіймання'] = bl;
+  // sources
+  const src = L.layerGroup([
+    L.polygon(DATA.sources.ellipsoid,{color:'#000',weight:2,fillOpacity:.08}).bindPopup(`<b>Видовжений резервуар (найкраща модель)</b><br>центр на ~${fmt(S.ell.depth)} км, довжина ~${fmt(S.ell.length)} км, вісь ${fmt(S.ell.strike,0)}°<br>${fmt(S.ell.vol/1e6)} млн м³/рік`),
+    L.circleMarker(DATA.sources.mogi,{radius:6,color:'#000',fillColor:'#fff',fillOpacity:1,weight:2}).bindPopup('Моґі (NISAR + GNSS): глибина 3.8 км, 15.5 млн м³/рік')]).addTo(map);
+  // GNSS
+  const gl = L.layerGroup(DATA.gnss.map(g=>L.marker([g.lat,g.lon],{icon:L.divIcon({className:'',html:`<div class="tri${g.ref?' ref':''}"></div>`,iconSize:[14,12]})})
+     .bindPopup(g.ref?`<b>${g.name}</b><br>опорна станція GNSS`:`<b>${g.name}</b> (GNSS / модель, см/рік)<br>схід ${g.v[0]} / ${g.m[0]}<br>північ ${g.v[1]} / ${g.m[1]}<br>вгору ${g.v[2]} / ${g.m[2]}`)
+     .bindTooltip(g.name,{permanent:true,direction:'right',className:'place'}))).addTo(map);
+  // places
+  const pl = L.layerGroup(DATA.places.filter(p=>['village','suburb','neighbourhood','locality','hamlet'].includes(p.place) && !['Grindavík','Vogar','Hafnir'].includes(p.name)).map(p=>
+     L.marker([p.lat,p.lon],{opacity:0}).bindTooltip(p.name,{permanent:true,direction:'center',className:'place'})));
+  // ---- volcanic features and key objects (OSM)
+  const V = DATA.volcanic;
+  const val = (u,t)=>`модельне здіймання <b>${u??'—'}</b> см/рік, нахил <b>${t??'—'}</b> мкрад/рік`;
+  const dot = (cls,size)=>L.divIcon({className:'', html:`<div class="${cls}"></div>`, iconSize:[size,size], iconAnchor:[size/2,size/2]});
+  const row = V.row.length>1 ? L.polyline(V.row,{color:'#d7191c',weight:4,dashArray:'8 5'}).bindPopup(`<b>Ряд кратерів Сундгнукур (Sundhnúksgígaröð)</b><br>лінія через ${V.row.length} жерл з OSM<br>місце інтрузій і вивержень 2023–2025; за IMO — найімовірніше місце наступного виверження`).bindTooltip('Сундгнукур',{permanent:true,direction:'right',className:'place'}) : null;
+  const fissures = L.layerGroup([ ...(row?[row]:[]),
+    ...V.vents.map(v=>L.circleMarker(v,{radius:3,color:'#d7191c',weight:1,fillColor:'#fdae61',fillOpacity:1}).bindPopup('Жерло (OSM, geological=volcanic_vent)'))]).addTo(map);
+  const volcs = L.layerGroup(V.volcanoes.map(v=>L.marker([v.lat,v.lon],{icon:dot(v.recent?'volc recent':'volc',v.recent?16:11)})
+     .bindPopup(`<b>${v.name}</b>${v.en?' ('+v.en+')':''}<br>${v.status?'стан: '+v.status+'<br>':''}${v.ele?'висота '+v.ele+' м<br>':''}${val(v.up,v.tilt)}`)
+     .bindTooltip(v.name,{permanent:v.recent && v.name!=='вулканічна форма',direction:'right',className:'place'}))).addTo(map);
+  const peaks = L.layerGroup(V.peaks.map(p=>L.circleMarker([p.lat,p.lon],{radius:2.5,color:'#555',weight:1,fillColor:'#fff',fillOpacity:1})
+     .bindTooltip(`${p.name}${p.ele?' '+p.ele+' м':''}`,{direction:'top',className:'place'})));
+  const icon = {town:'🏘', resort:'♨', 'power plant':'⚡', substation:'⚡', airport:'✈'};
+  const keyObj = L.layerGroup([
+    ...V.key.filter(k=>k.kind!=='substation').map(k=>L.marker([k.lat,k.lon],{icon:L.divIcon({className:'',html:`<div class="key">${icon[k.kind]||'●'}</div>`,iconSize:[22,22],iconAnchor:[11,11]})})
+      .bindPopup(`<b>${k.name}</b><br>${val(k.up,k.tilt)}`).bindTooltip(k.name,{permanent:['town','resort','power plant','airport'].includes(k.kind),direction:'right',className:'place'})),
+    L.geoJSON(DATA.layers.keyroads,{style:{color:'#1a1a1a',weight:4,opacity:.8},onEachFeature:(f,l)=>l.bindPopup(`<b>${f.properties.name}</b><br>${val(f.properties.up,f.properties.tilt)}`)})]).addTo(map);
+  // ---- hachures (Dufour style) and contours of the vertical rate
+  const hach = fc => L.geoJSON(fc,{style:f=>({color:f.properties.color,weight:f.properties.w,opacity:.9,lineCap:'butt'}),
+     onEachFeature:(f,l)=>l.bindPopup(`<b>${f.properties.sign>0?'здіймання':'опускання'}</b><br>штрих іде вниз по схилу поля руху;<br>крутизна ${f.properties.slope_lo}–${f.properties.slope_hi} см/рік на км`)});
+  const cont = (fc,col) => L.geoJSON(fc,{style:f=>({color:f.properties.level>0?col[0]:col[1],weight:f.properties.level%10===0?1.8:0.9,opacity:.8,dashArray:f.properties.level%10===0?null:'3 3'}),
+     onEachFeature:(f,l)=>l.bindTooltip(`${f.properties.level>0?'+':''}${f.properties.level} см/рік`,{sticky:true})});
+  const hObs = hach(DATA.layers.hach_obs).addTo(map), hMod = hach(DATA.layers.hach_mod);
+  const cObs = cont(DATA.layers.cont_obs,['#67001f','#053061']), cMod = cont(DATA.layers.cont_mod,['#67001f','#053061']);
+  const groups0 = {'Штрихи: NISAR, вертикаль (згладжено ~0.5 км)':hObs,'Штрихи: модель (видовжений еліпсоїд)':hMod,
+                   'Ізолінії NISAR, кожні 2 см/рік':cObs,'Ізолінії моделі, кожні 2 см/рік':cMod};
+  const hl = L.control({position:'bottomright'});
+  hl.onAdd = ()=>{ const d=L.DomUtil.create('div','legend'); d.innerHTML='<b>штрихи</b><br><span style="color:#b2182b">━</span> здіймання · <span style="color:#2166ac">━</span> опускання<br>штрих іде вниз по схилу поля руху;<br>товщий = рух змінюється різкіше<br>(один ряд на кожні 2 см/рік)'; return d; };
+  hl.addTo(map);
+  const groups = Object.assign(groups0, {"Ключові об'єкти (місто, лагуна, ГеоТЕС, аеропорт, дороги)":keyObj,
+    'Тріщини: ряд Сундгнукур і жерла (OSM)':fissures,'Вулкани й місця вивержень (OSM)':volcs,'Вершини (OSM)':peaks,
+    'Джерела моделі':src,'Станції GNSS':gl,'Назви місць (OSM)':pl}, infra);
+  L.control.layers({'Карта (Esri)':street,'Рельєф (Esri)':topo,'Супутник (Esri): видно лавові поля':sat,'OpenStreetMap (лише з http-сервера)':osm}, Object.assign({}, ov, groups), {collapsed: window.innerWidth < 900}).addTo(map);
+  const leg = L.control({position:'bottomleft'});
+  leg.onAdd = ()=>{ const d = L.DomUtil.create('div','legend'); d.id='legend'; return d; };
+  leg.addTo(map);
+  const showLegend = name => { const l = legends[name]; const d = document.getElementById('legend'); if(!l) return;
+    d.style.display='block'; d.innerHTML = `<b>${l[3]}</b><div class="bar" style="background:${l[0]}"></div><div style="display:flex;justify-content:space-between"><span>${l[1]}</span><span>${l[2]}</span></div>`; };
+  showLegend(Object.keys(DATA.overlays)[0]);
+  map.on('overlayadd', e=>showLegend(e.name));
+  map.on('overlayremove', e=>{ const on = Object.keys(ov).filter(k=>map.hasLayer(ov[k])); if(on.length) showLegend(on[on.length-1]); else document.getElementById('legend').style.display='none'; });
+  map.fitBounds([[63.80,-22.72],[64.0,-22.12]]);
+})();
+</script>
+</body>
+</html>
