@@ -1889,3 +1889,62 @@ water 2 631, vegetated bed 41 187, bare bed 2 758, cropland 73 973.
 - **Consequence:** K1–K4 here measure the interference, not the surfaces, so their fails say nothing about the
   radio physics of water, forest or frozen soil. The surface tests move to a clean site (Wisconsin, quad-pol) with the
   same code and thresholds. Per section K, no spatial map of the interference is made or published.
+
+## W. Northern Wisconsin: L-band radio physics with full quad-pol GCOV (кібератлет + Claude)
+
+Goal: run the surface tests that the Kakhovka bed could not answer (section K: the data there were interference-dominated)
+on a clean site, and add the tests that need all four polarizations. NISAR GCOV `2005_QPDH` here carries the **full
+covariance matrix** in band A (10 terms, `isFullCovariance = True`, complex off-diagonals) and HH/HV in band B.
+
+**Pre-registered 2026-11-14 ~23:50 (Dnipro time), before any GCOV backscatter value over this site was read.**
+Seen before writing, and nothing else: ASF scene lists (52 QPDH scenes, tracks A76/24: 18, A148/24: 7, D41/65: 10,
+D113/66: 16; no QPDH scenes Feb – mid-June 2026), the term lists and flags of one file (D113, 2026-11-01:
+`rfiLikelihood` = inf and 1e35), ESA WorldCover shares (used to choose the windows), Sentinel-2 scene lists, and the
+array shapes (not values) of one test read (A76, 2026-10-29, band A).
+
+**Windows.** Full window W −91.00, S 45.02, E −90.56, N 45.28 (WorldCover: tree 67 %, cropland 20 %, grass 11 %,
+water 1.2 %), band B 80 m, all 52 scenes. Sub-window W −90.77, S 45.17, E −90.67, N 45.24, chosen from WorldCover only as the
+~8 × 8 km box with most open water that keeps ≥ 30 % tree and ≥ 10 % cropland (water 12 %, tree 67 %, cropland 12 %):
+band A 20 m, full covariance, one scene per track and calendar month (the earliest of the month).
+Terrain height for the incidence cube 350 m above the ellipsoid.
+
+**Classes** (radar-independent; Sentinel-2 L2A 2026-07-14 = leaf-on, 2025-11-03 = leaf-off and snow-free, tiles 15TXL + 15TXK):
+- *water*: SCL = 6 on both dates for every S2 pixel under the radar pixel, and July NDWI ≥ 0.3.
+- *deciduous forest*: WorldCover tree fraction ≥ 0.9, July NDVI ≥ 0.75, November NDVI ≤ 0.45.
+- *conifer forest*: WorldCover tree fraction ≥ 0.9, July NDVI ≥ 0.75, November NDVI ≥ 0.60.
+- *cropland*: WorldCover cropland fraction ≥ 0.9, no water.
+- Frozen / unfrozen dates: the section K rule (Open-Meteo hourly 2 m temperature). A window is used for a class only with
+  ≥ 50 class pixels. dB = 10·log10 of gamma0.
+- Corn against soybean (USDA CDL) is **not tested**: the CDL service returned errors on 14.11.
+
+**W1. Noise floor** (repeat of K1). W1a band B: water HV / NEB_HV within ±2 dB in ≥ 80 % of scenes. W1b band B: water
+HH ≥ water HV − 0.5 dB in ≥ 80 %. W1c band A: water HV / NEB_HV and VH / NEB_VH both within ±2 dB in ≥ 80 % of scenes.
+
+**W2. Does the 24 cm wave see leaves?** Band B, unfrozen dates. A track is eligible with ≥ 4 unfrozen dates including
+≥ 1 in Jun–Aug and ≥ 1 in 15 Oct – 30 Nov. Fewer than 2 eligible tracks: inconclusive.
+- W2a. Deciduous-forest HV amplitude (max − min of per-date medians) ≤ 2.0 dB on ≥ 2/3 of eligible tracks.
+- W2b. Deciduous-forest HV amplitude < cropland HV amplitude on ≥ 2/3 of eligible tracks.
+- W2c. Deciduous HV amplitude − conifer HV amplitude ≤ 1.0 dB on ≥ 2/3 of eligible tracks (losing all leaves adds little).
+
+**W3. Angular signature.** Band B, Jun–Sep 2026, unfrozen. Per track, class medians of γ⁰ and θ. Spread of θ over
+tracks < 5°: inconclusive. W3: for deciduous and for conifer forest, the range over tracks ≤ 1.5 dB in HV and in HH.
+
+**W4. Frozen ground and frozen trees.** Band B, Oct 2025 – Jan 2026, per track and class (deciduous, conifer, cropland),
+eligible with ≥ 1 frozen and ≥ 2 unfrozen dates. W4: median HH frozen − median HH unfrozen ≤ −1.5 dB on ≥ half of the
+eligible cases. Fewer than 2 eligible cases: inconclusive.
+
+**W5. Reciprocity HV = VH** (band A). For forest (deciduous ∪ conifer) and cropland, per scene:
+- W5a. |median 10·log10(HV / VH)| ≤ 0.5 dB in ≥ 80 % of scenes.
+- W5b. Cross-pol coherence |⟨HV·VH*⟩| / √(⟨|HV|²⟩⟨|VH|²⟩) of the class means ≥ 0.9 in ≥ 80 % of scenes.
+
+**W6. Co-pol ratio against scattering theory** (band A).
+- W6a. Forest: |median VV − median HH| ≤ 1.0 dB in ≥ 80 % of scenes (volume scattering, no preferred polarization).
+- W6b. Water: VV − HH ≥ +1.0 dB (Bragg / small-perturbation model) in ≥ 80 % of the scenes where water HH and VV are both
+  ≥ 3 dB above their NEB. Fewer than 5 such scenes: inconclusive.
+
+**W7. Cloude–Pottier H/α** (band A, unfrozen scenes, from the class-mean 3 × 3 coherency matrix). W7: forest entropy
+H ≥ 0.7 and 40° ≤ ᾱ ≤ 55° in ≥ 80 % of scenes. Cropland and water: reported, not judged.
+
+**W8. Faraday rotation** (band A, forest class mean, Bickel–Bates estimator from the full covariance:
+Ω = ¼·arg(⟨|b|²⟩ − ⟨|a|²⟩ − 2j·Re⟨a b*⟩) with a = HV − VH, b = HH + VV). Reported, not judged; expectation |Ω| ≤ 3°.
+Crosstalk is not corrected in the product (all-zero layers, section K), so a non-zero Ω may be crosstalk, not ionosphere.
