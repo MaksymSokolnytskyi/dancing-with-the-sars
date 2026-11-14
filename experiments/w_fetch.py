@@ -43,7 +43,7 @@ def target_grid():
     return from_origin(w, n, RES, RES), (H, W)
 
 
-def s2_mosaic(date, dst_tf, shape):
+def s2_mosaic(date, dst_tf, shape, epsg=EPSG):
     """Sentinel-2 layers of one date; scenes with less no-data first, later scenes only fill the gaps."""
     r = requests.post(k_fetch.STAC, json={"collections": ["sentinel-2-l2a"], "bbox": list(BBOX),
                                           "datetime": f"{date}T00:00:00Z/{date}T23:59:59Z", "limit": 20},
@@ -55,9 +55,9 @@ def s2_mosaic(date, dst_tf, shape):
         a = it["assets"]
         valid = lambda v: np.where(v == 0, np.nan, v.astype("float32"))  # noqa: E731
         lay = {"water": k_fetch.read_cog(a["scl"]["href"], dst_tf, shape,
-                                         lambda v: np.where(v == 0, np.nan, (v == 6).astype("float32")), epsg=EPSG)}
+                                         lambda v: np.where(v == 0, np.nan, (v == 6).astype("float32")), epsg=epsg)}
         for b in ("red", "nir", "green"):
-            lay[b] = k_fetch.read_cog(a[b]["href"], dst_tf, shape, valid, epsg=EPSG)
+            lay[b] = k_fetch.read_cog(a[b]["href"], dst_tf, shape, valid, epsg=epsg)
         lay["ndvi"] = (lay["nir"] - lay["red"]) / (lay["nir"] + lay["red"])
         lay["ndwi"] = (lay["green"] - lay["nir"]) / (lay["green"] + lay["nir"])
         lay = {k: lay[k] for k in ("water", "ndvi", "ndwi")}
@@ -72,12 +72,12 @@ def s2_mosaic(date, dst_tf, shape):
     return out
 
 
-def layers(dst_tf, shape):
+def layers(dst_tf, shape, epsg=EPSG):
     wc = lambda c: (lambda v: np.where(v == 0, np.nan, (v == c).astype("float32")))  # noqa: E731
-    out = {f"wc_{n}": k_fetch.read_cog(WC_URL, dst_tf, shape, wc(c), epsg=EPSG)
+    out = {f"wc_{n}": k_fetch.read_cog(WC_URL, dst_tf, shape, wc(c), epsg=epsg)
            for n, c in (("water", 80), ("crop", 40), ("tree", 10))}
     for d in S2_DATES:
-        for k, v in s2_mosaic(d, dst_tf, shape).items():
+        for k, v in s2_mosaic(d, dst_tf, shape, epsg).items():
             out[f"s2_{d}_{k}"] = v
     return out
 
@@ -111,13 +111,12 @@ def main():
     np.savez_compressed(OUT / "grid.npz", transform=np.array(tf)[:6], epsg=EPSG, **layers(tf, shape))
     done = {}                                     # band A windows on the same grid share their class layers
     for p in a_paths:
-        w = gcov.Window.load(p)
-        assert w.epsg == EPSG, w.epsg
+        w = gcov.Window.load(p)                   # on the product's own UTM zone (32616 here), not EPSG above
         dx, dy = w.x[1] - w.x[0], w.y[1] - w.y[0]
         atf = rasterio.Affine(dx, 0, w.x[0] - dx / 2, 0, dy, w.y[0] - dy / 2)
-        key = (float(w.x[0]), float(w.y[0]), w.hh.shape)
+        key = (w.epsg, float(w.x[0]), float(w.y[0]), w.hh.shape)
         if key not in done:
-            done[key] = layers(atf, w.hh.shape)
+            done[key] = layers(atf, w.hh.shape, w.epsg)
         np.savez_compressed(OUT / f"gridA_{p.stem}.npz", **done[key])
     print(f"class layers saved in {OUT}", flush=True)
 

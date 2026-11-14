@@ -1953,3 +1953,48 @@ H ≥ 0.7 and 40° ≤ ᾱ ≤ 55° in ≥ 80 % of scenes. Cropland and water: r
 **W8. Faraday rotation** (band A, forest class mean, Bickel–Bates estimator from the full covariance:
 Ω = ¼·arg(⟨|b|²⟩ − ⟨|a|²⟩ − 2j·Re⟨a b*⟩) with a = HV − VH, b = HH + VV). Reported, not judged; expectation |Ω| ≤ 3°.
 Crosstalk is not corrected in the product (all-zero layers, section K), so a non-zero Ω may be crosstalk, not ionosphere.
+
+**Results W (2026-11-14 ~23:40, `experiments/w_fetch.py`, `experiments/w_tests.py`).** 52 band B windows (A76: 18,
+D113: 16, D41: 11, A148: 7), 27 band A full-covariance windows (one per track and month). Class pixels on the 80 m grid:
+water 76, deciduous 15 684, conifer 14 990, cropland 21 538. Fix before the run, no rule changed: the products are on UTM
+zone 16 (EPSG 32616), so the band A class layers are built on each window's own zone.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| W1a water HV / NEB_HV within ±2 dB (band B) | 0 of 42; finite values +3.3 … +5.9 dB; NEB layer zero somewhere in the window in 28 of 52 scenes (inf) | ≥ 80 % | **fail** |
+| W1b water HH ≥ HV − 0.5 dB | 42 of 42 | ≥ 80 % | pass |
+| W1c band A water vs NEB | no water pixels on the band A grid (see below) | | inconclusive |
+| W2a deciduous HV amplitude ≤ 2 dB | 0.8, 2.8, 1.8 dB (D41, A76, D113; A148 not eligible) | ≥ 2/3 | pass |
+| W2b deciduous HV amp < cropland HV amp | 3 of 3 (cropland 2.6, 4.4, 2.7 dB) | ≥ 2/3 | pass |
+| W2c deciduous − conifer HV amp ≤ 1 dB | −0.2, −1.6, +0.1 dB | ≥ 2/3 | pass |
+| W3 forest range over tracks, θ spread 12.7° | deciduous HH 0.5 / HV 0.7 dB, conifer HH 0.9 / HV 0.4 dB | ≤ 1.5 dB | pass |
+| W4 frozen − unfrozen HH | deciduous −2.0 / −2.2, conifer −2.6 / −2.3, cropland −1.2 / −1.8 dB (A76 / D113) | ≤ −1.5 on half | pass (4 of 6) |
+| W5a \|HV − VH\| ≤ 0.5 dB | forest 16 of 27, cropland 17 of 27 | ≥ 80 % | **fail** |
+| W5b cross-pol coherence ≥ 0.9 | forest 10 of 27 (0.76–0.95), cropland 0 of 27 (0.25–0.77) | ≥ 80 % | **fail** |
+| W6a forest \|VV − HH\| ≤ 1 dB | 5 of 27 (VV − HH −0.5 … −4.2 dB) | ≥ 80 % | **fail** |
+| W6b water VV − HH | no scene passes the NEB gate (no band A water class) | | inconclusive |
+| W7 forest H ≥ 0.7 and 40° ≤ ᾱ ≤ 55° | 18 of 22 unfrozen scenes (H 0.65–0.97, ᾱ 48.8–53.1°) | ≥ 80 % | pass |
+| W8 Faraday Ω (forest, reported) | Oct 2025 – Jan 2026: −1.8 … +1.2°; Jun – Oct 2026: +0.2 … +5.2° | expectation \|Ω\| ≤ 3° | reported |
+
+**Post-hoc (not pre-registered), what the fails and gaps show.**
+- *Processing version.* W5a and W6a split by `compositeReleaseId`: X05009/X05010 (Oct 2025 – Jan 2026, 10 scenes) give
+  forest HV − VH −0.9 … −1.4 dB (median) and VV − HH −2.8 dB; P05023/P05036 (Jun – Nov 2026, 17 scenes) give HV − VH
+  −0.1 … −0.3 dB and VV − HH −0.9 … −1.1 dB. Reciprocity (HV = VH) does not depend on season, so the early releases carry a
+  ≈ 1 dB cross-pol channel imbalance that the 2026 releases mostly do not. Season and release are confounded for VV − HH.
+- *Cross-pol coherence and noise.* Noise is not subtracted (section K), and receiver noise in HV and VH is independent, so
+  the coherence falls where the cross-pol signal is weak: cropland (low HV) 0.25–0.77, forest (high HV) 0.76–0.95. W5b as
+  written asked more than an un-denoised product can give.
+- *The NEB layer itself.* `noiseEquivalentBackscatter` HV has zeros inside the window in 28 of 52 band B scenes, and on the
+  band A grid it is all NaN in 15 of 27 scenes; it is complete only in some P05023/P05036 scenes. Where it is finite, calm
+  water HV (about −22 dB, like the Lake Balaton control in section K) sits 3–6 dB above it. Either the stated floor is
+  too low or the water returns some HV; we cannot tell which from these data. Add to the K0 audit.
+- *Empty water class on the band A grid.* The July NDWI rule (≥ 0.3) removes every lake pixel of the sub-window
+  (NDWI there is below 0.3 in July; ≥ 0.3 in November). So W1c and W6b test nothing; the rule was too strict for a
+  summer lake, not a radar result.
+- *Faraday.* The estimate is near zero in winter and +2 … +5° in summer, largest on the descending (evening) tracks.
+  That fits more ionospheric electron content in summer evenings, but crosstalk is not corrected, and no TEC data were
+  compared. Not a claim.
+- **Reading.** On this clean site the surface physics behaves as textbook L-band: the wave does not see leaves (W2), forest
+  γ⁰ is flat in angle (W3), freezing drops backscatter by ~2 dB (W4), forest is a high-entropy volume scatterer at
+  ᾱ ≈ 50° (W7). What fails is the product's polarimetric calibration in the early releases (W5a, W6a) and its noise layer
+  (W1a), plus our own too-strict water rule (W1c, W6b).
