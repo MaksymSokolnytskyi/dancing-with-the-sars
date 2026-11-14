@@ -104,7 +104,8 @@ class Window:
 
 
 def read_window(h5, bbox, *, freq: str = "B", name: str = "", date: datetime | None = None,
-                height_m: float | None = None) -> Window:
+                height_m: float | None = None, offdiag: bool = False) -> Window:
+    """offdiag: also keep the complex off-diagonal covariance terms (e.g. HHVV, HVVH) as extra["hhvv"] etc."""
     g = f"science/LSAR/GCOV/grids/frequency{freq}"
     xs, ys = h5[f"{g}/xCoordinates"][()], h5[f"{g}/yCoordinates"][()]
     epsg = _epsg(h5, g)
@@ -118,6 +119,10 @@ def read_window(h5, bbox, *, freq: str = "B", name: str = "", date: datetime | N
     for key, term in (("vv", "VVVV"), ("vh", "VHVH")):
         if f"{g}/{term}" in h5 and f"{g}/HHHH" in h5:
             extra[key] = h5[f"{g}/{term}"][rs, cs].astype("float32")
+    if offdiag and f"{g}/listOfCovarianceTerms" in h5:
+        for term in (t.decode() for t in h5[f"{g}/listOfCovarianceTerms"][()]):
+            if term[:2] != term[2:]:
+                extra[term.lower()] = h5[f"{g}/{term}"][rs, cs].astype("complex64")
     if f"{g}/rtcGammaToSigmaFactor" in h5:
         extra["g2s"] = h5[f"{g}/rtcGammaToSigmaFactor"][rs, cs].astype("float32")
     if _find(h5, "incidenceAngle", "radarGrid"):
@@ -183,15 +188,16 @@ def _meta(h5) -> dict:
     return out
 
 
-def cache_dir(bbox, freq: str = "B") -> Path:
-    return CACHE / ("bbox_" + "_".join(f"{v:.3f}" for v in bbox) + f"_f{freq}")
+def cache_dir(bbox, freq: str = "B", offdiag: bool = False) -> Path:
+    return CACHE / ("bbox_" + "_".join(f"{v:.3f}" for v in bbox) + f"_f{freq}" + ("_full" if offdiag else ""))
 
 
-def fetch(scenes: list[Scene], bbox, *, freq: str = "B", height_m: float | None = None, log=print) -> list[Path]:
+def fetch(scenes: list[Scene], bbox, *, freq: str = "B", height_m: float | None = None, offdiag: bool = False,
+          log=print) -> list[Path]:
     """Read and cache each scene's window (skips cached ones). Returns the cache paths that exist."""
     import time
     from hachure import nisar
-    d = cache_dir(bbox, freq)
+    d = cache_dir(bbox, freq, offdiag)
     d.mkdir(parents=True, exist_ok=True)
     out = []
     for i, s in enumerate(scenes, 1):
@@ -200,7 +206,8 @@ def fetch(scenes: list[Scene], bbox, *, freq: str = "B", height_m: float | None 
             t = time.time()
             try:
                 with nisar.open_h5(s.url) as h5:
-                    win = read_window(h5, bbox, freq=freq, name=s.name, date=s.date, height_m=height_m)
+                    win = read_window(h5, bbox, freq=freq, name=s.name, date=s.date, height_m=height_m,
+                                      offdiag=offdiag)
                 tmp = d / f"_part_{i}.npz"
                 win.save(tmp)
                 tmp.replace(p)
