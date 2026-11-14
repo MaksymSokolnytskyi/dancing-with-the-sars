@@ -139,7 +139,7 @@ function render(name, win, scale) {
   for (const [lo, la] of bld) { const [x, y] = toPx(lo, la); for (let dy = -dot; dy <= dot; dy += 0.5) for (let dx = -dot; dx <= dot; dx += 0.5) if (dx * dx + dy * dy <= dot * dot) put(x + dx, y + dy, hex("#1d1d1b"), 230); }
   const labels = [];
   for (const f of zones.features) {
-    const p = f.properties, rel = p.reliable === "так";
+    const p = f.properties, rel = p.reliable === "yes";
     for (const rings of ringsOf(f.geometry)) {
       if (rel) { line(rings, hex("#ffffff"), Math.max(2, scale / 1.2)); line(rings, hex("#1d1d1b"), Math.max(1, scale / 2.5)); }
       else line(rings, hex("#5b5a56"), Math.max(1, scale / 3), 3);

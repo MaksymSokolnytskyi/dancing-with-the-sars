@@ -107,8 +107,8 @@ for (const id of ["M02", "M04", "M03", "M06"]) {
   }
   out[id] = { polygon_parts: polyParts, components_by_level: levels, minima_5x5: minima.sort((a, b) => a.v_cm_yr - b.v_cm_yr).slice(0, 6) };
   console.log(`\n${id}: polygon parts ${polyParts}`);
-  for (const [L, cs] of Object.entries(levels)) console.log(`  < ${L} см/рік: ${cs.length} компонент(и) ` + cs.map((c) => `[${c.km2} км², ${c.lon},${c.lat}, min ${c.min_sm}]`).join(" "));
-  console.log("  мінімуми:", minima.slice(0, 6).map((m) => `${m.lon},${m.lat} ${m.v_cm_yr}`).join(" | "));
+  for (const [L, cs] of Object.entries(levels)) console.log(`  < ${L} cm/yr: ${cs.length} component(s) ` + cs.map((c) => `[${c.km2} km², ${c.lon},${c.lat}, min ${c.min_sm}]`).join(" "));
+  console.log("  minima:", minima.slice(0, 6).map((m) => `${m.lon},${m.lat} ${m.v_cm_yr}`).join(" | "));
 }
 
 // ---------- 2) linear feature near E 771 km, N 5545 km ----------

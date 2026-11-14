@@ -94,20 +94,20 @@ const ROAD_CLASS = { motorway: "major", motorway_link: "major", trunk: "major", 
   residential: "local", unclassified: "local", living_street: "local", service: "local", road: "local" };
 const RAIL = new Set(["rail", "light_rail", "tram", "narrow_gauge", "subway"]);
 function landClass(t) {
-  if (t.man_made === "spoil_heap" || t.landuse === "landfill") return "відвал/звалище";
-  if (t.landuse === "construction") return "будмайданчик";
-  if (t.natural === "water" || t.landuse === "reservoir" || t.landuse === "basin" || t.water) return "вода";
-  if (t.natural === "wetland") return "болото";
-  if (t.landuse === "industrial" || t.industrial || t.landuse === "railway") return "промзона";
-  if (t.landuse === "quarry") return "кар'єр";
-  if (t.landuse === "residential" || t.landuse === "retail" || t.landuse === "commercial") return "житлова/комерційна";
-  if (t.landuse === "farmland" || t.landuse === "meadow" || t.landuse === "grass" || t.landuse === "farmyard" || t.landuse === "orchard" || t.natural === "grassland") return "поле/луки";
-  if (t.landuse === "forest" || t.natural === "wood" || t.natural === "scrub") return "ліс/чагарник";
-  if (t.leisure || t.landuse === "recreation_ground" || t.landuse === "allotments" || t.landuse === "cemetery") return "парк/дачі/цвинтар";
-  if (t.landuse === "brownfield" || t.landuse === "greenfield") return "пустир";
+  if (t.man_made === "spoil_heap" || t.landuse === "landfill") return "spoil heap / landfill";
+  if (t.landuse === "construction") return "construction site";
+  if (t.natural === "water" || t.landuse === "reservoir" || t.landuse === "basin" || t.water) return "water";
+  if (t.natural === "wetland") return "wetland";
+  if (t.landuse === "industrial" || t.industrial || t.landuse === "railway") return "industrial";
+  if (t.landuse === "quarry") return "quarry";
+  if (t.landuse === "residential" || t.landuse === "retail" || t.landuse === "commercial") return "residential / commercial";
+  if (t.landuse === "farmland" || t.landuse === "meadow" || t.landuse === "grass" || t.landuse === "farmyard" || t.landuse === "orchard" || t.natural === "grassland") return "farmland / meadow";
+  if (t.landuse === "forest" || t.natural === "wood" || t.natural === "scrub") return "forest / scrub";
+  if (t.leisure || t.landuse === "recreation_ground" || t.landuse === "allotments" || t.landuse === "cemetery") return "park / allotments / cemetery";
+  if (t.landuse === "brownfield" || t.landuse === "greenfield") return "brownfield";
   return null;
 }
-const LAND_PRIORITY = ["відвал/звалище", "будмайданчик", "вода", "болото", "кар'єр", "промзона", "житлова/комерційна", "парк/дачі/цвинтар", "пустир", "ліс/чагарник", "поле/луки"];
+const LAND_PRIORITY = ["spoil heap / landfill", "construction site", "water", "wetland", "quarry", "industrial", "residential / commercial", "park / allotments / cemetery", "brownfield", "forest / scrub", "farmland / meadow"];
 
 // ---------- main ----------
 const zones = JSON.parse(fs.readFileSync(path.join(DIR, "zones_vertical_clustered.geojson"), "utf8"));
@@ -115,7 +115,7 @@ const bb = BBOX.join(",");
 const mines = await overpass("mines", `[out:json][timeout:120];(
   nwr["man_made"="mineshaft"](${bb}); nwr["industrial"="mine"](${bb}); nwr["landuse"="industrial"]["name"~"KWK|[Kk]opalni|Důl|ZG |Ruch |[Mm]ine|Doly"](${bb}); );out center tags;`);
 const places = await overpass("places", `[out:json][timeout:120];nwr["place"~"^(city|town|village|suburb|quarter|hamlet)$"]["name"](${bb});out center tags;`);
-const mineList = mines.elements.map((e) => ({ p: elCenter(e), name: e.tags.name || "", kind: e.tags.man_made === "mineshaft" ? "шахтний ствол" : e.tags.industrial === "mine" ? "шахта" : "промзона шахти", id: `${e.type}/${e.id}`, disused: !!(e.tags.disused || e.tags["disused:man_made"] || e.tags.abandoned) })).filter((m) => m.p);
+const mineList = mines.elements.map((e) => ({ p: elCenter(e), name: e.tags.name || "", kind: e.tags.man_made === "mineshaft" ? "mine shaft" : e.tags.industrial === "mine" ? "mine" : "mine industrial area", id: `${e.type}/${e.id}`, disused: !!(e.tags.disused || e.tags["disused:man_made"] || e.tags.abandoned) })).filter((m) => m.p);
 const placeList = places.elements.map((e) => ({ p: elCenter(e), name: e.tags.name, place: e.tags.place })).filter((m) => m.p);
 console.log(`mines/shafts: ${mineList.length}, named settlements: ${placeList.length}`);
 // country for all bowls in one Overpass request (one is_in block per centroid, outputs come in order)
@@ -173,7 +173,7 @@ for (const [zi, ft] of zones.features.entries()) {
     let best = null;
     for (const L of landEls) if (x >= L.bbox[0] && x <= L.bbox[2] && y >= L.bbox[1] && y <= L.bbox[3] && inRing([x, y], L.r))
       if (!best || LAND_PRIORITY.indexOf(L.lc) < LAND_PRIORITY.indexOf(best)) best = L.lc;
-    comp[best || "без landuse"] = (comp[best || "без landuse"] || 0) + 1;
+    comp[best || "no landuse"] = (comp[best || "no landuse"] || 0) + 1;
   }
   const landuse = Object.entries(comp).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${Math.round((100 * v) / ns)}%`).join(", ");
 
@@ -184,7 +184,7 @@ for (const [zi, ft] of zones.features.entries()) {
   const country = ctry[zi];
 
   Object.assign(pr, {
-    country, reliable: ROBUST.has(pr.id) ? "так" : "кандидат",
+    country, reliable: ROBUST.has(pr.id) ? "yes" : "candidate",
     buildings: nb, built_m2: Math.round(barea), built_frac: +(barea / (pr.area_km2 * 1e6)).toFixed(3),
     roads_km: +((roads.major + roads.local) / 1000).toFixed(2), roads_major_km: +(roads.major / 1000).toFixed(2), roads_local_km: +(roads.local / 1000).toFixed(2),
     major_roads: [...roadNames].slice(0, 6).join("; "),
@@ -197,7 +197,7 @@ for (const [zi, ft] of zones.features.entries()) {
     settlement: town ? town.name : "", settlement_km: town ? +(Math.hypot(town.p[0] - ctr[0], town.p[1] - ctr[1]) / 1000).toFixed(1) : null,
     locality: local ? local.name : "", locality_place: local ? local.place : "",
   });
-  console.log(`${pr.id} ${country} ${pr.area_km2} km² | буд. ${nb} | дороги ${pr.roads_km} км | залізн. ${pr.rail_km} км | шахта: ${pr.mine || "—"} ${pr.mine_dist_km ?? ""} км | ${pr.locality} | ${landuse}`);
+  console.log(`${pr.id} ${country} ${pr.area_km2} km² | bldg ${nb} | roads ${pr.roads_km} km | rail ${pr.rail_km} km | mine: ${pr.mine || "—"} ${pr.mine_dist_km ?? ""} km | ${pr.locality} | ${landuse}`);
 }
 
 // ---------- outputs ----------

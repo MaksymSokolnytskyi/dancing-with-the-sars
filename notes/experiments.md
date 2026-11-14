@@ -3,6 +3,16 @@
 Rule: each experiment states up front what result counts as success, partial or failure.
 The thresholds are not moved after seeing the data. Results go under each block with a date.
 
+Rule (added 2026-11-14, from the PR reviews): a sign, a direction or a threshold chosen so that the result "looks right"
+makes the next check circular. Such choices are written here as **post-hoc**, with the independent evidence for them, if any.
+
+Post-hoc choices in the engine (recorded 2026-11-14):
+- **LOS sign** (`src/hachure/nisar.py`, `LOS_SIGN = −1`, positive = towards the satellite). The module docstring sets it by
+  the expected answer: "Mexico City must come out NEGATIVE; if not, use flip_sign". So "Mexico sinks" is not evidence for
+  the sign. Independent support: GNSS on two NISAR GUNW sites agrees in sign and size (Mexico City MMX1 −27.8 vs −27.0 cm/yr,
+  Reykjanes SENG +20.1 vs +21.0 cm/yr, the latter with the same convention in `scripts/reykjanes/`). The NISAR GUNW product
+  specification has not been checked for the phase convention.
+
 Baseline facts, measured by `scripts/atmo_stats.py` and `scripts/gnss_check.py`:
 - 12-day sinking in the bowl: about 0.73 cm.
 - Noise in one pair: about 2.0 cm std (1.5 cm after removing the height-linked part and a plane).
@@ -1792,24 +1802,62 @@ Numbers come from `output/reykjanes/results.html` and `output/reykjanes/ml/*.jso
 existed, so its thresholds were **not** written here in advance. The notebook's settings (bowl threshold −15 cm/yr vertical,
 track confirmation −8 cm/yr LOS on ≥ 2 tracks, water share ≤ 0.30, watershed split at 10 cm/yr, Isolation Forest
 contamination 0.03) were chosen while developing the method on these same data, so every result below is **post-hoc**.
-Data: NISAR L2 GUNW PROVISIONAL, 17 Jun – 17 Oct 2026, vertical from A158_F027 + D152_F063, A057_F027 for confirmation.
+
+**Period.** All O1 numbers use the vertical from A158_F027 (8 pairs, 25 Jun – 11 Oct 2026) and D152_F063 (8 pairs,
+24 Jun – 10 Oct 2026), i.e. **24 Jun – 11 Oct 2026**; A057_F027 (9 pairs, 18 Jun – 16 Oct 2026) only confirms.
+The search window was 17 Jun – 14 Nov 2026 and returned pairs up to 17 Oct (frames D051, D080, A158_F026 were dropped for
+coverage < 30 %). This one period is used on the results page and in the data guide.
 
 ### O1. Bowls and what stands on them (results of the first run)
 - 22 bowls after the water mask and the watershed split: 18 in PL (14.86 km²), 4 in CZ (2.81 km²).
 - 10 "reliable" PL bowls (M01–M09, M18): 11.88 km², area-weighted vertical −39.5 cm/yr, 932 buildings, 30.3 km of roads,
-  4.4 km of rail. Fastest: M01 (Bzie Górne), mean −68.4, p10 −174.6 cm/yr.
-- Horizontal motion points to the bowl centre in 82 % of bowls (a physical consistency check).
+  4.4 km of rail. Fastest: M01 (Bzie Górne), mean −68.4 cm/yr; its p10 (−174.6 cm/yr) is a lower bound near the unwrapping
+  limit, not a measurement.
+- Horizontal motion points to the bowl centre in 82 % of bowls: a **consistency check, not an independent test** (see O2).
 - Spoil heaps: where a heap covers part of a bowl, the heap sinks less than the ground next to it (M05, M08), so the strongest
   sinking is not heap compaction.
 
-### O2. Post-hoc choices and open issues (said on any plate built from this)
+### O2. Sign, direction and other choices made to look right (post-hoc), and open issues
+Lesson for the team: a sign, direction or threshold chosen so that the result "looks right" makes the next check circular.
+Such choices are listed here.
+- **Phase sign `SIGN = −1`** (positive LOS = towards the satellite). In the first run it was set by the expected answer: the
+  notebook said "bowls must be negative; if they are positive, flip SIGN". So inside this study it is **post-hoc**, and
+  "the bowls are negative" is not evidence. Independent support: it is the same convention as the repo engine
+  (`src/hachure/nisar.py`, `LOS_SIGN = −1`), which matched GNSS on two other NISAR GUNW sites (Mexico City MMX1:
+  −27.8 vs −27.0 cm/yr; Reykjanes SENG: +20.1 vs +21.0 cm/yr). The NISAR GUNW product specification was **not** checked.
+  The notebook now fixes `SIGN` and says not to tune it.
+- **LOS vector direction.** The first run's `geometry()` flipped `losUnitVector` if its mean east component had the
+  "wrong" sign for a left-looking radar. It **did not trigger** on any track (the run printed `geometry: losUnitVector`
+  for A057, A158 and D152), so the vectors were used as given in the product. The notebook now never flips; it only warns.
+- **The 82 % horizontal check** therefore rests on product geometry (not tuned) and on a sign chosen post-hoc but supported
+  by GNSS elsewhere. Because the method's settings were also chosen on these data, it is a consistency check only.
 - **"Reliable" is a hand-picked list**, made by eye after the first run: M11, M12, M16, M17, M21, M22 are also confirmed by
   3 tracks but were left as candidates. M16 is in CZ. So the headline "0 reliable bowls on the Czech side" depends on this
   choice; with the plain rule "confirmed by 3 tracks" CZ would have 1 bowl (M16, 0.70 km², 2 buildings). The results page
-  now labels the set "hand-picked, post-hoc".
+  labels the set "hand-picked, post-hoc" and names the 3-track CZ bowls next to the headline.
 - PROVISIONAL data, about 4 months: slow trends are not visible. The fastest centres (more than ~12 cm LOS in 12 days) are
-  near the limit of unambiguous L-band phase unwrapping, so the peak values (~−2 m/yr LOS) are provisional.
+  near the limit of unambiguous L-band phase unwrapping, so peak values (~−2 m/yr LOS) are shown as lower bounds, faded.
+  Building counts carry "provisional, not validated" next to them.
 - No validation against EGMS or mining-lease maps yet. Mine names and statuses are OSM labels, not checked at the source.
+
+### O2b. How the thresholds were set (recorded 2026-11-15)
+Honestly: some were fixed in advance, some were changed after looking at the results, and then all were checked by tests
+that do not care about the wanted answer.
+- **Fixed in advance** (standard InSAR practice or physics): coherence ≥ 0.3; the sign convention (bowls over mined-out
+  ground must sink; see O2 for why this makes "bowls are negative" no evidence); merging of fragments; splitting bowls
+  with several centres.
+- **Changed after looking at the results (post-hoc):** the frame-coverage threshold (because of D080), the swath-edge trim,
+  the long-wavelength noise filter, the bowl threshold −15 cm/yr (instead of −10), and the water mask (because of a pond).
+- **Checks of these choices** (as reported by the analyst; the scripts for them are **not in the repo yet**, so they cannot
+  be re-run by others until added to `scripts/ostrava/`):
+  - coverage: the distribution of frame coverage is bimodal, so any threshold from 0.22 to 0.83 selects the same frames;
+  - noise: σ of the vertical ≈ 3.5 cm/yr, so −15 cm/yr is about 4σ, stricter than the classic 3σ;
+  - null test: subtract each pixel's mean velocity, put random signs on the pairs, and count how many bowls the method
+    "finds" where there is no motion. Result: false discovery rate **2 % for bowls confirmed by three tracks and 20 % for
+    two tracks**. The first version of this test had a bug (residual motion leaked into the "null"); it was fixed;
+  - robustness: changing each parameter one at a time leaves the reliable bowls the same.
+- Reading: the 20 % FDR for two-track bowls supports keeping them as candidates only. The robustness check refers to the
+  hand-picked reliable set (O2); it will be repeated for the rule-based set of O3a.
 
 ### O3. Next tests, pre-registered 2026-11-14 (before running)
 - **O3a. Rule-based reliable set (a fixed rule, not a test).** Reliable = confirmed by 3 tracks AND no-data share < 0.6 AND
@@ -1817,3 +1865,8 @@ Data: NISAR L2 GUNW PROVISIONAL, 17 Jun – 17 Oct 2026, vertical from A158_F027
   list. Any plate's PL-vs-CZ numbers will use this rule, whatever it gives.
 - **O3b. EGMS check.** For each bowl, the EGMS Ortho-Vertical (2019–2023) mean inside the polygon. Prediction: ≥ 8 of the 10
   PL bowls of O1 have EGMS mean ≤ −2 cm/yr; ≤ 1 of the 4 CZ bowls does. Pass: both. Partial: one. Fail: neither.
+  **How the CZ half will be read (fixed now, before running).** A pass on the CZ half means NISAR's CZ bowls are mostly
+  absent from EGMS 2019–2023. We will read that as "**not confirmed: treat as possible NISAR artefacts**", and will **not**
+  read it as new post-2023 subsidence (e.g. after mine closures), unless a third, independent source shows motion there
+  after 2023 (Sentinel-1 2024–2026 or a published Czech mining-damage report). If instead ≥ 2 of the 4 CZ bowls are in EGMS
+  (CZ half fails), they are long-running real subsidence, and the "calmer Czech side" story is weakened, not supported.
