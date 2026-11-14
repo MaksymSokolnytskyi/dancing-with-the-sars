@@ -1897,10 +1897,11 @@ water 2 631, vegetated bed 41 187, bare bed 2 758, cropland 73 973.
 Goal: run the surface tests that the Kakhovka bed could not answer (section K: the backscatter levels there were not
 physical) on a clean site, and add the tests that need all four polarizations. NISAR GCOV `2005_QPDH` here carries the **full
 covariance matrix** in band A (10 terms, `isFullCovariance = True`, complex off-diagonals) and HH/HV in band B.
-(The goal sentence and the heading were reworded on 2026-11-15 to match section K; no test or threshold changed.)
+(The goal sentence and the heading were reworded on 2026-11-14 to match section K; no test or threshold changed.)
 
-**Pre-registered 2026-11-14 ~22:00 (Dnipro time; committed alone as eb54159 at 22:02 — first written here as "~23:50"
-by mistake), before any GCOV backscatter value over this site was read.**
+**Pre-registered 2026-11-14 ~22:00 (Dnipro time; committed on its own at 22:02, in the PR branch
+`kiberatlet/wisconsin-quadpol`, first written here as "~23:50" by mistake), before any GCOV backscatter value over this
+site was read.**
 Seen before writing, and nothing else: ASF scene lists (52 QPDH scenes, tracks A76/24: 18, A148/24: 7, D41/65: 10,
 D113/66: 16; no QPDH scenes Feb – mid-June 2026), the term lists and flags of one file (D113, 2026-11-01:
 `rfiLikelihood` = inf and 1e35), ESA WorldCover shares (used to choose the windows), Sentinel-2 scene lists, and the
