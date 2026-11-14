@@ -128,7 +128,15 @@ def read_window(h5, bbox, *, freq: str = "B", name: str = "", date: datetime | N
             extra[f"neb_{pol.lower()}"] = _on_grid(h5, f"{neb}/{pol}", x, y)
     return Window(hh.astype("float32"), None if hv is None else hv.astype("float32"),
                   h5[f"{g}/mask"][rs, cs], h5[f"{g}/numberOfLooks"][rs, cs].astype("float32"),
-                  x, y, epsg, date or datetime.min, name, extra, _meta(h5))
+                  x, y, epsg, date or datetime.min, name, extra, _safe_meta(h5))
+
+
+def _safe_meta(h5) -> dict:
+    """_meta, but an unexpected layout in one product must not stop a whole fetch."""
+    try:
+        return _meta(h5)
+    except Exception as e:                                   # noqa: BLE001
+        return {"meta_error": f"{type(e).__name__}: {e}"}
 
 
 def _on_grid(h5, path: str, x: np.ndarray, y: np.ndarray) -> np.ndarray:

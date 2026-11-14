@@ -45,7 +45,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "src")]
 from hachure import gcov  # noqa: E402
 
-BBOX = (34.75, 47.35, 35.20, 47.70)          # upper bed (Velykyi Luh); no towns, no NPP (see section K)
+BBOX = (34.75, 47.35, 35.20, 47.70)          # upper bed (Velykyi Luh); natural surfaces only (see section K)
 HEIGHT = 45.0                                 # bed height above the ellipsoid, m (~16 m a.s.l. + geoid ~29 m)
 TRACKS = {42, 143, 36, 108}
 S2_DATES = ("2026-08-23", "2026-03-11")      # 02-27 was pre-registered; see the K amendment

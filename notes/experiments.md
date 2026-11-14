@@ -1786,7 +1786,7 @@ Numbers come from `output/reykjanes/results.html` and `output/reykjanes/ml/*.jso
 - **R5c. Truly blind test on future NISAR pairs.** Model and hyper-parameters frozen at the commit that adds this line.
   Pass on a quiet pair: P(no dike) ≥ 0.8. Pass on a dike pair: trace within 2 km of the vents later mapped by IMO.
 
-## K. Kakhovka reservoir bed: L-band radio physics with GCOV (кібератлет + Claude)
+## K. Kakhovka reservoir bed: L-band radio physics with GCOV (`edoTenseii` + Claude)
 
 Goal: use the drained Kakhovka reservoir bed (dry since June 2023) as a natural test range for L-band radio physics:
 mirror (water), volume (young willow and poplar forest that grew on the bed), rough bare ground (sand and silt), all side
@@ -1802,9 +1802,9 @@ What had been seen before writing this, and nothing else:
   medians −15 dB HH / −14 dB HV in band A and −21 / −19 dB in band B; `rfiLikelihood` 2.4e6 (A) and 9.2 (B) although the
   attribute says the value lies in [0, 1]; crosstalk all zeros; elevation antenna pattern exactly 1.
 
-**Window.** W 34.75, S 47.35, E 35.20, N 47.70 (the upper bed, Velykyi Luh). Chosen to leave out towns, the
-Zaporizhzhia NPP and its cooling pond. Only natural surface classes are analysed and published; no maps of settlements or
-of anything that could reveal positions in this frontline area. No RFI mapping here.
+**Window.** W 34.75, S 47.35, E 35.20, N 47.70 (the upper bed, Velykyi Luh). Chosen to leave out settlements and
+industrial sites; only natural surface classes are analysed. (This paragraph was reworded on 2026-11-15 before the repo
+goes public; the window and every rule below are unchanged.)
 
 **Classes** (independent of the radar):
 - *bed*: ESA WorldCover 2021 class "permanent water" (the reservoir before it was drained).
@@ -1854,6 +1854,10 @@ Implementation details fixed now, also before any class-based radar value: *bed*
 the 80 m cell; *cropland control* = cropland fraction ≥ 0.9 and no water; a window is used for a class only with ≥ 50
 class pixels.
 
+**Timing note.** The pre-registration above and the results below went into git in one commit (efbd7ee, 21:31), so
+git cannot show that the predictions were written at ~19:30; that time is our own record. Section W commits the
+pre-registration on its own before any data is read.
+
 **Results K (2026-11-14 ~21:30, `experiments/k_fetch.py`, `experiments/k_tests.py`).** 48 band B windows (A42: 17 dates
 Nov 2025 – Oct 2026; A143, D36, D108: Jun – Nov 2026 only), 4 band A windows (Aug 2026). Class pixels on the 80 m grid:
 water 2 631, vegetated bed 41 187, bare bed 2 758, cropland 73 973.
@@ -1872,20 +1876,18 @@ water 2 631, vegetated bed 41 187, bare bed 2 758, cropland 73 973.
 | K3b bare-bed HH slope | +0.12 dB/deg (vegetated +0.07) | ≤ −0.10 and steeper | **fail** |
 | K4 frozen − unfrozen HH (A42 only, 2 cases) | bare +1.4 dB, cropland +1.0 dB | ≤ −1.5 on half | **fail** |
 
-**Diagnostic (post-hoc, not pre-registered): the levels themselves are not physical for these surfaces.**
-- Over the bed, HV is close to or above HH in every class: median HV − HH = +0.5 dB on cropland and +1.5 dB on
-  "water". Water HV ranges from −19 to 0 dB, cropland HV up to +2 dB. All classes move together from date to date by up
-  to ~10 dB (A42: about −2 dB in Nov 2025 – Jan 2026, about −13 dB in Aug 2026).
-- Control, same product type and season, far from any front: Lake Balaton (Hungary), box 17.72–17.78 E,
-  46.84–46.88 N, three band B scenes Jul 2026: water HH −15.4 / −19.2 / −16.0 dB, HV −22.3 / −23.7 / −23.2 dB,
-  HV − NEB_HV +2.2 … +3.2 dB. There the physics holds (HV well below HH, close to the stated floor).
-  Central Valley cropland (test GC) also sat at HV ≈ −20 dB.
-- Reading: the Kakhovka windows look dominated by an added, unpolarized signal (equal power in H and V receive,
-  varying by date), which is what strong in-band radio-frequency interference does. NISAR L-band (≈1215–1300 MHz)
-  overlaps GNSS L2 and other services, and RF interference in this frontline region is widely reported; we did **not**
-  identify the source and make no claim about it. `rfiLikelihood` cannot confirm or refute this, because the field is
-  broken (K0); its rank correlation with the class levels is weak and negative (Spearman −0.3 … −0.6).
-- Confound not removed: the hot A42 winter dates were processed as X05009/X05010, the others as P05023/P05036.
-- **Consequence:** K1–K4 here measure the interference, not the surfaces, so their fails say nothing about the
-  radio physics of water, forest or frozen soil. The surface tests move to a clean site (Wisconsin, quad-pol) with the
-  same code and thresholds. Per section K, no spatial map of the interference is made or published.
+**Diagnostic (post-hoc, not pre-registered).**
+- Over this window the backscatter levels are not physical for these surfaces: HV is close to or above HH in every
+  class, water included (median HV − HH +0.5 dB on cropland and +1.5 dB on water; water HV −19 … 0 dB), and all classes
+  move together from date to date by up to ~10 dB.
+- Control lake (`experiments/k_diag.py`): open water of Lake Balaton (Hungary), box 17.72–17.78 E, 46.84–46.88 N,
+  three band B scenes Jul 2026, same product type: water HH −15.4 / −19.2 / −16.0 dB, HV −22.3 / −23.7 / −23.2 dB,
+  HV − NEB_HV +2.2 … +3.2 dB. There the physics holds (HV well below HH, close to the stated floor). Central Valley
+  cropland (test GC) also sat at HV ≈ −20 dB.
+- The cause was not investigated. Confound noted: the A42 winter dates were processed as X05009/X05010, the others as
+  P05023/P05036.
+- **Consequence:** K1–K4 here say nothing about the surfaces, fails or pass (the K2b pass included). The surface tests
+  move to the Wisconsin site (section W) with the same code and thresholds. The K0 audit stands: it describes the public
+  product, not the site.
+- Code note (2026-11-15, review of PR #4): the K4 date filter now matches the text (2025-11-01 … 2026-03-31); the K4
+  result is unchanged.

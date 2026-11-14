@@ -188,7 +188,7 @@ def main():
     # K4: frozen vs unfrozen, Nov-Mar
     k4 = []
     for t in tracks:
-        rr = [r for r in rows if r["track"] == t and (r["date"][5:7] in ("11", "12", "01", "02", "03"))]
+        rr = [r for r in rows if r["track"] == t and "2025-11-01" <= r["date"] <= "2026-03-31"]
         fr = [r for r in rr if r["state"] == "frozen"]
         un = [r for r in rr if r["state"] == "unfrozen"]
         for c in ("bare", "crop"):
