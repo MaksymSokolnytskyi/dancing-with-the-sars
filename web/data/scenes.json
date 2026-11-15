@@ -36,8 +36,17 @@
     "en": "Ostrava–Karviná coal basin",
     "uk": "Остравсько-Карвінський вугільний басейн"
    },
-   "subtitle": "NISAR L-band GUNW, ascending (morning) pass: ground sinking over the mines",
+   "subtitle": "NISAR L-band GUNW, one northbound track: ground sinking over the coal mines",
    "kind": "terrain+velocity+contours+grid"
+  },
+  {
+   "id": "wisconsin",
+   "title": {
+    "en": "North woods, Wisconsin",
+    "uk": "Північні ліси, Вісконсин"
+   },
+   "subtitle": "NISAR L-band GCOV, four tracks: a year of forest, fields, swamps and lakes",
+   "kind": "cells"
   }
  ]
 }

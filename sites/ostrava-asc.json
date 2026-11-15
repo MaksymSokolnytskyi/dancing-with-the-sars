@@ -4,7 +4,7 @@
   "en": "Ostrava–Karviná coal basin",
   "uk": "Остравсько-Карвінський вугільний басейн"
  },
- "subtitle": "NISAR L-band GUNW, ascending (morning) pass: ground sinking over the mines",
+ "subtitle": "NISAR L-band GUNW, one northbound track: ground sinking over the coal mines",
  "bbox": [
   18.15,
   49.7,
@@ -121,5 +121,32 @@
    "z": 3.6,
    "attribution": "© OpenStreetMap contributors"
   }
- ]
+ ],
+ "extra_layers": [
+  {
+   "id": "bowls",
+   "kind": "lines",
+   "file": "bowls.geojson",
+   "style": "bowl",
+   "z": 3.55,
+   "visible": true,
+   "label": {
+    "en": "Subsidence bowls: seen on 3 tracks, enough data",
+    "uk": "Мульди просідання: видно на 3 треках, даних досить"
+   }
+  },
+  {
+   "id": "bowls_candidate",
+   "kind": "lines",
+   "file": "bowls_candidate.geojson",
+   "style": "bowl_candidate",
+   "z": 3.54,
+   "visible": true,
+   "label": {
+    "en": "Candidate bowls, not confirmed",
+    "uk": "Кандидати в мульди, не підтверджені"
+   }
+  }
+ ],
+ "story": "sites/ostrava-asc.story.json"
 }

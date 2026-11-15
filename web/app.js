@@ -125,7 +125,7 @@ function seriesIndex(d) {          // index of the last series date at or before
 }
 
 function cellValue(d, m, c) {
-  if (m.time) return c[d.columns.indexOf(d.series)][seriesIndex(d)];
+  if (m.time) return c[d.columns.indexOf(m.series || d.series)]?.[seriesIndex(d)];   // a mode may name its own series
   return c[d.columns.indexOf(m.key)];
 }
 
@@ -585,7 +585,7 @@ function renderLegend() {
     if (m.categorical) {
       const cols = th.categorical[m.categorical] || [];
       out.push(`<div class="small">${label(lay.label)}: ${label(m.label)}</div>` + cols.map((c, i) =>
-        `<div class="legend-item"><span class="box" style="background:${rgba(c)}"></span>${T("type")} ${i + 1}` +
+        `<div class="legend-item"><span class="box" style="background:${rgba(c)}"></span>${m.names?.[i] ? label(m.names[i]) : `${T("type")} ${i + 1}`}` +
         (d.cluster_sizes ? ` · ${d.cluster_sizes[i]} ${T("blocks")}` : "") + `</div>`).join(""));
     } else {
       const stops = th.ramps[m.ramp] || [];
