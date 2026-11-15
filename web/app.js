@@ -125,7 +125,7 @@ function seriesIndex(d) {          // index of the last series date at or before
 }
 
 function cellValue(d, m, c) {
-  if (m.time) return c[d.columns.indexOf(d.series)][seriesIndex(d)];
+  if (m.time) return c[d.columns.indexOf(m.series || d.series)]?.[seriesIndex(d)];   // a mode may name its own series
   return c[d.columns.indexOf(m.key)];
 }
 
@@ -585,7 +585,7 @@ function renderLegend() {
     if (m.categorical) {
       const cols = th.categorical[m.categorical] || [];
       out.push(`<div class="small">${label(lay.label)}: ${label(m.label)}</div>` + cols.map((c, i) =>
-        `<div class="legend-item"><span class="box" style="background:${rgba(c)}"></span>${T("type")} ${i + 1}` +
+        `<div class="legend-item"><span class="box" style="background:${rgba(c)}"></span>${m.names?.[i] ? label(m.names[i]) : `${T("type")} ${i + 1}`}` +
         (d.cluster_sizes ? ` · ${d.cluster_sizes[i]} ${T("blocks")}` : "") + `</div>`).join(""));
     } else {
       const stops = th.ramps[m.ramp] || [];
@@ -1052,7 +1052,7 @@ function drawFrame() {
   for (let i = 0; i <= 4; i += 2) s += `<text x="${xA + i * segPx}" y="${y - 4}" text-anchor="middle" class="ft">${i * nice}</text>`;
   s += `<text x="${xA + 4 * segPx + 6}" y="${y + 5}" class="ft">${T("km")}</text>`;
   if (state.man) {
-    const man = state.man, yrs = [man.dates[0], man.dates.at(-1)].map((d) => d.slice(0, 4));
+    const man = state.man, yrs = [man.dates[0], man.dates.at(-1)].map((d) => (d || man.generated || "").slice(0, 4));   // a quake card has no dates
     const name = [...label(man.title).toLocaleUpperCase()].join("\u2009");
     const sub = (state.man.frame_sub ? label(state.man.frame_sub) : T("frame_sub")).replace("{a}", yrs[0]).replace("{b}", yrs[1]);
     const cx = (R.x0 + R.x1) / 2, w = Math.max(name.length * 9.5, sub.length * 5.6) + 44, h = 40;
@@ -1503,7 +1503,7 @@ async function main() {
   const sceneSel = $("scene"), themeSel = $("theme");
   idx.scenes.forEach((s) => sceneSel.add(new Option(label(s.title), s.id)));
   THEMES.forEach((t) => themeSel.add(new Option(t, t)));
-  const scene = q.get("scene") || idx.scenes[0].id, theme = q.get("theme") || THEMES[0];
+  const scene = q.get("scene") || idx.scenes.find((s) => !s.href).id, theme = q.get("theme") || THEMES[0];
   sceneSel.value = scene; themeSel.value = theme;
   await setTheme(theme);
   map = new maplibregl.Map({ container: "map", style: mapStyle(state.theme), center: [0, 0], zoom: 2, attributionControl: false });
@@ -1527,7 +1527,10 @@ async function main() {
   await new Promise((r) => { if (map.loaded()) r(); else { map.once("load", r); setTimeout(r, 1500); } });   // hidden tabs may never fire "load"
   await loadScene(scene);
   drawFrame();
-  sceneSel.onchange = () => loadScene(sceneSel.value);
+  sceneSel.onchange = () => {                       // a scene with "href" is its own page (Reykjanes)
+    const sc = idx.scenes.find((s) => s.id === sceneSel.value);
+    if (sc?.href) location.href = sc.href; else loadScene(sceneSel.value);
+  };
   themeSel.onchange = () => setTheme(themeSel.value);
   $("trustmode").onchange = (e) => { state.trust = e.target.value; redraw(); };
   $("time").oninput = (e) => setDay(+e.target.value);
