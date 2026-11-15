@@ -341,5 +341,6 @@
   "No 'sure it sinks at least' number on this plate: its 1.5 km window is wider than the bowls, so it picked an edge artefact."
  ],
  "generated": "2026-11-15T19:28:43",
- "story": "story.json"
+ "story": "story.json",
+ "tint_step": 5
 }

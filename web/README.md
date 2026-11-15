@@ -74,11 +74,15 @@ that lifts a district and drops it back does not ring twice. Still rows stay sil
 
 Page text: the first paragraph is the page's one idea and stands on the card; the rest opens in a detail sheet beside
 the card ("Tell me more"; `keep: n` on a page keeps n paragraphs on the card). A "sure" page must say its main limit in
-that first paragraph. `cells` layers are drawn as an engraved tint: the blocks are read as one smooth field and long
-45° strokes are laid over it, denser where the value is stronger (theme `hatch`: `max` strokes per block, `min`
-strength below which the paper stays bare, `w` width, `ink` share of ink mixed into pale ramp colours). A theme can ask
-for `"cells_as": "dots"` or `"squares"`. While motion or cells are on the map, the terrain, context lines and town
-blocks are drawn at theme `quiet` strength (0.45 in scroll) and every label is drawn last, over the strokes. The score
+that first paragraph. `cells` layers are drawn as a smooth tint (theme `"cells_as": "tint"`): the block values are read as
+one field, bilinear between block centres, and painted into a bitmap with the mode's ramp; categorical modes fall back to
+the engraved hatch (theme `hatch`). A theme can also ask for `"hatch"`, `"dots"` or `"squares"`. On motion plates the
+ground's total move since the first date (the `cum_cm` series of the `grid` cells) is laid under the strokes as layer
+tints, one band per `tint.step` cm (10; a manifest may set `tint_step`, Ostrava-Karviná uses 5): umber for sinking, slate
+for uplift (Reykjanes swaps them to match its strokes), darker = further. Contours are then drawn only at band edges, so
+lines and tints agree. While motion or cells are on the map, the terrain, context lines and town blocks are drawn at
+theme `quiet` strength (0.65 in scroll) and every label is drawn last, over the strokes. Build numbers under the
+legend show only with `?debug=1`. The score
 strip (layer kind `rhythm`, "the music") is left out of the atlas; `?score=1` brings it back.
 
 A plate is played as pages. Write `sites/<id>.story.json`, point the site at it (`"story": "sites/<id>.story.json"`), then

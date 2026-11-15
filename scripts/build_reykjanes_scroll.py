@@ -142,6 +142,32 @@ def must(s, old, new, count=1):
     return s.replace(old, new) if count == 0 else s.replace(old, new, count)
 
 
+# wording fixes from Oleh's review of 15 Nov 2026, applied to the built story (and by repack_reykjanes.py to a packed one)
+TEXT_FIX = [
+    ("rose by about 25 cm", "rose by about 23 cm"), ("піднявся приблизно на 25 см", "піднявся приблизно на 23 см"),
+    ("As the year plays the wedges grow; each ring of strokes is 2 more cm.",
+     "As the year plays the wedges grow. Strokes stand in rings, each ring is 2 more cm of uplift: the tighter the rings, the steeper "
+     "the dome bends. Thin lines and bands of tone show how far the ground has risen since the first date: one every 10 cm."),
+    ("Поки програється рік, клини ростуть; кожне кільце штрихів — ще 2 см.",
+     "Поки програється рік, клини ростуть. Штрихи стоять кільцями, кожне кільце — ще 2 см підняття: що тісніші кільця, то крутіше "
+     "вигинається купол. Тонкі лінії й смуги тону показують, наскільки земля піднялась від першої дати: одна на кожні 10 см."),
+    ("a deeper chamber in our model needs a larger dike.",
+     "a deeper chamber in our model needs a larger dike. For this event our chamber lies at about 6 km, deeper than the 4.7 km of "
+     "page III: it is another event fitted to other data, and a layered crust puts the source about 1 km deeper."),
+    ("глибша камера в нашій моделі потребує більшої дайки.",
+     "глибша камера в нашій моделі потребує більшої дайки. Для цієї події наша камера лежить на глибині близько 6 км, глибше за 4,7 км "
+     "зі сторінки III: це інша подія й інші дані, а шарувата кора опускає джерело приблизно на 1 км."),
+]
+
+
+def fix_text(st):
+    txt = json.dumps(st, ensure_ascii=False)
+    for a, b in TEXT_FIX:
+        if b not in txt:
+            txt = txt.replace(a, b)
+    return json.loads(txt)
+
+
 def patch_app(app, with_math):
     uk = {
         'stroke: "кожне кільце штрихів = {b} см опускання"': 'stroke: "кожне кільце штрихів = {b} см підняття"',
@@ -206,9 +232,10 @@ def patch_app(app, with_math):
 
 def patch_head(head, with_math):
     head = re.sub(r"<title>.*?</title>", "<title>Reykjanes · The ground breathes</title>", head, count=1)
-    extra = '\n      <div class="testbuild" data-i18n="test_build">TEST BUILD</div>'
+    extra = ""                                           # the jury build (--no-math) carries no test badge
     if with_math:
-        extra += '\n      <button class="mathbtn" id="math-open" data-i18n="math_open">∑ The math behind the plate</button>'
+        extra += '\n      <div class="testbuild" data-i18n="test_build">TEST BUILD</div>'
+        extra +='\n      <button class="mathbtn" id="math-open" data-i18n="math_open">∑ The math behind the plate</button>'
     # the atlas link of index.html leads back to the atlas cover from this separate page
     head = must(head, '<a href="#" id="to-cover" class="small">☰ Edelweiss</a>', '<a href="index.html?cover=1" id="back-atlas" style="display:inline-block;margin-bottom:6px;color:var(--muted);text-decoration:none;letter-spacing:.04em;font-size:12px">☰ Edelweiss</a>')
     head = must(head, '<button id="story-open" class="hidden"></button>', '<button id="story-open" class="hidden"></button>' + extra)
@@ -219,6 +246,8 @@ def patch_head(head, with_math):
 
 def theme_for(th):
     th = json.loads(json.dumps(th))
+    if "tint" in th:                                     # layer tints: uplift warm like the strokes, sinking slate
+        th["tint"].update({"up": [[230, 198, 172], [132, 46, 24]], "down": [[192, 208, 216], [52, 84, 112]]})
     th["velocity"]["color"] = [150, 44, 26]              # uplift: magma red
     th["velocity"]["color_down"] = [52, 84, 110]         # sinking: the old blue
     th["ramps"]["sigma_r"] = [[0, [0, 0, 0, 0]], [1.0, [40, 70, 140, 15]], [2.0, [40, 70, 140, 80]], [3.5, [30, 50, 120, 160]]]
@@ -705,8 +734,8 @@ def story(V, dates, with_math=True):
                            L('<button class="mathbtn bigbtn">∑ Відкрити математичне вікно</button>', '<button class="mathbtn bigbtn">∑ Open the math window</button>'),
                            L("Клавіша M відкриває вікно з будь-якої сторінки; Esc закриває.", "Key M opens the window from any page; Esc closes it.")],
                   "camera": {"bbox": [-22.58, 63.80, -22.28, 63.93]}, "layers": ["terrain", "dike", "source", "coast", "sea", "places"], "day": "end"})
-    return {"title": L("Рейк'янес", "Reykjanes"), "pages": P,
-            "note": "Pages of the Reykjanes plate, written for the Mexico City scroll engine; numbers from output/reykjanes/results.html."}
+    return fix_text({"title": L("Рейк'янес", "Reykjanes"), "pages": P,
+            "note": "Pages of the Reykjanes plate, written for the Mexico City scroll engine; numbers from output/reykjanes/results.html."})
 
 
 # ------------------------------------------------------------------ assemble
