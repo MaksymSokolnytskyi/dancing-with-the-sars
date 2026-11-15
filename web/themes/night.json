@@ -557,6 +557,34 @@
    ],
    "label_size": 9,
    "legend": true
+  },
+  "river": {
+   "color": [
+    110,
+    165,
+    210
+   ],
+   "alpha": 220,
+   "width": 1.3,
+   "label_size": 11,
+   "label_color": [
+    140,
+    185,
+    220
+   ],
+   "legend": true,
+   "italic": true
+  },
+  "coast": {
+   "color": [
+    110,
+    165,
+    210
+   ],
+   "alpha": 230,
+   "width": 1.3,
+   "legend": true,
+   "casing": 0
   }
  }
 }

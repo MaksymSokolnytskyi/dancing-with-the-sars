@@ -10,16 +10,29 @@
    "kind": "terrain+velocity+contours+surface+grid"
   },
   {
+   "id": "ostrava-asc",
+   "title": {
+    "en": "Ostrava–Karviná coal basin",
+    "uk": "Остравсько-Карвінський вугільний басейн"
+   },
+   "subtitle": "NISAR L-band GUNW, one northbound track: ground sinking over the coal mines",
+   "kind": "terrain+velocity+contours+grid"
+  },
+  {
+   "id": "reykjanes",
+   "title": {
+    "en": "Reykjanes, Iceland",
+    "uk": "Рейк'янес, Ісландія"
+   },
+   "subtitle": "The ground breathes: magma under the peninsula, one packed page",
+   "kind": "page",
+   "href": "reykjanes-scroll.html"
+  },
+  {
    "id": "panama-quake",
    "title": "Panama M7.7 earthquake",
    "subtitle": "2026-10-09 · fault estimate from two NISAR passes, with a confidence flag",
    "kind": "quake"
-  },
-  {
-   "id": "central-valley-asc",
-   "title": "Central Valley, California",
-   "subtitle": "Rhythm of the fields: radar coherence through the farming year",
-   "kind": "fields"
   },
   {
    "id": "langtang-asc",
@@ -31,13 +44,10 @@
    "kind": "terrain+footprint"
   },
   {
-   "id": "ostrava-asc",
-   "title": {
-    "en": "Ostrava–Karviná coal basin",
-    "uk": "Остравсько-Карвінський вугільний басейн"
-   },
-   "subtitle": "NISAR L-band GUNW, one northbound track: ground sinking over the coal mines",
-   "kind": "terrain+velocity+contours+grid"
+   "id": "central-valley-asc",
+   "title": "Central Valley, California",
+   "subtitle": "Rhythm of the fields: radar coherence through the farming year",
+   "kind": "fields"
   },
   {
    "id": "wisconsin",

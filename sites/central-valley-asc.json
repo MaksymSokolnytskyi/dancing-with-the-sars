@@ -1,19 +1,117 @@
 {
-  "id": "central-valley-asc",
-  "title": "Central Valley, California",
-  "subtitle": "Rhythm of the fields: radar coherence through the farming year",
-  "bbox": [-120.20, 35.80, -119.00, 36.50],
-  "ref_bbox": [-119.10, 36.33, -119.02, 36.43],
-  "ref_label": "built-up blocks (coherence normaliser)",
-  "direction": "ASCENDING",
-  "cache_height": 80,
-  "anchor": "radar-only",
-  "layers": ["fields"],
-  "fields": {
-    "block_km": 2, "k": 4,
-    "landcover": {"npz": "data/raw/context/cv_worldcover_frac.npz",
-                  "grid_tif": "data/processed/central-valley-asc/nisar_rate.tif",
-                  "crop": "cropland", "ref": "builtup", "crop_min": 0.6, "ref_min": 0.3}
+ "id": "central-valley-asc",
+ "title": "Central Valley, California",
+ "subtitle": "Rhythm of the fields: radar coherence through the farming year",
+ "bbox": [
+  -120.2,
+  35.8,
+  -119.0,
+  36.5
+ ],
+ "ref_bbox": [
+  -119.1,
+  36.33,
+  -119.02,
+  36.43
+ ],
+ "ref_label": "built-up blocks (coherence normaliser)",
+ "direction": "ASCENDING",
+ "cache_height": 80,
+ "anchor": "radar-only",
+ "layers": [
+  "fields"
+ ],
+ "fields": {
+  "block_km": 2,
+  "k": 4,
+  "landcover": {
+   "npz": "data/raw/context/cv_worldcover_frac.npz",
+   "grid_tif": "data/processed/central-valley-asc/nisar_rate.tif",
+   "crop": "cropland",
+   "ref": "builtup",
+   "crop_min": 0.6,
+   "ref_min": 0.3
+  }
+ },
+ "notes": [
+  "Post-hoc exploratory clustering (X-coh, night 10-11.11); pre-registered X1-X3 results in notes/experiments.md."
+ ],
+ "frame_sub": {
+  "en": "the farming year heard by the NISAR radar · {a}–{b}",
+  "uk": "рік на полях, почутий радаром NISAR · {a}–{b}"
+ },
+ "osm": {
+  "rivers": "way[\"waterway\"=\"river\"]({b});out geom;",
+  "canals": "way[\"waterway\"=\"canal\"][\"name\"~\"Aqueduct|Canal\"]({b});out geom;",
+  "water": "(way[\"natural\"=\"water\"][\"water\"~\"^(reservoir|lake)$\"]({b});relation[\"natural\"=\"water\"][\"water\"~\"^(reservoir|lake)$\"]({b}););out geom;",
+  "places": "node[\"place\"~\"^(city|town)$\"]({b});out;"
+ },
+ "dem_res": 30,
+ "context": [
+  {
+   "id": "water",
+   "kind": "waterlines",
+   "src": "data/raw/osm/central-valley-asc/water.json",
+   "style": "water",
+   "label": {
+    "en": "Lakes and reservoirs",
+    "uk": "Озера й водосховища"
+   },
+   "z": 1.2,
+   "attribution": "© OpenStreetMap contributors"
   },
-  "notes": ["Post-hoc exploratory clustering (X-coh, night 10-11.11); pre-registered X1-X3 results in notes/experiments.md."]
+  {
+   "id": "rivers",
+   "kind": "lines",
+   "src": "data/raw/osm/central-valley-asc/rivers.json",
+   "style": "river",
+   "min_len_m": 5000,
+   "label_from": [
+    "name"
+   ],
+   "label": {
+    "en": "Rivers",
+    "uk": "Річки"
+   },
+   "z": 1.25,
+   "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "canals",
+   "kind": "lines",
+   "src": "data/raw/osm/central-valley-asc/canals.json",
+   "style": "canal",
+   "min_len_m": 3000,
+   "label_from": [
+    "name"
+   ],
+   "label": {
+    "en": "Canals",
+    "uk": "Канали"
+   },
+   "z": 1.3,
+   "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "places",
+   "kind": "lines",
+   "src": "data/raw/osm/central-valley-asc/places.json",
+   "style": "place",
+   "name_key": [
+    "name:en",
+    "name"
+   ],
+   "rank": {
+    "city": 3,
+    "town": 2
+   },
+   "label": {
+    "en": "Towns",
+    "uk": "Міста"
+   },
+   "z": 3.6,
+   "attribution": "© OpenStreetMap contributors"
+  }
+ ],
+ "story": "sites/central-valley-asc.story.json"
 }

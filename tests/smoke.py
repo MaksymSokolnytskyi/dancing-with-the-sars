@@ -76,6 +76,9 @@ def _sites():
 def _web():
     scenes = json.loads((ROOT / "web/data/scenes.json").read_text(encoding="utf-8"))["scenes"]
     for sc in scenes:
+        if sc.get("href"):                                       # a packed page of its own (Reykjanes)
+            assert (ROOT / "web" / sc["href"]).exists(), f"{sc['id']}: missing {sc['href']}"
+            continue
         d = ROOT / "web/data" / sc["id"]
         man = json.loads((d / "manifest.json").read_text(encoding="utf-8"))
         for layer in man["layers"]:

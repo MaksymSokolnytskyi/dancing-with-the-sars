@@ -65,7 +65,10 @@
     ]
    },
    "layers": [
-    "blocks"
+    "blocks",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "blocks": "hv_anom_db"
@@ -97,7 +100,10 @@
     ]
    },
    "layers": [
-    "blocks"
+    "blocks",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "blocks": "hv_anom_db"
@@ -153,7 +159,10 @@
     ]
    },
    "layers": [
-    "blocks"
+    "blocks",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "blocks": "class"
@@ -185,7 +194,10 @@
     ]
    },
    "layers": [
-    "harvest"
+    "harvest",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "harvest": "radar_cut"
@@ -214,7 +226,10 @@
     ]
    },
    "layers": [
-    "blocks"
+    "blocks",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "blocks": "hh_anom_db"
@@ -246,7 +261,10 @@
     ]
    },
    "layers": [
-    "blocks"
+    "blocks",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "blocks": "hh_anom_db"
@@ -282,7 +300,10 @@
     ]
    },
    "layers": [
-    "blocks"
+    "blocks",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "blocks": "hv_anom_db"
@@ -318,7 +339,10 @@
     ]
    },
    "layers": [
-    "blocks"
+    "blocks",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "blocks": "class"
@@ -351,7 +375,10 @@
    },
    "layers": [
     "blocks",
-    "harvest"
+    "harvest",
+    "water",
+    "rivers",
+    "places"
    ],
    "modes": {
     "blocks": "hv_anom_db",
