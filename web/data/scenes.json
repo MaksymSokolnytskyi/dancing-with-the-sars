@@ -29,6 +29,15 @@
    },
    "subtitle": "Debris-flow footprint: where the radar lost the ground's fingerprint",
    "kind": "terrain+footprint"
+  },
+  {
+   "id": "ostrava-asc",
+   "title": {
+    "en": "Ostrava–Karviná coal basin",
+    "uk": "Остравсько-Карвінський вугільний басейн"
+   },
+   "subtitle": "NISAR L-band GUNW, ascending (morning) pass: ground sinking over the mines",
+   "kind": "terrain+velocity+contours+grid"
   }
  ]
 }
