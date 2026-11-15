@@ -68,7 +68,11 @@
     "places",
     "trees"
    ],
-   "day": "end"
+   "day": "end",
+   "voice": {
+    "en": "Five centuries ago this valley held a lake, with an island city in the middle. The lake is gone, but its soft clay is still here, and a city of more than twenty million people stands on it. Every twelve days a radar passes overhead, in daylight or in darkness, and measures how far the ground has fallen.",
+    "uk": "П'ять століть тому в цій долині було озеро з містом-островом посередині. Озера немає, але його м'яка глина лишилась, і на ній стоїть місто з понад двадцятьма мільйонами людей. Кожні дванадцять днів над ним пролітає радар, удень чи вночі, і міряє, наскільки опустилась земля."
+   }
   },
   {
    "section": "what",
@@ -104,7 +108,11 @@
    ],
    "day": "start",
    "play": true,
-   "legend": true
+   "legend": true,
+   "voice": {
+    "en": "Watch closely. Each new ring is another two centimetres gone. In a single year parts of the city settle by the length of a school ruler. No one feels it on any given day; the radar sees all of it.",
+    "uk": "Дивіться уважно. Кожне нове кільце — ще два сантиметри вниз. За один рік частини міста осідають на довжину шкільної лінійки. Ніхто не відчуває цього щодня; радар бачить усе."
+   }
   },
   {
    "section": "why",
@@ -183,7 +191,11 @@
    ],
    "focus": [
     "lake"
-   ]
+   ],
+   "voice": {
+    "en": "The pattern is no accident. Where the old lake lay, the soft clay is settling; on the volcanic hills around it, the rock holds firm. The map of the sinking is, almost exactly, the map of a lake that vanished.",
+    "uk": "Цей візерунок не випадковий. Де лежало старе озеро, м'яка глина осідає; на вулканічних пагорбах довкола скеля тримається. Мапа осідання — це майже точно мапа озера, якого вже немає."
+   }
   },
   {
    "section": "why",
@@ -318,7 +330,11 @@
    ],
    "focus": [
     "canals"
-   ]
+   ],
+   "voice": {
+    "en": "And it goes on. With a fresh picture every twelve days, the city could see where the ground bends faster, before a pipe breaks or a metro line cracks.",
+    "uk": "І це триває. Зі свіжим знімком кожні дванадцять днів місто могло б бачити, де земля вигинається швидше, ще до того, як лусне труба чи трісне лінія метро."
+   }
   }
  ]
 }

@@ -171,7 +171,37 @@ def fix_text(st):
             p.setdefault("focus", ["dike_blind"])
         if p.get("section") == "why" and "source" in p.get("layers", []):
             p.setdefault("focus", ["source"])
+        if p.get("section") in ("listen", "sure", "next"):       # one idea per page: these wait as questions after the story
+            p["appendix"] = True
+        v = VOICE.get(p.get("section") + ("-cut" if "surface" in p.get("layers", []) else ""))
+        if v:
+            p["voice"] = v
     return st
+
+
+# the narrator (read by the browser's speech, see web/README.md): told in its own words, not the card's
+VOICE = {
+    "intro": {"en": "On a peninsula of black lava at the edge of the Atlantic, the Earth is breathing. A few kilometres down, molten rock is gathering, "
+                    "and the land above swells, slowly, like a chest drawing in air.",
+              "uk": "На півострові з чорної лави, на краю Атлантики, Земля дихає. За кілька кілометрів під нами збирається розплавлена порода, "
+                    "і земля над нею повільно здіймається, як груди на вдиху."},
+    "what": {"en": "Over the year the swelling spreads in rings, strongest above the power plant at Svartsengi. More than twenty centimetres in a single year: "
+                   "a hand's breadth of rising ground, measured from orbit through the polar night and the clouds.",
+             "uk": "За рік підняття розходиться кільцями, найсильніше над електростанцією Свартсенгі. Понад двадцять сантиметрів за один рік: "
+                   "долоня піднятої землі, виміряна з орбіти крізь полярну ніч і хмари."},
+    "why": {"en": "The shape of the dome gives away what lies beneath. Like a footprint in sand, it tells the depth of the body that made it: "
+                  "a pocket of magma a few kilometres under the lava fields.",
+            "uk": "Форма купола видає те, що під ним. Як слід на піску, вона показує глибину того, що його лишило: "
+                  "кишеню магми за кілька кілометрів під лавовими полями."},
+    "why-cut": {"en": "Slice through the dome from Grindavík to Vogar, and the houses along the way lean, much exaggerated, toward the place that rises fastest. "
+                      "These towns sit on the flank of something very much alive.",
+                "uk": "Розріжте купол від Ґріндавіка до Воґара, і будинки вздовж розрізу нахиляться, з великим перебільшенням, до місця, що росте найшвидше. "
+                      "Ці містечка стоять на схилі чогось дуже живого."},
+    "exhale": {"en": "And then the breath goes out. On the tenth of November 2023, within hours, magma tore a crack some fifteen kilometres long, right beneath Grindavík. "
+                     "The town was evacuated, and the dome fell.",
+               "uk": "А потім — видих. Десятого листопада 2023 року за кілька годин магма розірвала тріщину завдовжки близько п'ятнадцяти кілометрів просто під Ґріндавіком. "
+                     "Місто евакуювали, а купол опустився."},
+}
 
 
 def patch_app(app, with_math):

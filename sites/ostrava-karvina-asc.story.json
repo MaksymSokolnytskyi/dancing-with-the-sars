@@ -78,8 +78,13 @@
    "day": "end",
    "legend": true,
    "focus": [
-    "border"
-   ]
+    "border",
+    "countries"
+   ],
+   "voice": {
+    "en": "Deep beneath this quiet farmland, hundreds of metres down, miners cut coal from a seam that pays no attention to the border above. When the coal is taken away the rock settles, and the fields on the surface sag, gently, into shallow bowls.",
+    "uk": "Глибоко під цими тихими полями, за сотні метрів, шахтарі вирізають вугілля з пласта, якому байдуже до кордону нагорі. Коли вугілля забирають, порода осідає, і поля на поверхні м'яко прогинаються в неглибокі чаші."
+   }
   },
   {
    "section": "what",
@@ -169,7 +174,11 @@
    ],
    "focus": [
     "bowls_reliable"
-   ]
+   ],
+   "voice": {
+    "en": "Here they are. The solid outlines are bowls the radar saw from every track it had; the dotted ones are still only suspects. Nearly all the firm ones lie on the Polish side, where the deep mines are still at work.",
+    "uk": "Ось вони. Суцільні контури — чаші, які радар побачив з усіх своїх орбіт; пунктирні — поки лише підозрювані. Майже всі надійні лежать на польському боці, де глибокі шахти ще працюють."
+   }
   },
   {
    "section": "why",
@@ -246,7 +255,11 @@
    ],
    "focus": [
     "heaps"
-   ]
+   ],
+   "voice": {
+    "en": "These bowls are not empty. Villages, roads and a railway stand on them: about eleven hundred buildings, lowered slowly with the ground beneath. The pale heaps of mine waste tell their own story: they sink less than the fields beside them.",
+    "uk": "Ці чаші не порожні. На них стоять села, дороги й залізниця: близько тисячі ста будівель, що повільно опускаються разом із землею. Світлі терикони розповідають своє: вони осідають менше, ніж поля поруч."
+   }
   },
   {
    "section": "sure",
@@ -321,7 +334,8 @@
     "bowls"
    ],
    "day": "end",
-   "legend": true
+   "legend": true,
+   "appendix": true
   }
  ]
 }

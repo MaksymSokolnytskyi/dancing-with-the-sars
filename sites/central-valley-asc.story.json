@@ -8,10 +8,14 @@
   {
    "section": "intro",
    "title": {
-    "en": "A valley of fields, read by radar",
-    "uk": "Долина полів очима радара"
+    "en": "The farm year, heard by radar",
+    "uk": "Рік ферми, почутий радаром"
    },
    "text": [
+    {
+     "en": "Press ▶ and watch the fields: calm in winter, restless from March to May, partly calm again in late summer.",
+     "uk": "Натисніть ▶ і дивіться на поля: спокійні взимку, неспокійні з березня до травня, знову частково спокійні наприкінці літа."
+    },
     {
      "en": "The tint lies over the farmland: the radar shows whether it stayed the same over 12 days or changed.",
      "uk": "Тон лягає на ріллю: радар показує, чи лишилась вона такою самою за 12 днів, чи змінилась."
@@ -19,64 +23,6 @@
     {
      "en": "Where nothing changed, two radar echoes 12 days apart match. When a field is ploughed, grows, is watered or harvested, the match breaks. Radar people call this match coherence.",
      "uk": "Де нічого не змінилося, два відлуння радара з різницею в 12 днів збігаються. Коли поле орють, на ньому ростуть рослини, його поливають чи збирають урожай, збіг руйнується. Фахівці називають цю міру збігу когерентністю."
-    }
-   ],
-   "facts": [
-    {
-     "value": "820",
-     "label": {
-      "en": "farmland blocks, 2 × 2 km",
-      "uk": "блоків ріллі, 2 × 2 км"
-     }
-    },
-    {
-     "value": "25",
-     "label": {
-      "en": "radar pairs, Nov 2025 – Oct 2026",
-      "uk": "пар знімків, лист. 2025 – жовт. 2026"
-     }
-    },
-    {
-     "value": "54",
-     "label": {
-      "en": "town blocks, the steady yardstick",
-      "uk": "міські блоки — стабільна мірка"
-     }
-    }
-   ],
-   "camera": {
-    "bbox": [
-     -120.25,
-     35.78,
-     -118.98,
-     36.52
-    ]
-   },
-   "layers": [
-    "fields",
-    "water",
-    "rivers",
-    "canals",
-    "places"
-   ],
-   "modes": {
-    "fields": "rel_coh"
-   },
-   "day": "start",
-   "focus": [
-    "canals"
-   ]
-  },
-  {
-   "section": "what",
-   "title": {
-    "en": "Watch the year: calm winter, restless spring",
-    "uk": "Подивіться рік: спокійна зима, неспокійна весна"
-   },
-   "text": [
-    {
-     "en": "Press ▶ and watch the fields: calm in winter, restless from March to May, partly calm again in late summer.",
-     "uk": "Натисніть ▶ і дивіться на поля: спокійні взимку, неспокійні з березня до травня, знову частково спокійні наприкінці літа."
     },
     {
      "en": "The colour and strength of the tint compare each block's 12-day match with town blocks that barely change: 1 means as steady as the town.",
@@ -122,7 +68,248 @@
     "fields": "rel_coh"
    },
    "day": "start",
-   "play": true
+   "play": true,
+   "focus": [
+    "fields"
+   ],
+   "voice": {
+    "en": "In the great valley of California the year has a heartbeat. In winter the fields lie still, and the radar finds them unchanged from one visit to the next. Then spring comes, with ploughs, seed, water and growth, and the stillness breaks, field by field.",
+    "uk": "У великій долині Каліфорнії рік має серцебиття. Взимку поля лежать нерухомо, і радар бачить їх незмінними від прольоту до прольоту. Потім приходить весна: оранка, сівба, вода й ріст, і спокій ламається, поле за полем."
+   }
+  },
+  {
+   "section": "what",
+   "title": {
+    "en": "Four rhythms of the fields",
+    "uk": "Чотири ритми полів"
+   },
+   "text": [
+    {
+     "en": "Each colour is one of 4 yearly rhythms; each seal draws its curve over the year (up = steady). Sorted after the tests: not a test.",
+     "uk": "Кожен колір — один із 4 річних ритмів; кожна печатка малює свою криву за рік (вгорі = стабільно). Розкладено після тестів: це не тест."
+    },
+    {
+     "en": "Types 1–3 (725 blocks) follow the valley's calendar: steadiest in January, most restless in spring or late summer. Type 4 (95 blocks) runs the other way: most restless in early March, steadiest in September. Perhaps winter crops, bare after harvest; not checked.",
+     "uk": "Типи 1–3 (725 блоків) йдуть за календарем долини: найстабільніші в січні, найнеспокійніші навесні чи наприкінці літа. Тип 4 (95 блоків) — навпаки: найнеспокійніший на початку березня, найстабільніший у вересні. Можливо, озимі культури, голі після жнив; не перевірено."
+    },
+    {
+     "en": "Click a block to see its own curve against the curve of its type.",
+     "uk": "Клацніть на блок, щоб побачити його власну криву поруч із кривою його типу."
+    }
+   ],
+   "facts": [
+    {
+     "value": "725",
+     "label": {
+      "en": "blocks in types 1–3",
+      "uk": "блоків у типах 1–3"
+     }
+    },
+    {
+     "value": "95",
+     "label": {
+      "en": "blocks in type 4, the opposite rhythm",
+      "uk": "блоків у типі 4, зворотний ритм"
+     }
+    }
+   ],
+   "camera": {
+    "bbox": [
+     -120.25,
+     35.78,
+     -118.98,
+     36.52
+    ]
+   },
+   "layers": [
+    "fields",
+    "water",
+    "rivers",
+    "canals",
+    "places"
+   ],
+   "modes": {
+    "fields": "cluster"
+   },
+   "day": "end",
+   "marks": [
+    {
+     "lon": -119.4966,
+     "lat": 36.2914,
+     "curve": [
+      0.836,
+      0.83,
+      0.834,
+      0.929,
+      0.924,
+      0.907,
+      0.874,
+      0.844,
+      0.802,
+      0.689,
+      0.683,
+      0.541,
+      0.491,
+      0.424,
+      0.455,
+      0.511,
+      0.478,
+      0.537,
+      0.578,
+      0.577,
+      0.46,
+      0.638,
+      0.62,
+      0.539,
+      0.395
+     ],
+     "r_m": 3000,
+     "dx": 30,
+     "dy": -60,
+     "text": {
+      "en": "type 1: calm winter, restless from spring",
+      "uk": "тип 1: тиха зима, неспокій з весни"
+     },
+     "color": [
+      150,
+      62,
+      34
+     ]
+    },
+    {
+     "lon": -119.2667,
+     "lat": 36.0436,
+     "curve": [
+      0.89,
+      0.875,
+      0.872,
+      0.957,
+      0.917,
+      0.883,
+      0.855,
+      0.86,
+      0.813,
+      0.784,
+      0.725,
+      0.675,
+      0.677,
+      0.689,
+      0.702,
+      0.749,
+      0.735,
+      0.768,
+      0.781,
+      0.769,
+      0.691,
+      0.784,
+      0.789,
+      0.789,
+      0.716
+     ],
+     "r_m": 3000,
+     "dx": 50,
+     "dy": 30,
+     "text": {
+      "en": "type 2: only a mild spring dip",
+      "uk": "тип 2: лише легкий весняний спад"
+     },
+     "color": [
+      52,
+      86,
+      128
+     ]
+    },
+    {
+     "lon": -119.7762,
+     "lat": 36.0148,
+     "curve": [
+      0.976,
+      0.938,
+      0.969,
+      1.025,
+      0.998,
+      0.954,
+      0.931,
+      0.891,
+      0.728,
+      0.533,
+      0.605,
+      0.591,
+      0.634,
+      0.688,
+      0.689,
+      0.756,
+      0.732,
+      0.783,
+      0.807,
+      0.689,
+      0.455,
+      0.71,
+      0.771,
+      0.791,
+      0.761
+     ],
+     "r_m": 3000,
+     "dx": -40,
+     "dy": 52,
+     "text": {
+      "en": "type 3: two sharp breaks, spring and late summer",
+      "uk": "тип 3: два різкі злами, весна й кінець літа"
+     },
+     "color": [
+      176,
+      140,
+      60
+     ]
+    },
+    {
+     "lon": -119.4204,
+     "lat": 35.9865,
+     "curve": [
+      0.85,
+      0.818,
+      0.79,
+      0.861,
+      0.802,
+      0.731,
+      0.69,
+      0.754,
+      0.662,
+      0.704,
+      0.735,
+      0.752,
+      0.79,
+      0.796,
+      0.811,
+      0.821,
+      0.816,
+      0.839,
+      0.852,
+      0.86,
+      0.837,
+      0.857,
+      0.876,
+      0.882,
+      0.868
+     ],
+     "r_m": 3000,
+     "dx": 50,
+     "dy": 46,
+     "text": {
+      "en": "type 4: the other way round, restless in March",
+      "uk": "тип 4: навпаки, неспокій у березні"
+     },
+     "color": [
+      86,
+      112,
+      74
+     ]
+    }
+   ],
+   "voice": {
+    "en": "Not every field keeps the same time. Most follow the valley's calendar: quiet in winter, restless in spring. But some, many of them in the west, run the other way round: busiest in March, calm by September. The radar cannot name the crop, but it can hear its rhythm.",
+    "uk": "Не кожне поле живе в одному темпі. Більшість іде за календарем долини: тихі взимку, неспокійні навесні. Але деякі, чимало з них на заході, — навпаки: найактивніші в березні, спокійні до вересня. Радар не може назвати культуру, але чує її ритм."
+   }
   },
   {
    "section": "why",
@@ -171,75 +358,8 @@
    "modes": {
     "fields": "rel_coh"
    },
-   "day": "2026-05-05"
-  },
-  {
-   "section": "what",
-   "title": {
-    "en": "Four rhythms of the fields",
-    "uk": "Чотири ритми полів"
-   },
-   "text": [
-    {
-     "en": "Each colour is one of 4 types of yearly rhythm, sorted after the tests to explore: this is not a test.",
-     "uk": "Кожен колір — один із 4 типів річного ритму, розкладених уже після тестів, для дослідження: це не тест."
-    },
-    {
-     "en": "Types 1–3 (725 blocks) follow the valley's calendar: steadiest in January, most restless in spring or late summer. Type 4 (95 blocks) runs the other way: most restless in early March, steadiest in September. Perhaps winter crops, bare after harvest; not checked.",
-     "uk": "Типи 1–3 (725 блоків) йдуть за календарем долини: найстабільніші в січні, найнеспокійніші навесні чи наприкінці літа. Тип 4 (95 блоків) — навпаки: найнеспокійніший на початку березня, найстабільніший у вересні. Можливо, озимі культури, голі після жнив; не перевірено."
-    },
-    {
-     "en": "Click a block to see its own curve against the curve of its type.",
-     "uk": "Клацніть на блок, щоб побачити його власну криву поруч із кривою його типу."
-    }
-   ],
-   "facts": [
-    {
-     "value": "725",
-     "label": {
-      "en": "blocks in types 1–3",
-      "uk": "блоків у типах 1–3"
-     }
-    },
-    {
-     "value": "95",
-     "label": {
-      "en": "blocks in type 4, the opposite rhythm",
-      "uk": "блоків у типі 4, зворотний ритм"
-     }
-    }
-   ],
-   "camera": {
-    "bbox": [
-     -120.25,
-     35.78,
-     -118.98,
-     36.52
-    ]
-   },
-   "layers": [
-    "fields",
-    "water",
-    "rivers",
-    "canals",
-    "places"
-   ],
-   "modes": {
-    "fields": "cluster"
-   },
-   "day": "end",
-   "marks": [
-    {
-     "lon": -119.963,
-     "lat": 36.299,
-     "text": {
-      "en": "most of type 4 is in the west: 70 of 95 blocks (counted after the tests)",
-      "uk": "більшість типу 4 — на заході: 70 із 95 блоків (пораховано після тестів)"
-     },
-     "dx": -40,
-     "dy": -36
-    }
-   ]
+   "day": "2026-05-05",
+   "appendix": true
   },
   {
    "section": "sure",
@@ -300,7 +420,8 @@
      "dx": 30,
      "dy": -40
     }
-   ]
+   ],
+   "appendix": true
   },
   {
    "section": "next",
@@ -340,7 +461,8 @@
    "modes": {
     "fields": "mean_rel_coh"
    },
-   "day": "end"
+   "day": "end",
+   "appendix": true
   }
  ]
 }
