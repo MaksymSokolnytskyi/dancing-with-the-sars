@@ -45,6 +45,7 @@ web/data/<plate>/                                               the built plate:
 | **Copernicus DEM GLO-30** | ESA / Airbus | free licence with attribution | heights for the relief hachures, terrain shading and summits | `sars fetch` (public AWS bucket, anonymous) |
 | **ESA WorldCover 2021, 10 m** | ESA | CC BY 4.0 | land-cover classes: built-up blocks, trees, cropland | `sars fetch` (public COG tiles, anonymous) |
 | **OpenStreetMap** | OSM contributors | ODbL | rivers, lakes, glaciers, paths, villages, roads, metro | `sars fetch` (Overpass API) |
+| **Natural Earth 1:110m land** | Natural Earth, via world-atlas 2.0.2 | public domain | coastlines of the small locator globe (`web/data/world-land.json`, committed, 76 kB) | converted once from the world-atlas TopoJSON; no fetch needed |
 | **Atlas de Riesgos CDMX** | Government of Mexico City | open data portal; check the terms before redistributing | geotechnical zones (the old lakebed), mapped ground cracks | `sars fetch` (URL in the plate's `context` entry) |
 | **GNSS daily series** | Nevada Geodetic Laboratory | free; cite Blewitt, Hammond & Kreemer (2018) | station MMX1 (Mexico City airport) as ground truth | `sars fetch` (station listed in the plate's `gnss`) |
 
@@ -82,7 +83,7 @@ web/data/<plate>/                                               the built plate:
 |---|---|---|---|
 | `mexico-city-asc` | slow motion (subsidence) | NISAR (28 pairs), DEM, WorldCover, OSM, CDMX atlas, GNSS MMX1 | `sars fetch` + `sars build` |
 | `langtang-asc` | sudden change (debris flow) | NISAR (25 pairs), DEM, OSM | `sars fetch` + `sars build` (checked on a clean clone: same result) |
-| `central-valley-asc` | fields rhythm (coherence) | NISAR (25 pairs), plus a land-cover grid | **two extra steps**, see below |
+| `central-valley-asc` | fields rhythm (coherence) | NISAR (25 pairs), plus a land-cover grid | **two extra steps**, see below; landscape (relief, woods, towns) added after with `scripts/add_landscape.py central-valley-asc` (Copernicus DEM, WorldCover via `scripts/fetch_worldcover.py`, OSM via `scripts/fetch_osm.py`) |
 | `panama-quake` | earthquake card | quake windows, a trained network (GPU) | research pipeline: `scripts/fetch_event.py`, then `scripts/export_quake.py` with `uv sync --group ml` |
 | `ostrava-karvina-asc` | slow motion (mining subsidence) + the study's bowls | NISAR (8 pairs, track 158 A), DEM, WorldCover, OSM, and the Ostrava study outputs for the bowls | run the study first (`scripts/ostrava/`), then `plate_layers.py`, `sars fetch` + `sars build` (below) |
 | `reykjanes` (packed page `web/reykjanes-scroll.html`) | uplift + dike | NISAR GUNW 159A + 082D (also 010D, 087A, 111D), Copernicus DEM tile N63W023, GNSS (NGL), Sentinel-1 HyP3, FIRMS, HLS, OSM extract | research pipeline in `scripts/reykjanes/` (below), then `scripts/build_reykjanes_scroll.py` |

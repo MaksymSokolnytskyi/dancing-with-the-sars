@@ -22,7 +22,9 @@
  "osm": {
   "water": "(way[\"natural\"=\"water\"]({b});relation[\"natural\"=\"water\"]({b}););out geom;",
   "rivers": "way[\"waterway\"=\"river\"]({b});out geom;",
-  "places": "node[\"place\"~\"^(town|village)$\"]({b});out;"
+  "places": "node[\"place\"~\"^(town|village)$\"]({b});out;",
+  "roads": "way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)$\"]({b});out tags geom;",
+  "rail": "way[\"railway\"=\"rail\"]({b});out geom;"
  },
  "context": [
   {
@@ -72,9 +74,59 @@
    },
    "z": 3.6,
    "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "roads",
+   "kind": "lines",
+   "src": "data/raw/osm/wisconsin/roads.json",
+   "style": "road",
+   "min_len_m": 500,
+   "label": {
+    "en": "Main roads",
+    "uk": "Головні дороги"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": true,
+   "z": 1.25
+  },
+  {
+   "id": "rail",
+   "kind": "lines",
+   "src": "data/raw/osm/wisconsin/rail.json",
+   "style": "rail",
+   "min_len_m": 500,
+   "label": {
+    "en": "Railways",
+    "uk": "Залізниці"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": true,
+   "z": 1.25
   }
  ],
  "notes": [
   "Not built by `sars build`: the cells come from the WS test outputs via scripts/export_wisconsin.py; the OSM context is added by scripts/add_context.py wisconsin."
- ]
+ ],
+ "landcover": {
+  "src": "data/raw/context/wisconsin_worldcover_10m.tif",
+  "attribution": "© ESA WorldCover 2021 (CC-BY 4.0)",
+  "trees": {
+   "class": 10,
+   "cell_m": 480,
+   "min_share": 0.6
+  },
+  "built": {
+   "class": 50,
+   "block_m": 60,
+   "min_share": 0.5,
+   "spacing_m": 220,
+   "min_run_m": 120
+  }
+ },
+ "terrain": {
+  "interval_m": 40,
+  "spacing_px": 2.0,
+  "sigma_dir_m": 200,
+  "sigma_tone_m": 100
+ }
 }

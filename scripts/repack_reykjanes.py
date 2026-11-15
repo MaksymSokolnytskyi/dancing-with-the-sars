@@ -42,6 +42,8 @@ def main():
     with_math = 'id="math-open"' in html and not a.no_math
     head, app, tail, theme = B.engine()
     packs["themes/scroll.json"] = B.pack(B.theme_for(theme))
+    # the atlas index as it is now, so the last page leads on to the next plate (that plate opens in index.html)
+    packs["data/scenes.json"] = B.pack(json.loads((B.ROOT / "web" / "data" / "scenes.json").read_text(encoding="utf-8")))
     key = f"data/{B.SID}/story.json"
     if key in packs:
         txt = json.dumps(unpack(packs[key]), ensure_ascii=False)
