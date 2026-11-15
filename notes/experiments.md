@@ -1891,3 +1891,119 @@ water 2 631, vegetated bed 41 187, bare bed 2 758, cropland 73 973.
   product, not the site.
 - Code note (2026-11-14, review of PR #4): the K4 date filter now matches the text (2025-11-01 … 2026-03-31); the K4
   result is unchanged.
+
+## W. Northern Wisconsin: L-band radio physics with full quad-pol GCOV (`edoTenseii` + Claude)
+
+Goal: run the surface tests that the Kakhovka bed could not answer (section K: the backscatter levels there were not
+physical) on a clean site, and add the tests that need all four polarizations. NISAR GCOV `2005_QPDH` here carries the **full
+covariance matrix** in band A (10 terms, `isFullCovariance = True`, complex off-diagonals) and HH/HV in band B.
+(The goal sentence and the heading were reworded on 2026-11-14 to match section K; no test or threshold changed.)
+
+**Pre-registered 2026-11-14, written ~22:00 (Dnipro time), before any GCOV backscatter value over this site was read.**
+What git shows (review of PR #6): the text was committed locally on its own at 22:02 (b5fe3df; it said "~23:50" by
+mistake). That commit was rewritten by two rebases during the data run (22:50 and ~23:11) to reword the goal and the
+heading; the branch was first pushed at 23:45, after the results commit (23:31). So, as in section K, the timing is our
+own record. The original commit is kept unchanged at `kiberatlet/w-prereg-original`; `git diff b5fe3df <this commit>
+-- notes/experiments.md` shows that only the heading, the goal sentence and this timing line changed, no test or
+threshold.
+Seen before writing, and nothing else: ASF scene lists (52 QPDH scenes, tracks A76/24: 18, A148/24: 7, D41/65: 10,
+D113/66: 16; no QPDH scenes Feb – mid-June 2026), the term lists and flags of one file (D113, 2026-11-01:
+`rfiLikelihood` = inf and 1e35), ESA WorldCover shares (used to choose the windows), Sentinel-2 scene lists, and the
+array shapes (not values) of one test read (A76, 2026-10-29, band A).
+
+**Windows.** Full window W −91.00, S 45.02, E −90.56, N 45.28 (WorldCover: tree 67 %, cropland 20 %, grass 11 %,
+water 1.2 %), band B 80 m, all 52 scenes. Sub-window W −90.77, S 45.17, E −90.67, N 45.24, chosen from WorldCover only as the
+~8 × 8 km box with most open water that keeps ≥ 30 % tree and ≥ 10 % cropland (water 12 %, tree 67 %, cropland 12 %):
+band A 20 m, full covariance, one scene per track and calendar month (the earliest of the month).
+Terrain height for the incidence cube 350 m above the ellipsoid.
+
+**Classes** (radar-independent; Sentinel-2 L2A 2026-07-14 = leaf-on, 2025-11-03 = leaf-off and snow-free, tiles 15TXL + 15TXK):
+- *water*: SCL = 6 on both dates for every S2 pixel under the radar pixel, and July NDWI ≥ 0.3.
+- *deciduous forest*: WorldCover tree fraction ≥ 0.9, July NDVI ≥ 0.75, November NDVI ≤ 0.45.
+- *conifer forest*: WorldCover tree fraction ≥ 0.9, July NDVI ≥ 0.75, November NDVI ≥ 0.60.
+- *cropland*: WorldCover cropland fraction ≥ 0.9, no water.
+- Frozen / unfrozen dates: the section K rule (Open-Meteo hourly 2 m temperature). A window is used for a class only with
+  ≥ 50 class pixels. dB = 10·log10 of gamma0.
+- Corn against soybean (USDA CDL) is **not tested**: the CDL service returned errors on 14.11.
+
+**W1. Noise floor** (repeat of K1). W1a band B: water HV / NEB_HV within ±2 dB in ≥ 80 % of scenes. W1b band B: water
+HH ≥ water HV − 0.5 dB in ≥ 80 %. W1c band A: water HV / NEB_HV and VH / NEB_VH both within ±2 dB in ≥ 80 % of scenes.
+
+**W2. Does the 24 cm wave see leaves?** Band B, unfrozen dates. A track is eligible with ≥ 4 unfrozen dates including
+≥ 1 in Jun–Aug and ≥ 1 in 15 Oct – 30 Nov. Fewer than 2 eligible tracks: inconclusive.
+- W2a. Deciduous-forest HV amplitude (max − min of per-date medians) ≤ 2.0 dB on ≥ 2/3 of eligible tracks.
+- W2b. Deciduous-forest HV amplitude < cropland HV amplitude on ≥ 2/3 of eligible tracks.
+- W2c. Deciduous HV amplitude − conifer HV amplitude ≤ 1.0 dB on ≥ 2/3 of eligible tracks (losing all leaves adds little).
+
+**W3. Angular signature.** Band B, Jun–Sep 2026, unfrozen. Per track, class medians of γ⁰ and θ. Spread of θ over
+tracks < 5°: inconclusive. W3: for deciduous and for conifer forest, the range over tracks ≤ 1.5 dB in HV and in HH.
+
+**W4. Frozen ground and frozen trees.** Band B, Oct 2025 – Jan 2026, per track and class (deciduous, conifer, cropland),
+eligible with ≥ 1 frozen and ≥ 2 unfrozen dates. W4: median HH frozen − median HH unfrozen ≤ −1.5 dB on ≥ half of the
+eligible cases. Fewer than 2 eligible cases: inconclusive.
+
+**W5. Reciprocity HV = VH** (band A). For forest (deciduous ∪ conifer) and cropland, per scene:
+- W5a. |median 10·log10(HV / VH)| ≤ 0.5 dB in ≥ 80 % of scenes.
+- W5b. Cross-pol coherence |⟨HV·VH*⟩| / √(⟨|HV|²⟩⟨|VH|²⟩) of the class means ≥ 0.9 in ≥ 80 % of scenes.
+
+**W6. Co-pol ratio against scattering theory** (band A).
+- W6a. Forest: |median VV − median HH| ≤ 1.0 dB in ≥ 80 % of scenes (volume scattering, no preferred polarization).
+- W6b. Water: VV − HH ≥ +1.0 dB (Bragg / small-perturbation model) in ≥ 80 % of the scenes where water HH and VV are both
+  ≥ 3 dB above their NEB. Fewer than 5 such scenes: inconclusive.
+
+**W7. Cloude–Pottier H/α** (band A, unfrozen scenes, from the class-mean 3 × 3 coherency matrix). W7: forest entropy
+H ≥ 0.7 and 40° ≤ ᾱ ≤ 55° in ≥ 80 % of scenes. Cropland and water: reported, not judged.
+
+**W8. Faraday rotation** (band A, forest class mean, Bickel–Bates estimator from the full covariance:
+Ω = ¼·arg(⟨|b|²⟩ − ⟨|a|²⟩ − 2j·Re⟨a b*⟩) with a = HV − VH, b = HH + VV). Reported, not judged; expectation |Ω| ≤ 3°.
+Crosstalk is not corrected in the product (all-zero layers, section K), so a non-zero Ω may be crosstalk, not ionosphere.
+
+**Results W (2026-11-14 ~23:40, `experiments/w_fetch.py`, `experiments/w_tests.py`).** 52 band B windows (A76: 18,
+D113: 16, D41: 11, A148: 7), 27 band A full-covariance windows (one per track and month). Class pixels on the 80 m grid:
+water 76, deciduous 15 684, conifer 14 990, cropland 21 538. Fix before the run, no rule changed: the products are on UTM
+zone 16 (EPSG 32616), so the band A class layers are built on each window's own zone.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| W1a water HV / NEB_HV within ±2 dB (band B) | 0 of 42: NEB layer zero or NaN under the water pixels in 30; finite in 12, all outside (+3.3 … +5.1 dB) | ≥ 80 % | **fail** |
+| W1b water HH ≥ HV − 0.5 dB | 42 of 42 | ≥ 80 % | pass |
+| W1c band A water vs NEB | no water pixels on the band A grid (see below) | | inconclusive |
+| W2a deciduous HV amplitude ≤ 2 dB | 0.8, 2.8, 1.8 dB (D41, A76, D113; A148 not eligible) | ≥ 2/3 | pass |
+| W2b deciduous HV amp < cropland HV amp | 3 of 3 (cropland 2.6, 4.4, 2.7 dB) | ≥ 2/3 | pass |
+| W2c deciduous − conifer HV amp ≤ 1 dB | −0.2, −1.6, +0.1 dB | ≥ 2/3 | pass |
+| W3 forest range over tracks, θ spread 12.7° | deciduous HH 0.5 / HV 0.7 dB, conifer HH 0.9 / HV 0.4 dB | ≤ 1.5 dB | pass |
+| W4 frozen − unfrozen HH | deciduous −2.0 / −2.2, conifer −2.6 / −2.3, cropland −1.2 / −1.8 dB (A76 / D113) | ≤ −1.5 on half | pass (4 of 6) |
+| W5a \|HV − VH\| ≤ 0.5 dB | forest 16 of 27, cropland 17 of 27 | ≥ 80 % | **fail** |
+| W5b cross-pol coherence ≥ 0.9 | forest 10 of 27 (0.76–0.95), cropland 0 of 27 (0.25–0.77) | ≥ 80 % | **fail** |
+| W6a forest \|VV − HH\| ≤ 1 dB | 5 of 27 (VV − HH −0.5 … −4.2 dB) | ≥ 80 % | **fail** |
+| W6b water VV − HH | no scene passes the NEB gate (no band A water class) | | inconclusive |
+| W7 forest H ≥ 0.7 and 40° ≤ ᾱ ≤ 55° | 18 of 22 unfrozen scenes (H 0.65–0.97, ᾱ 48.8–53.1°) | ≥ 80 % | pass |
+| W8 Faraday Ω (forest, reported; sign convention in `faraday_deg`) | Oct 2025 – Jan 2026: −1.2 … +1.8°; Jun – Nov 2026: −5.2 … +0.1° | expectation \|Ω\| ≤ 3° | reported |
+
+**Post-hoc (not pre-registered), what the fails and gaps show.**
+- *Processing version.* W5a and W6a split by `compositeReleaseId`: X05009/X05010 (Oct 2025 – Jan 2026, 10 scenes) give
+  forest HV − VH −0.9 … −1.4 dB (median) and VV − HH −2.8 dB; P05023/P05036 (Jun – Nov 2026, 17 scenes) give HV − VH
+  −0.1 … −0.3 dB and VV − HH −0.9 … −1.1 dB. Reciprocity (HV = VH) does not depend on season, so the early releases carry a
+  ≈ 1 dB cross-pol channel imbalance that the 2026 releases mostly do not. Season and release are confounded for VV − HH.
+- *Cross-pol coherence and noise.* Noise is not subtracted (section K), and receiver noise in HV and VH is independent, so
+  the coherence falls where the cross-pol signal is weak: cropland (low HV) 0.25–0.77, forest (high HV) 0.76–0.95. W5b as
+  written asked more than an un-denoised product can give.
+- *The NEB layer itself.* `noiseEquivalentBackscatter` HV has zeros inside the window in 28 of 52 band B scenes, and on the
+  band A grid it is all NaN in 15 of 27 scenes; it is complete only in some P05023/P05036 scenes. Where it is finite, calm
+  water HV (about −22 dB, like the Lake Balaton control in section K) sits 3–6 dB above it. Either the stated floor is
+  too low or the water returns some HV; we cannot tell which from these data. Add to the K0 audit.
+- *Empty water class on the band A grid.* The July NDWI rule (≥ 0.3) removes every lake pixel of the sub-window
+  (NDWI there is below 0.3 in July; ≥ 0.3 in November). So W1c and W6b test nothing; the rule was too strict for a
+  summer lake, not a radar result.
+- *Faraday.* The estimate is near zero in winter and 2–5° in magnitude in summer (negative in the convention of
+  `faraday_deg`: M = R(Ω)·S·R(Ω), checked in `experiments/w_selfcheck.py`), largest on the descending (evening) tracks.
+  That fits more ionospheric electron content in summer evenings, but crosstalk is not corrected, and no TEC data were
+  compared. Not a claim.
+- **Reading.** On this clean site the surface physics behaves as textbook L-band: the wave does not see leaves (W2), forest
+  γ⁰ is flat in angle (W3), freezing drops backscatter by ~2 dB (W4), forest is a high-entropy volume scatterer at
+  ᾱ ≈ 50° (W7). What fails is the product's polarimetric calibration in the early releases (W5a, W6a) and its noise layer
+  (W1a), plus our own too-strict water rule (W1c, W6b).
+- *Review of PR #6 (2026-11-15), code only, no verdict changed:* W1c now uses the median of 10·log10(HV / NEB) as the
+  text says (it was median dB minus median dB); W1a reports broken-layer and finite counts separately; the Faraday sign
+  convention is fixed and stated (the W8 values above flipped sign, magnitudes unchanged); `experiments/w_selfcheck.py`
+  reruns the synthetic checks of the polarimetry helpers.

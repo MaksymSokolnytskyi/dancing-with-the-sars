@@ -52,13 +52,13 @@ web/data/<plate>/                                               the built plate:
 
 | Dataset | Licence | Used for | How to get it |
 |---|---|---|---|
-| **NISAR L2 GCOV** (backscatter gamma0, HH and HV) | NASA open data | test GC: crop seasons by polarization (`notes/research-resources-2026-11-13.md`); Kakhovka tests K (noise floor, scattering, product audit) | `experiments/probe_gcov.py`, `experiments/k_fetch.py` via `src/hachure/gcov.py` |
+| **NISAR L2 GCOV** (backscatter gamma0, HH and HV; full quad-pol covariance where acquired) | NASA open data | test GC: crop seasons by polarization (`notes/research-resources-2026-11-13.md`); Kakhovka tests K (noise floor, scattering, product audit); Wisconsin quad-pol tests W (reciprocity, co-pol ratio, H/α, Faraday) | `experiments/probe_gcov.py`, `experiments/k_fetch.py`, `experiments/w_fetch.py` via `src/hachure/gcov.py` |
 | NISAR GUNW pixel offsets | NASA open data | landslide test L-offsets | `scripts/fetch_offsets.py` |
 | NISAR GUNW around earthquakes | NASA open data | fault parameter tests (SBI), quake cards | `scripts/fetch_event.py --name ... --lon ... --lat ... --date ...` |
 | USGS earthquake catalogue and finite faults | public domain | blind check of our fault estimates | `scripts/fetch_event.py`, `scripts/sbi_compare.py` |
 | Open-Meteo daily rain (historical) | CC BY 4.0 | test H9 (Central Valley) | `experiments/fetch_h9_context.py` |
-| Copernicus Sentinel-2 L2A (scene classification, red, green, NIR) | Copernicus, free and open; cite "contains modified Copernicus Sentinel data" | water and NDVI classes for the Kakhovka tests K (radar-independent) | `experiments/k_fetch.py` (Element 84 Earth Search STAC, anonymous COG reads) |
-| Open-Meteo hourly 2 m temperature (historical) | CC BY 4.0 | frozen / unfrozen overpass dates, test K4 | `experiments/k_fetch.py` |
+| Copernicus Sentinel-2 L2A (scene classification, red, green, NIR) | Copernicus, free and open; cite "contains modified Copernicus Sentinel data" | water and NDVI classes for the Kakhovka tests K and the Wisconsin tests W (radar-independent) | `experiments/k_fetch.py`, `experiments/w_fetch.py` (Element 84 Earth Search STAC, anonymous COG reads) |
+| Open-Meteo hourly 2 m temperature (historical) | CC BY 4.0 | frozen / unfrozen overpass dates, tests K4 and W4 | `experiments/k_fetch.py`, `experiments/w_fetch.py` |
 | GOES-19 water vapour, IGRA radiosondes | public | atmosphere tests (B6, E2, T2) | `experiments/fetch_goes.py`, `experiments/t2_radiosonde.py` |
 | Sentinel-1 interferograms, Nov 2023 – Jul 2024 (Reykjanes) | Copernicus, free and open; processed by ASF HyP3 (INSAR_GAMMA) | real-dike check of the NPE (10 Nov 2023), null pairs, 2024 events, coherence loss | `scripts/reykjanes/run_s1_dike.py`, `scripts/reykjanes/hyp3_wait.py` (Earthdata token) |
 | GNSS daily series, Iceland (SENG, AUSV, GEVK, VOGC, NYLA, VOGS, REYK) | Nevada Geodetic Laboratory; free, cite Blewitt, Hammond & Kreemer (2018) | independent check of the uplift (R1), dike inversion (R3) | `.tenv3` files into `data/gnss/` (`scripts/fetch_ngl.py --name reykjanes --bbox -22.8 63.75 -22.0 64.05`, then copy) |
