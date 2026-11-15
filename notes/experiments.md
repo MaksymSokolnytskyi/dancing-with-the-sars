@@ -2070,30 +2070,31 @@ that do not care about the wanted answer.
   with several centres.
 - **Changed after looking at the results (post-hoc):** the frame-coverage threshold (because of D080), the swath-edge trim,
   the long-wavelength noise filter, the bowl threshold −15 cm/yr (instead of −10), and the water mask (because of a pond).
-- **Checks of these choices**: `scripts/ostrava/ostrava_thresholds.ipynb` (added 2026-11-15; it reads the saved stacks,
-  no download). The numbers below are from the analyst's run of that notebook (seed 42, `N_PERM` = 30). That run had **no
-  water mask** (the water file was not attached), and its copy of the detector finds 24 bowls, 17 of them confirmed by 3
-  tracks, not the 22 of O1. It has **not yet been re-run from the repo**.
+- **Checks of these choices**: `scripts/ostrava/ostrava_thresholds.ipynb` (added 2026-11-15). It reads the saved stacks and
+  downloads nothing. Numbers below are from the run of 2026-11-15: the English notebook with the Kaggle paths, the
+  first-run stacks, **with the water mask** (8.2 % of the box), seed 42, `N_PERM` = 30. Its copy of the detector gives
+  **22 bowls, 16 of them confirmed by 3 tracks**, the same counts as O1 (22 bowls; the 10 reliable plus the 6 three-track
+  candidates of O2). An earlier run by the analyst without the water mask gave 24 / 17 and FDR values within ±1 point of these.
   - A, coverage: frame coverage is bimodal (0.21 for D080, then 0.83 and above), so any threshold from 0.22 to 0.83 selects
     the same frames;
-  - C, noise: σ of the vertical in stable places (1.4826·MAD) = 3.6 cm/yr, so −15 cm/yr ≈ 4.2σ (3σ = −10.7);
+  - C, noise: σ of the vertical in stable places (1.4826·MAD) = 3.5 cm/yr, so −15 cm/yr ≈ 4.3σ (3σ = −10.6);
   - D, null test: subtract each pixel's mean rate, put random signs on the pair deviations, and count the bowls the method
-    "finds" where there is no motion. At −15 cm/yr the FDR is **2 % for bowls confirmed by ≥ 3 tracks, 12 % for ≥ 2 tracks
-    (the default rule) and 20 % for ≥ 1 track**. Under the default rule the FDR is ≤ 10 % only from −20 cm/yr down
-    (6 % at −20). The test is conservative (random signs break the partial cancellation of shared acquisitions). The first
+    "finds" where there is no motion. At −15 cm/yr the FDR is **1 % for bowls confirmed by ≥ 3 tracks, 12 % for ≥ 2 tracks
+    (the default rule) and 21 % for ≥ 1 track**. Under the default rule the FDR is ≤ 10 % only from −20 cm/yr down
+    (5 % at −20). The test is conservative (random signs break the partial cancellation of shared acquisitions). The first
     version of this test had a bug (~27 % of the motion leaked into the "null"); it was fixed;
-  - E, injected bowls at −15: found 82 % of −60, 71 % of −45, 75 % of −30, 73 % of −20 and 54 % of −10 cm/yr bowls; only
-    ~14 bowls per cell, so these shares are rough (they are not monotonic);
+  - E, injected bowls at −15: found 73 % of −60, 76 % of −45, 56 % of −30, 47 % of −20 and 38 % of −10 cm/yr bowls
+    (11–17 bowls per cell, so these shares are rough and not monotonic). Recall of moderate bowls (−20…−30) is about half:
+    the bowl list is **not complete**;
   - B, coherence: per-pair noise is 1.6× larger at γ ≈ 0.3 than at 0.7 (theory: 3.1×); only γ ≥ 0.3 is in the stacks;
   - F, noise filter: with the mask the injected bowl keeps 100 % of its amplitude for σ = 1–12 km (73 % at 1 km without it);
-  - G, split depth: the bowl count is flat (24) from 8 to 12 cm/yr around the default 10;
-  - H, robustness: changing one parameter at a time recovers all 17 three-track bowls for most values, and 12–15 of 17 at
-    the edges (threshold −10/−12: 15; −20: 14; −25: 12; split depth 15–20: 15; min. size 40 px: 15). So "the same" holds
-    near the defaults, not over the whole range.
-- Reading: the 12 % FDR for two-track bowls (above the notebook's own 10 % line) supports keeping them as candidates only.
-  H uses the detector's own 3-track set, not the hand-picked reliable list of O2; it will be repeated for the rule-based set
-  of O3a. Before any of these numbers goes on a plate or into the pitch, re-run the notebook from the repo with the water
-  mask and write the result here.
+  - G, split depth: the bowl count is flat (22) from 8 to 12 cm/yr around the default 10;
+  - H, robustness: changing one parameter at a time recovers all 16 three-track bowls for most values, and 11–15 of 16 at
+    the edges (threshold −10: 15, −20: 13, −25: 11; split depth 15–20: 14; max. hole 0.5 km², water share 0.1, min. size
+    40 px, LOS confirmation −12: 15). So "the same bowls" holds near the defaults, not over the whole range.
+- Reading: the 12 % FDR for two-track bowls (above the notebook's own 10 % line) supports keeping them as candidates only;
+  three-track bowls (1 %) are the ones a plate may call reliable. H uses the detector's own 3-track set, which here equals
+  the first condition of the O3a rule; it will be repeated for the full O3a rule.
 
 ### O3. Next tests, pre-registered 2026-11-14 (before running)
 - **O3a. Rule-based reliable set (a fixed rule, not a test).** Reliable = confirmed by 3 tracks AND no-data share < 0.6 AND
