@@ -47,7 +47,7 @@ const STR = {
         score_sound_t: "кожен дзвін — ще 2 см опускання: що швидше район сідає, то частіше дзвонить; нерухомі мовчать",
         lg_change: "радар втратив відбиток між двома прольотами (сніг, вода, обвал)", lg_change_event: "пляма, що лишається: селевий потік",
         story_intro: "таблиця", story_what: "що змінилось", story_why: "чому", story_sure: "наскільки певні",
-        story_next: "що ще може NISAR", story_listen: "послухати", story_back: "Назад", story_next_btn: "Далі", narrator: "🔈 Оповідач", narrator_on: "🔊 Оповідач: увімк.", questions: "Питання, які можуть виникнути", to_story: "До історії", 
+        story_next: "що ще може NISAR", story_listen: "послухати", story_back: "Назад", story_next_btn: "Далі", narrator: "🔈 Оповідач", narrator_on: "🔊 Оповідач: увімк.", narrator_note: "Текст оповіді написано за допомогою ШІ (Claude) й перевірено командою; голос — вбудований синтез мовлення вашого браузера", questions: "Питання, які можуть виникнути", to_story: "До історії", 
         story_explore: "досліджувати мапу самому ✕", story_open: "Читати таблицю ▸",
         contents: "☰ Зміст", glossary: "Слова, вжиті в атласі", next_plate: "Наступна таблиця", the_end: "Кінець атласу: до змісту" },
   en: { scene: "Place", theme: "Style", trust: "Trust", trust_fade: "weak strokes faded", trust_strong: "reliable only",
@@ -88,7 +88,7 @@ const STR = {
         score_sound_t: "each chime = 2 more cm of sinking: the faster a district sinks, the more often it chimes; still ground stays silent",
         lg_change: "the radar lost the ground's fingerprint between two passes (snow, water, a slide)", lg_change_event: "the patch that stays: the debris flow",
         story_intro: "plate", story_what: "what changed", story_why: "why", story_sure: "how sure",
-        story_next: "what else NISAR can do", story_listen: "listen", story_back: "Back", story_next_btn: "Next", narrator: "🔈 Narrator", narrator_on: "🔊 Narrator: on", questions: "Questions you may have", to_story: "To the story", 
+        story_next: "what else NISAR can do", story_listen: "listen", story_back: "Back", story_next_btn: "Next", narrator: "🔈 Narrator", narrator_on: "🔊 Narrator: on", narrator_note: "Narration text drafted with AI (Claude) and checked by the team; the voice is your browser's own speech synthesis", questions: "Questions you may have", to_story: "To the story", 
         story_explore: "explore the map yourself ✕", story_open: "Read the plate ▸",
         contents: "☰ Contents", glossary: "Words used in the atlas", next_plate: "Next plate", the_end: "End of the atlas: back to the contents" },
 };
@@ -1866,7 +1866,7 @@ function renderStoryCard() {
     (timed ? `<div class="st-time"><button id="st-play">${state.playing ? "❚❚" : "▶"}</button><span id="st-date"></span></div>` : "") + questions + onward +
     `<nav><button id="st-prev"${stepPage(i, -1) != null ? "" : " disabled"}>← ${T(p.appendix ? "to_story" : "story_back")}</button><span class="tabs">${tabs}</span>` +
     `<button id="st-next"${stepPage(i, 1) != null || onward ? "" : " disabled"}>${T("story_next_btn")} →</button></nav>` +
-    `<div class="st-foot"><a href="#" id="st-voice" class="${state.narrate ? "on" : ""}">${T(state.narrate ? "narrator_on" : "narrator")}</a>` +
+    `<div class="st-foot"><a href="#" id="st-voice" class="${state.narrate ? "on" : ""}" title="${T("narrator_note")}">${T(state.narrate ? "narrator_on" : "narrator")}</a>` +
     `<a href="#" id="st-explore">${T("story_explore")}</a></div>`;
   box.classList.remove("turn"); void box.offsetWidth; box.classList.add("turn");      // a short page-turn
   $("st-prev").onclick = () => applyPage(stepPage(i, -1));
