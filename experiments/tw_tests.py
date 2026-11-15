@@ -76,6 +76,10 @@ def pass_weather(t_utc, lon, vpd, rain):
     r48 = [rain.get(h - timedelta(hours=i)) for i in range(48)]
     return {"local": loc.isoformat(timespec="minutes"), "local_date": loc.date().isoformat(),
             "vpd": afternoon_vpd(vpd, day, lon), "vpd_after": afternoon_vpd(vpd, day + timedelta(days=1), lon),
+            # hours absent from the Open-Meteo file (or NaN) add nothing to the sums below, so a gap could make a
+            # wet pass look dry; count them so the output shows whether that happened
+            "rain24_missing": sum(x is None or np.isnan(x) for x in r24),
+            "rain48_missing": sum(x is None or np.isnan(x) for x in r48),
             "rain24": float(np.nansum([x for x in r24 if x is not None])),
             "rain48": float(np.nansum([x for x in r48 if x is not None]))}
 
@@ -203,6 +207,9 @@ def main():
         rows += f(vpd, rain)
     rows = [r for r in rows if r["vpd"] is not None]
     print(len(rows), "passes in season;", sum(r["rain24"] < RAIN_MM for r in rows), "dry (24 h)")
+    print("passes with missing rain hours: 24 h window", sum(r["rain24_missing"] > 0 for r in rows),
+          "(of them counted dry:", sum(r["rain24_missing"] > 0 and r["rain24"] < RAIN_MM for r in rows), ");",
+          "48 h window", sum(r["rain48_missing"] > 0 for r in rows))
     rng = np.random.default_rng(2026)
     main_res = analyse(rows, rng)
     ev, mo = main_res["evening"], main_res["morning"]

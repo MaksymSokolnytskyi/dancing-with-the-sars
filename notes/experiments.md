@@ -2291,6 +2291,11 @@ Reported:
 - *Two Bakota outliers.* D166 on 17 and 29 Sep: +1.18 dB, then −1.14 dB (forest HV −13.4 dB on 29 Sep, 2 dB below the
   other dates). Both passes were dry by the 24 h rule. Cause not checked; it may be the start of leaf fall or a
   processing change. They do not decide TW2: Wisconsin alone already has ρ > 0.
+- *Rain gaps (checked after the PR #7 review).* An hour missing from the Open-Meteo file adds nothing to the rain sum, so
+  a gap could make a wet pass count as dry. `tw_tests.py` now counts them: 0 of 53 passes have a missing hour in the 24 h
+  or the 48 h window, so no pass was counted dry because of a gap. Rerunning with the count gives the same results.
 - **Reading.** From orbit, at a 12-day repeat, NISAR does not see an afternoon's dryness in the dusk echo of a temperate
-  forest above ~0.15 dB/kPa. The stability is itself useful: summer dusk HV of a deciduous forest repeats within ~0.1 dB
-  in Wisconsin, a usable reference target for calibration checks.
+  forest above ~0.15 dB/kPa. The stability is itself useful, with a caveat: *after a per-track linear detrend*, summer
+  dusk HV of Wisconsin deciduous forest scatters by only ~0.1 dB (s.d., 9 passes on 2 evening tracks). This is not a
+  raw calibration figure: without the detrend the same class moves by 0.8 – 2.8 dB over the season (W2a). With that
+  detrend it could serve as a reference target for calibration checks.
