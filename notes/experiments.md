@@ -2148,3 +2148,47 @@ Seen before writing:
 branch-scattering HV by roughly 0.5 – 1 dB, while the per-date class median scatters by ~0.3 dB plus calibration drift.
 In a dense canopy the echo depends on the scattering-to-extinction ratio, which is less sensitive to ε than either
 term alone. A fail is a usable result: it bounds what NISAR can see of tree water from orbit.
+
+**Timing note.** The pre-registration text says "~15:50"; its commit (ebab20e) is stamped 15:43 Dnipro time and was pushed
+right after, before `experiments/tw_tests.py` existed. The first run of the script returned no passes at all (an hour key
+kept fractional microseconds, so no VPD value matched); the fix touched only that key, no rule or threshold.
+
+**Results TW (2026-11-15 ~16:10, `experiments/tw_tests.py`).** 53 passes in season, 38 dry (24 h rule): evening 21
+(Wisconsin D41 4, D113 5; Bakota D94 6, D166 6), morning 17 (Wisconsin A76 5; Bakota A100 5, A172 7). All release P05023.
+Class pixels per scene: Wisconsin deciduous 15 684 (80 m), Bakota flat forest ≥ 7 291 (20 m). Afternoon VPD ranged
+0.38 – 2.62 kPa; its detrended anomalies ±0.6 kPa.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| TW1 evening, pooled ρ (HV anomaly, VPD anomaly) | −0.11, permutation p = 0.34, n = 21 | ρ ≤ −0.3 and p ≤ 0.05 | **fail** |
+| TW2 evening ρ per site | Wisconsin +0.10 (n = 9), Bakota −0.08 (n = 12) | both < 0 | **fail** |
+| TW3 morning against evening | ρ_m = −0.31 (p = 0.13, n = 17) | judged only if TW1 passes | not judged |
+
+Reported:
+- Slope, evening pooled: +0.03 dB/kPa, bootstrap 90 % interval −0.25 … +0.43 dB/kPa.
+- Centring only (no trend): evening ρ +0.09, morning +0.15.
+- 48 h rain rule: evening n = 5 (too few), morning ρ −0.44 (p = 0.07).
+- HH: evening +0.12, morning −0.09.
+- Wisconsin conifer HV: evening +0.17 (n = 9).
+- Placebo (VPD of the afternoon after the pass): evening −0.04, morning −0.07.
+
+**Post-hoc (not pre-registered).**
+- *What the fail bounds.* Wisconsin evening alone: the deciduous HV anomaly scatters by only 0.11 dB (s.d.) while the
+  afternoon VPD anomaly spans ±0.5 kPa. Slope +0.03 dB/kPa, bootstrap 90 % −0.15 … +0.33. So a drier-than-usual
+  afternoon lowers the dusk HV of this forest by less than ~0.15 dB per kPa (one-sided 95 %). That is several times below
+  the 0.5 – 1 dB we expected from wood permittivity. Two readings, not tested:
+  1. The day-to-day change in wood water at dusk is smaller than a few %, because stems buffer it.
+  2. Most of the daily water swing is in the leaves and thin twigs, which the 24 cm wave does not see (W2).
+- *This is not the dawn-to-dusk swing itself.* Morning and evening tracks look from opposite sides at different angles,
+  so the test compares dusk with dusk only. A tower or a same-geometry morning/evening pair would be needed for the
+  full diurnal cycle.
+- *Bakota evening tracks sit close to the stated noise floor.* The flat-forest HV on D94 is about −9 dB with NEB_HV
+  −12 … −13 dB, so the floor is only 3 – 4 dB below the signal. On D166 the gap is ~6 dB, on the morning tracks ~11 dB
+  (NEB from section B). Noise not subtracted in GCOV can shift those medians. The HV anomaly does not follow the NEB
+  across dates (Spearman +0.15 evening, +0.01 morning).
+- *Two Bakota outliers.* D166 on 17 and 29 Sep: +1.18 dB, then −1.14 dB (forest HV −13.4 dB on 29 Sep, 2 dB below the
+  other dates). Both passes were dry by the 24 h rule. Cause not checked; it may be the start of leaf fall or a
+  processing change. They do not decide TW2: Wisconsin alone already has ρ > 0.
+- **Reading.** From orbit, at a 12-day repeat, NISAR does not see an afternoon's dryness in the dusk echo of a temperate
+  forest above ~0.15 dB/kPa. The stability is itself useful: summer dusk HV of a deciduous forest repeats within ~0.1 dB
+  in Wisconsin, a usable reference target for calibration checks.
