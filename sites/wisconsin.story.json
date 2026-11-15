@@ -73,7 +73,33 @@
    "modes": {
     "blocks": "hv_anom_db"
    },
-   "day": "2026-10-27"
+   "day": "2026-10-27",
+   "marks": [
+    {
+     "lon": -90.68,
+     "lat": 45.14,
+     "icon": "tree",
+     "r_m": 2500,
+     "dx": 40,
+     "dy": -30,
+     "text": {
+      "en": "the north woods",
+      "uk": "північні ліси"
+     }
+    },
+    {
+     "lon": -90.7658,
+     "lat": 45.1849,
+     "icon": "field",
+     "r_m": 1500,
+     "dx": 44,
+     "dy": 26,
+     "text": {
+      "en": "fields among the woods",
+      "uk": "поля серед лісів"
+     }
+    }
+   ]
   },
   {
    "section": "what",
@@ -130,6 +156,32 @@
      "label": {
       "en": "fields, against 0.8–2.8 dB for forest",
       "uk": "поля, проти 0.8–2.8 дБ у лісу"
+     }
+    }
+   ],
+   "marks": [
+    {
+     "lon": -90.68,
+     "lat": 45.14,
+     "icon": "tree",
+     "r_m": 2500,
+     "dx": 40,
+     "dy": -30,
+     "text": {
+      "en": "leaves fall: the echo barely moves",
+      "uk": "листя опадає: відлуння майже не міняється"
+     }
+    },
+    {
+     "lon": -90.7658,
+     "lat": 45.1849,
+     "icon": "field",
+     "r_m": 1500,
+     "dx": 44,
+     "dy": 26,
+     "text": {
+      "en": "fields change more",
+      "uk": "поля міняються більше"
      }
     }
    ]
@@ -195,7 +247,33 @@
    "modes": {
     "blocks": "class"
    },
-   "day": "2025-10-22"
+   "day": "2025-10-22",
+   "marks": [
+    {
+     "lon": -90.8384,
+     "lat": 45.2036,
+     "icon": "corn",
+     "r_m": 900,
+     "dx": -44,
+     "dy": -28,
+     "text": {
+      "en": "corn: 3–8 dB brighter than soy (HV)",
+      "uk": "кукурудза: на 3–8 дБ яскравіша за сою (HV)"
+     }
+    },
+    {
+     "lon": -90.7909,
+     "lat": 45.1681,
+     "icon": "soy",
+     "r_m": 900,
+     "dx": 44,
+     "dy": 26,
+     "text": {
+      "en": "soybean",
+      "uk": "соя"
+     }
+    }
+   ]
   },
   {
    "section": "what",
@@ -235,7 +313,24 @@
     "harvest": "radar_cut"
    },
    "day": "2026-08-16",
-   "play": true
+   "play": true,
+   "focus": [
+    "harvest"
+   ],
+   "marks": [
+    {
+     "lon": -90.8384,
+     "lat": 45.1763,
+     "icon": "sheaf",
+     "r_m": 3000,
+     "dx": 48,
+     "dy": -30,
+     "text": {
+      "en": "crop fields: green standing, ochre cut",
+      "uk": "поля: зелене стоїть, охра скошене"
+     }
+    }
+   ]
   },
   {
    "section": "what",
@@ -270,7 +365,21 @@
    "modes": {
     "blocks": "hh_anom_db"
    },
-   "day": "2025-11-06"
+   "day": "2025-11-06",
+   "marks": [
+    {
+     "lon": -90.8275,
+     "lat": 45.1688,
+     "icon": "drop",
+     "r_m": 900,
+     "dx": 44,
+     "dy": -28,
+     "text": {
+      "en": "bare field after rain: brighter (HH)",
+      "uk": "голе поле після дощу: яскравіше (HH)"
+     }
+    }
+   ]
   },
   {
    "section": "what",
@@ -309,7 +418,21 @@
    "modes": {
     "blocks": "hh_anom_db"
    },
-   "day": "2026-01-17"
+   "day": "2026-01-17",
+   "marks": [
+    {
+     "lon": -90.68,
+     "lat": 45.14,
+     "icon": "frost",
+     "r_m": 2500,
+     "dx": 40,
+     "dy": -30,
+     "text": {
+      "en": "frozen woods: about −2 dB (HH)",
+      "uk": "замерзлий ліс: близько −2 дБ (HH)"
+     }
+    }
+   ]
   },
   {
    "section": "why",
@@ -382,7 +505,21 @@
    "modes": {
     "blocks": "class"
    },
-   "day": "2026-10-27"
+   "day": "2026-10-27",
+   "marks": [
+    {
+     "lon": -90.7037,
+     "lat": 45.2096,
+     "icon": "lake",
+     "r_m": 1200,
+     "dx": 44,
+     "dy": -26,
+     "text": {
+      "en": "lake ice: no clear sign (test failed)",
+      "uk": "лід на озері: чіткого сигналу немає (тест не пройшов)"
+     }
+    }
+   ]
   },
   {
    "section": "next",

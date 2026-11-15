@@ -62,7 +62,10 @@
    "modes": {
     "fields": "rel_coh"
    },
-   "day": "start"
+   "day": "start",
+   "focus": [
+    "canals"
+   ]
   },
   {
    "section": "what",

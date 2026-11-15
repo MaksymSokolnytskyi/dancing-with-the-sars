@@ -24,7 +24,8 @@
   "rivers": "way[\"waterway\"=\"river\"]({b});out geom;",
   "places": "node[\"place\"~\"^(town|village)$\"]({b});out;",
   "roads": "way[\"highway\"~\"^(motorway|trunk|primary|secondary|tertiary)$\"]({b});out tags geom;",
-  "rail": "way[\"railway\"=\"rail\"]({b});out geom;"
+  "rail": "way[\"railway\"=\"rail\"]({b});out geom;",
+  "streets": "(way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](45.154,-90.827,45.178,-90.795);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](45.053,-90.649,45.069,-90.629);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](45.169,-90.998,45.185,-90.978);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](45.067,-90.736,45.083,-90.716););out skel geom;"
  },
  "context": [
   {
@@ -102,6 +103,19 @@
    "attribution": "© OpenStreetMap contributors",
    "visible": true,
    "z": 1.25
+  },
+  {
+   "id": "streets",
+   "kind": "lines",
+   "src": "data/raw/osm/wisconsin/streets.json",
+   "style": "street",
+   "label": {
+    "en": "Town streets",
+    "uk": "Вулиці міст"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": true,
+   "z": 1.15
   }
  ],
  "notes": [

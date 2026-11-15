@@ -76,7 +76,10 @@
     "places"
    ],
    "day": "end",
-   "legend": true
+   "legend": true,
+   "focus": [
+    "border"
+   ]
   },
   {
    "section": "what",
@@ -163,6 +166,9 @@
      "dx": -60,
      "dy": 46
     }
+   ],
+   "focus": [
+    "bowls_reliable"
    ]
   },
   {
@@ -237,6 +243,9 @@
      "dx": -40,
      "dy": -40
     }
+   ],
+   "focus": [
+    "heaps"
    ]
   },
   {

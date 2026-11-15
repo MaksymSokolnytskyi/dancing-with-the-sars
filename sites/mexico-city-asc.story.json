@@ -99,7 +99,8 @@
     "velocity",
     "contours",
     "peaks",
-    "trees"
+    "trees",
+    "places"
    ],
    "day": "start",
    "play": true,
@@ -179,6 +180,9 @@
      "dx": -36,
      "dy": -22
     }
+   ],
+   "focus": [
+    "lake"
    ]
   },
   {
@@ -211,7 +215,8 @@
     "surface"
    ],
    "cut": "cut",
-   "day": "end"
+   "day": "end",
+   "appendix": true
   },
   {
    "section": "sure",
@@ -258,7 +263,8 @@
      "dx": 40,
      "dy": -34
     }
-   ]
+   ],
+   "appendix": true
   },
   {
    "section": "next",
@@ -309,6 +315,9 @@
      "dx": -46,
      "dy": 44
     }
+   ],
+   "focus": [
+    "canals"
    ]
   }
  ]
