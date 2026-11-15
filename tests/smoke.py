@@ -12,6 +12,7 @@ Checks:
 from __future__ import annotations
 
 import importlib
+import importlib.util
 import json
 import sys
 import tempfile
@@ -40,9 +41,13 @@ def check(name):
 
 @check("engine modules import")
 def _imports():
-    for m in ("cli", "dem", "engine", "export", "field", "gcov", "gridding", "nisar", "okada", "synthetic", "trace",
-              "trust"):
+    for m in ("cli", "dem", "engine", "export", "field", "gcov", "gridding", "nisar", "synthetic", "trace", "trust"):
         importlib.import_module(f"hachure.{m}")
+    # okada is PyTorch only (used by scripts/sbi_*); torch comes with `uv sync --group ml`, so check it only when present
+    if importlib.util.find_spec("torch") is not None:
+        importlib.import_module("hachure.okada")
+    else:
+        print("  (torch not installed - hachure.okada not checked; it needs `uv sync --group ml`)")
 
 
 @check("plate configs and lock files")
