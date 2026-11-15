@@ -44,7 +44,9 @@
   "rivers": "way[\"waterway\"=\"river\"]({b});out geom;",
   "canals": "way[\"waterway\"=\"canal\"][\"name\"~\"Aqueduct|Canal\"]({b});out geom;",
   "water": "(way[\"natural\"=\"water\"][\"water\"~\"^(reservoir|lake)$\"]({b});relation[\"natural\"=\"water\"][\"water\"~\"^(reservoir|lake)$\"]({b}););out geom;",
-  "places": "node[\"place\"~\"^(city|town)$\"]({b});out;"
+  "places": "node[\"place\"~\"^(city|town)$\"]({b});out;",
+  "roads": "way[\"highway\"~\"^(motorway|trunk|primary|secondary)$\"]({b});out tags geom;",
+  "rail": "way[\"railway\"=\"rail\"]({b});out geom;"
  },
  "dem_res": 30,
  "context": [
@@ -111,7 +113,57 @@
    },
    "z": 3.6,
    "attribution": "© OpenStreetMap contributors"
+  },
+  {
+   "id": "roads",
+   "kind": "lines",
+   "src": "data/raw/osm/central-valley-asc/roads.json",
+   "style": "road",
+   "min_len_m": 500,
+   "label": {
+    "en": "Main roads",
+    "uk": "Головні дороги"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": true,
+   "z": 1.25
+  },
+  {
+   "id": "rail",
+   "kind": "lines",
+   "src": "data/raw/osm/central-valley-asc/rail.json",
+   "style": "rail",
+   "min_len_m": 500,
+   "label": {
+    "en": "Railways",
+    "uk": "Залізниці"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": true,
+   "z": 1.25
   }
  ],
- "story": "sites/central-valley-asc.story.json"
+ "story": "sites/central-valley-asc.story.json",
+ "landcover": {
+  "src": "data/raw/context/central-valley-asc_worldcover_10m.tif",
+  "attribution": "© ESA WorldCover 2021 (CC-BY 4.0)",
+  "trees": {
+   "class": 10,
+   "cell_m": 700,
+   "min_share": 0.6
+  },
+  "built": {
+   "class": 50,
+   "block_m": 60,
+   "min_share": 0.5,
+   "spacing_m": 220,
+   "min_run_m": 120
+  }
+ },
+ "terrain": {
+  "interval_m": 60,
+  "spacing_px": 2.0,
+  "sigma_dir_m": 200,
+  "sigma_tone_m": 100
+ }
 }

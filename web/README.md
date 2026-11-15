@@ -82,7 +82,11 @@ tints, one band per `tint.step` cm (10; a manifest may set `tint_step`, Ostrava-
 for uplift (Reykjanes swaps them to match its strokes), darker = further. Contours are then drawn only at band edges, so
 lines and tints agree. While motion or cells are on the map, the terrain, context lines and town blocks are drawn at
 theme `quiet` strength (0.65 in scroll) and every label is drawn last, over the strokes. Build numbers under the
-legend show only with `?debug=1`. The score
+legend show only with `?debug=1`. A manifest's `base` list names the landscape layers (relief, woods, built-up land, roads,
+places) that stay on through every story page (a page can still drop one with `hide`); `scripts/add_landscape.py <plate>`
+draws them for plates built by their own scripts (Wisconsin, Central Valley). The locator globe in the corner
+(`renderLocator`, Natural Earth land in `data/world-land.json`) marks where on Earth the plate is. Page turns ease the
+camera in a straight line instead of a zoom-out flight. The score
 strip (layer kind `rhythm`, "the music") is left out of the atlas; `?score=1` brings it back.
 
 A plate is played as pages. Write `sites/<id>.story.json`, point the site at it (`"story": "sites/<id>.story.json"`), then

@@ -225,6 +225,11 @@ def patch_app(app, with_math):
     if with_math:
         app = must(app, '`<div class="st-foot"><a href="#" id="st-explore">${T("story_explore")}</a></div>`',
                    '`<div class="st-foot"><a href="#" class="mathbtn">${T("math_open")}</a> · <a href="#" id="st-explore">${T("story_explore")}</a></div>`')
+    # the packed page carries the whole atlas index (for the onward link) but opens on its own plate, not on the cover
+    app = must(app, 'if (idx.atlas && (!q.get("scene") || q.get("cover") === "1")) showCover(true);',
+               'if (idx.atlas && q.get("cover") === "1") showCover(true);')
+    app = must(app, 'const scene = q.get("scene") || idx.scenes.find((s) => !s.href).id,',
+               f'const scene = q.get("scene") || "{SID}",')
     app = must(app, "if (!state.storyOn || /INPUT|SELECT|TEXTAREA/.test(",
                "if (document.body.classList.contains(\"math-open\") || !state.storyOn || /INPUT|SELECT|TEXTAREA/.test(")
     return app
@@ -837,7 +842,7 @@ def main():
     pages = story(V, dates, a.math)
     th = theme_for(theme)
 
-    packs = {"data/scenes.json": {"scenes": [{"id": SID, "title": L("Рейк'янес", "Reykjanes"), "subtitle": man["subtitle"]}]},
+    packs = {"data/scenes.json": json.loads((ROOT / "web" / "data" / "scenes.json").read_text(encoding="utf-8")),   # whole index: onward link
              "themes/scroll.json": th, f"data/{SID}/manifest.json": man, f"data/{SID}/story.json": pages}
     for f, obj in files.items():
         packs[f"data/{SID}/{f}"] = obj
