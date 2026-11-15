@@ -1,0 +1,338 @@
+<!-- "The math behind the plate": an overlay window injected by build_reykjanes_scroll.py. English version of docs/uk/reykjanes-math.html.
+     Formulas are TeX between \[ \] (display) and \( \) (inline), typeset by KaTeX; if KaTeX does not load, the raw TeX stays readable.
+     Numbers: output/reykjanes/results.html -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"
+      integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"
+        integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+        integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"></script>
+<style>
+#math { position: fixed; inset: 0; z-index: 20; background: color-mix(in srgb, var(--ink) 35%, transparent); display: flex;
+        justify-content: center; align-items: stretch; padding: 18px; box-sizing: border-box; }
+#math.hidden { display: none; }
+#math .mw { position: relative; width: min(1020px, 100%); overflow: auto; background: var(--paper); color: var(--ink);
+            border: 3px double var(--panel-border); padding: 22px 30px 40px; box-sizing: border-box; font-size: 15px; line-height: 1.5;
+            font-family: var(--font); box-shadow: 0 10px 40px rgba(40,25,10,.35); }
+#math .close { position: sticky; top: 0; float: right; font-size: 18px; padding: 2px 10px; background: var(--paper); z-index: 2; }
+#math h1 { font-weight: normal; font-style: italic; font-size: 32px; margin: 0 0 2px; }
+#math h2 { font-weight: normal; font-style: italic; font-size: 24px; margin: 30px 0 8px; padding-top: 10px;
+           border-top: 1px solid color-mix(in srgb, var(--muted) 45%, transparent); }
+#math h3 { font-weight: normal; font-style: italic; font-size: 18px; margin: 18px 0 6px; }
+#math .kicker { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+#math .toc { columns: 2; font-size: 13.5px; margin: 12px 0 4px; padding-left: 20px; }
+#math .toc a { color: var(--ink); }
+#math .eq { font-family: "Cambria Math", "STIX Two Math", Georgia, serif; font-size: 16.5px; text-align: center; margin: 10px 0;
+            padding: 8px 10px; background: color-mix(in srgb, var(--ink) 5%, transparent); border-left: 3px solid var(--muted); overflow-x: auto; }
+#math .eq small { display: block; font-family: var(--font); font-size: 12px; color: var(--muted); margin-top: 3px; }
+/* KaTeX: the ink of the surrounding text (var(--ink) in the window), a little smaller than KaTeX's default 1.21em */
+#math .katex { color: inherit; font-size: 1.08em; }
+#math .eq .katex { font-size: 1.1em; }
+#math .eq .katex-display { margin: .15em 0; }
+#math .eq .katex-display > .katex { max-width: 100%; }
+#math table { border-collapse: collapse; width: 100%; margin: 8px 0 6px; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+#math th, #math td { padding: 4px 7px; border-bottom: 1px solid color-mix(in srgb, var(--muted) 30%, transparent); text-align: left; vertical-align: top; }
+#math th { font-weight: normal; font-style: italic; color: var(--muted); }
+#math td.n { text-align: right; white-space: nowrap; }
+#math tr.paper td { background: color-mix(in srgb, #8c2e1e 9%, transparent); }
+#math tr.ours td { background: color-mix(in srgb, #34546e 8%, transparent); }
+#math .note { font-size: 13px; color: var(--muted); }
+#math .mbox { border: 1px solid var(--panel-border); padding: 10px 14px; margin: 12px 0; background: color-mix(in srgb, var(--paper) 70%, white); }
+#math .mbox.warn { border-style: dashed; }
+#math .verdict { display: inline-block; padding: 0 6px; border: 1px solid var(--ink); font-size: 12px; white-space: nowrap; }
+#math .verdict.no { border-style: dashed; color: #8c2e1e; border-color: #8c2e1e; }
+#math .verdict.part { border-style: dotted; }
+#math .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+#math .grid2 > div { min-width: 0; }
+#math svg text { font-family: var(--font); }
+#math code { font-size: 13px; }
+@media (max-width: 760px) { #math { padding: 0; } #math .mw { padding: 14px 16px 30px; } #math .grid2 { grid-template-columns: 1fr; }
+  #math .toc { columns: 1; } #math table { font-size: 12px; } }
+.mathbtn { cursor: pointer; }
+#panel .mathbtn { display: block; margin-top: 8px; }
+.bigbtn { font-size: 15px !important; padding: 6px 14px !important; margin: 4px 0; }
+</style>
+<div id="math" class="hidden" role="dialog" aria-modal="true" aria-labelledby="math-h">
+ <div class="mw" tabindex="-1">
+  <button class="close" title="Esc">✕</button>
+  <div class="kicker">Reykjanes · the math behind the plate · written for the team</div>
+  <h1 id="math-h">The math behind “The ground breathes”</h1>
+  <p class="note">All numbers come from <code>output/reykjanes/results.html</code> and <code>output/reykjanes/ml/*.json</code>. Intervals are median [16–84 %] unless stated otherwise. Times: one laptop, 8 threads.</p>
+  <ol class="toc">
+   <li><a href="#m-rate">Uplift rate and the GPS check</a></li>
+   <li><a href="#m-fwd">Forward models: Mogi, ellipsoid, Okada, FEM</a></li>
+   <li><a href="#m-noise">Noise: covariance, whitening, PCA</a></li>
+   <li><a href="#m-inf">Inference: MCMC vs NPE</a></li>
+   <li><a href="#m-cal">How we check NPE: coverage, SBC, PPC</a></li>
+   <li><a href="#m-src">The Svartsengi source: tables</a></li>
+   <li><a href="#m-v3"><b>NPE v3 vs the paper by Sigmundsson et al. 2024</b></a></li>
+   <li><a href="#m-hyp">Hypotheses H1–H8 and verdicts</a></li>
+   <li><a href="#m-blind">Blind mode v4 and “data leakage”</a></li>
+   <li><a href="#m-rt">A dike in 0.35 s: amortization</a></li>
+   <li><a href="#m-lim">Limitations and what to do next</a></li>
+  </ol>
+
+  <h2 id="m-rate">1. Uplift rate and an independent GPS check</h2>
+  <p>Two NISAR tracks (159A ascending, 082D descending) give the cumulative line-of-sight (LOS) displacement at each date. The zero is station NYLA. From the two LOS values in each cell (240 m) we solve a 2×2 system for the vertical \(u\) and the east \(e\). Both tracks see the north component with the same sign, so we subtract it using a source model fitted <i>only</i> to NISAR.</p>
+  <div class="eq">\[ d_A = e\,\hat e_A + u\cos\theta_A,\qquad d_D = e\,\hat e_D + u\cos\theta_D \;\;\Rightarrow\;\; u = \frac{\hat e_A\, d_D - \hat e_D\, d_A}{\hat e_A\cos\theta_D - \hat e_D\cos\theta_A} \]
+   <small>\(\hat e\) is the east component of the LOS unit vector, \(\theta\) the incidence angle.</small></div>
+  <p>The rate in a cell is the least-squares slope of the series \(u(t)\). We inflate its error for the lag-one autocorrelation \(\rho\) of the residuals (neighbouring dates share an acquisition and the atmosphere):</p>
+  <div class="eq">\[ \sigma_v = \sqrt{\frac{s^2}{\sum_i (t_i - \bar t)^2}}\cdot\sqrt{\frac{1+\rho}{1-\rho}},\qquad \rho \in [0,\ 0.95] \]
+   <small>\(s^2\) is the residual variance. Reliable stroke: \(\mathrm{SNR} = |v|/\sigma \ge 3\); weak: 1–3; below 1 we do not draw.</small></div>
+  <p><b>The headline number</b> is not the maximum. We take the 3×3-cell neighbourhood (~0.7 km) where \(\bar v - 2\bar\sigma\) is largest: +23.5 ± 1.0 cm/yr, at least +21.6. We do not divide σ by \(\sqrt{9}\), because the errors of neighbouring cells are correlated.</p>
+  <table><tr><th>station</th><th>from SENG, km</th><th>NISAR, cm/yr</th><th>GPS, cm/yr</th><th>difference</th><th>z</th><th>verdict</th></tr>
+   <tr><td>SENG</td><td class="n">0</td><td class="n">20.1 ± 1.7</td><td class="n">21.0 ± 1.2</td><td class="n">−0.9</td><td class="n">−0.4</td><td><span class="verdict">match</span></td></tr>
+   <tr><td>AUSV</td><td class="n">4.4</td><td class="n">3.5 ± 1.1</td><td class="n">7.6 ± 1.1</td><td class="n">−4.2</td><td class="n">−2.7</td><td><span class="verdict no">no</span></td></tr>
+   <tr><td>GEVK</td><td class="n">5.5</td><td class="n">−0.3 ± 1.4</td><td class="n">7.0 ± 1.2</td><td class="n">−7.3</td><td class="n">−4.0</td><td><span class="verdict no">no</span></td></tr>
+   <tr><td>VOGC</td><td class="n">11.9</td><td class="n">4.3 ± 1.7</td><td class="n">−1.8 ± 1.4</td><td class="n">+6.1</td><td class="n">+2.8</td><td><span class="verdict no">no</span></td></tr></table>
+  <div id="m-gnss"></div>
+  <div class="eq">\[ z = \frac{v_\text{NISAR} - v_\text{GPS}}{\sqrt{\sigma_\text{NISAR}^2 + \sigma_\text{GPS}^2}} \]<small>\(|z| &lt; 2\): agreement within the errors. None of the stations was used for the reference or for the corrections.</small></div>
+  <p class="note">Takeaway for the story: <b>1 of 4 stations agrees</b>: SENG at the centre of the dome (225 mm vs 229 mm over the year, rms 19 mm). The other three disagree by 4–7 cm/yr, and the sign of the disagreement differs. AUSV and GEVK are not “far”: they are 4–5 km from SENG, near Grindavík, where GPS still shows 7–8 cm/yr and the radar 0–4. So NISAR probably underestimates the uplift on the southern flank of the dome. We do not know why (atmosphere over long distances, the NYLA reference point, the track plane, local motion of the stations).</p>
+  <div class="mbox warn"><b>The cell σ is too small.</b> The error in a cell (1–1.7 cm/yr) only counts the scatter of the series around the line, corrected for autocorrelation. It does not see systematics (atmosphere over distance, the reference, the plane). That is why the 4–7 cm/yr disagreements are 3–4σ “on paper”. A more honest error estimate a few kilometres from the centre is of the order of 4–7 cm/yr, until we find the cause.</div>
+
+  <h2 id="m-fwd">2. Forward models</h2>
+  <div class="grid2"><div>
+   <h3>Mogi point source</h3>
+   <div class="eq">\[ \begin{aligned} u_z(r) &amp;= \frac{(1-\nu)\,\Delta V}{\pi}\,\frac{d}{(r^2+d^2)^{3/2}} \\ u_r(r) &amp;= \frac{(1-\nu)\,\Delta V}{\pi}\,\frac{r}{(r^2+d^2)^{3/2}} \end{aligned} \]
+    <small>Homogeneous elastic half-space, \(\nu = 0.25\). Parameters: east, north, depth \(d\), \(\Delta V\).</small></div>
+   <p>The width of the dome sets the depth: the half-width of the \(u_z\) profile is \(\approx 0.77\,d\). The amplitude sets \(\Delta V/d^2\). So depth and volume are correlated: a deeper source needs a larger \(\Delta V\).</p>
+  </div><div>
+   <h3>Elongated reservoir (CDM ellipsoid)</h3>
+   <p>The same position and depth, plus the length \(2a\), the axis (strike) and the “sill” fraction \(w\) (how flattened the source is). Reference MCMC: \(2a\) = 6.1 [5.7…6.4] km, axis 58° [54…63], \(w\) = 0.52.</p>
+   <h3>Okada dike</h3>
+   <p>A rectangular crack in a half-space: centre, strike, length, top, height, opening. In v3 the opening varies (5 nodes, 8 segments); in v4 it is a 2-D Gaussian patch of up to 20 m, plus dip, strike-slip, a graben and a bend.</p>
+  </div></div>
+  <h3>Layered crust (FEM)</h3>
+  <p>An axisymmetric finite-element model (P2 elements). The \(V_p\) profile down to 2.5 km follows Růžek et al. 2023; deeper, a typical Icelandic crust (<b>an assumption</b>). Density after Gardner, \(\rho \approx 0.31\,V_p^{0.25}\). ASTER GDEM v3 topography is taken into account approximately (variable depth).</p>
+  <div class="mbox"><b>The trick that makes NPE on the FEM cheap.</b> One FEM run sets the <i>shape</i> of the field for its depth. The source position only shifts this shape, and the volume scales it linearly. So one run gives ~60 exact training examples: 900 runs (33 min) make the training set. MCMC directly on the FEM would need ~256 000 runs (~15 days), so for MCMC we had to build an emulator (a table of Green’s functions from 91 runs).</div>
+
+  <h2 id="m-noise">3. Noise: covariance, whitening, PCA</h2>
+  <p>Atmospheric “screens” are correlated in space, so the noise is not white. The covariance model between cells \(i, j\) at distance \(r_{ij}\):</p>
+  <div class="eq">\[ C_{ij} = s\,\exp\!\left(-\,r_{ij}/\lambda\right) + w\,\delta_{ij} \]<small>\(s\) is the sill (cm²), \(\lambda\) the correlation length (km), \(w\) the white noise. For NISAR estimated from the screens of ~20 dates; for Sentinel-1 2023, from a quiet pair and the residuals.</small></div>
+  <p>Whitening: we factor \(C = LL^\top\) (Cholesky) and move to \(\tilde x = L^{-1}x\). In whitened data the noise becomes \(\mathcal N(0, I)\), and \(\chi^2 = \lVert \tilde x - \tilde f(\theta) \rVert^2\) is the same Gaussian likelihood as in MCMC. Then we compress the data to principal components: \(z = U_k^\top \tilde x\).</p>
+  <div class="mbox warn"><b>Why this matters for NPE.</b> Without whitening the network has to learn the noise structure on its own, and with 80 thousand simulations it does this badly: coverage with “GP screens” is only 27–52 % instead of 68 %. After whitening and PCA the NPE flow matched MCMC for Mogi. The number of components matters: for the reservoir, 48 components lost information about depth (the 48th was still three times stronger than the noise). 192 components reduced the depth bias from 3.7σ to 1.7σ; for the 2023 dike we took 256 (99.2 % of the variance).</div>
+
+  <h2 id="m-inf">4. Inference: MCMC vs NPE</h2>
+  <div class="eq">\[ p(\theta \mid x) \propto p(x \mid \theta)\,p(\theta),\qquad \log p(x \mid \theta) = -\tfrac12\,\bigl(x - f(\theta)\bigr)^{\top} C^{-1} \bigl(x - f(\theta)\bigr) + \text{const} \]</div>
+  <div class="grid2"><div>
+   <h3>MCMC</h3>
+   <p>Markov chains draw \(\theta\) in proportion to the posterior. Each time they rerun the forward model \(f(\theta)\) hundreds of thousands of times. We check convergence with the Gelman–Rubin diagnostic \(\hat R\) (≈ 1.0 is good; 1.41 in the “NISAR only” reservoir with Gaussian noise is bad). It is the reference, but expensive: 38 s for Mogi, 12–29 min for the ellipsoid, ~49 s per dike, ~14 h for 1000 dikes.</p>
+  </div><div>
+   <h3>NPE (neural posterior estimation)</h3>
+   <p>We generate pairs \(\bigl(\theta_i \sim p(\theta),\; x_i \sim \text{simulator}(\theta_i) + \text{noise}\bigr)\) and train a conditional density \(q_\phi(\theta \mid z)\), a normalizing flow:</p>
+   <div class="eq">\[ \phi^* = \arg\min_\phi \; -\frac{1}{N} \sum_i \log q_\phi(\theta_i \mid z_i) \]</div>
+   <p>This loss reaches its minimum at the true \(p(\theta \mid x)\) if the network is flexible enough and there are enough simulations. After training, the answer is one pass through the network (0.1–8 s). This is <b>amortization</b>: we pay once and use it thousands of times.</p>
+  </div></div>
+  <p><b>What we added to make NPE competitive:</b> (1) whitening with the same \(C\) as in MCMC, and PCA; (2) fresh noise at every training epoch; (3) a second round of simulations only around the first-round answer (sequential NPE); (4) in v3, <b>hierarchical noise</b>: each simulation has its own sill \(\sim \log\mathcal U(0.1,\ 40)\) cm² and \(\lambda \sim \mathcal U(3,\ 16)\) km, so the network estimates the noise level from the data itself; (5) a “no dike” class (25 % of the simulations), which gives P(no dike).</p>
+
+  <h2 id="m-cal">5. How we check NPE</h2>
+  <table><tr><th>test</th><th>what we do</th><th>what “good” means</th></tr>
+   <tr><td>Coverage</td><td>On simulations not seen in training, we count how often the 68 % interval contains the truth</td><td>≈ 68 % (and ≈ 95 % for the 95 % interval)</td></tr>
+   <tr><td>SBC</td><td>For each simulation, the rank of the truth among \(L\) samples of \(q(\theta \mid x)\). If \(q\) is correct, the ranks are uniform on \(\{0, \dots, L\}\). We check this with a \(\chi^2\) test for uniformity</td><td>\(p &gt; 0.01\) for every parameter</td></tr>
+   <tr><td>PPC</td><td>Samples \(\theta \sim q\) → forward model → whitened residuals, \(\chi^2\)</td><td>\(\chi^2\) of the NPE samples ≈ \(\chi^2\) of the MCMC samples</td></tr>
+   <tr><td>Null pairs</td><td>Pairs without a dike (the quiet of October 2023, the inflation of July 2024)</td><td>P(no dike) high, volume small</td></tr>
+   <tr><td>Shrinkage</td><td>\(1 - \mathrm{Var}_\text{post}/\mathrm{Var}_\text{prior}\) on synthetic dikes</td><td>1: the data determine the parameter; 0: they added nothing</td></tr></table>
+  <p class="note">Coverage and SBC check whether NPE agrees with <i>its own model</i>. Whether the model itself is right is checked by PPC (and by the comparison with the paper).</p>
+
+  <h2 id="m-src">6. The Svartsengi source (NISAR 2025–2026)</h2>
+  <table><tr><th>model and method</th><th>depth, km</th><th>volume, million m³/yr</th><th>68 % coverage</th><th>new dataset</th></tr>
+   <tr class="ours"><td>Mogi · MCMC, real screens (reference)</td><td class="n">4.1 [4.0…4.3]</td><td class="n">18 [17…19]</td><td class="n">\(\hat R\) 1.03</td><td class="n">38 s</td></tr>
+   <tr><td>Mogi · NPE flow (whitened, 2 rounds)</td><td class="n">4.1 [4.0…4.3]</td><td class="n">17 [16…19]</td><td class="n">62–70 %</td><td class="n">8 s</td></tr>
+   <tr><td>Mogi · NPE, GP screens</td><td class="n">4.1 [3.9…4.2]</td><td class="n">16 [15…17]</td><td class="n">27–52 % ✗</td><td class="n">0.1 s</td></tr>
+   <tr class="ours"><td>Ellipsoid · MCMC (reference)</td><td class="n">3.6 [3.4…3.8]</td><td class="n">21 [20…23]</td><td class="n">\(\hat R\) 1.06</td><td class="n">12 min</td></tr>
+   <tr><td>Ellipsoid · NPE flow</td><td class="n">3.2 [3.0…3.4]</td><td class="n">21 [20…22]</td><td class="n">63–72 %</td><td class="n">11 s</td></tr>
+   <tr class="ours"><td>Layers + topography · MCMC on the FEM emulator</td><td class="n">4.7 [4.5…4.8]</td><td class="n">15 [14…16]</td><td class="n">—</td><td class="n">84 s</td></tr>
+   <tr><td>Layers + topography · NPE on direct FEM runs</td><td class="n">4.8 [4.6…5.0]</td><td class="n">16 [14…17]</td><td class="n">61–71 %</td><td class="n">2.7 s</td></tr></table>
+  <p>The crustal layers make the source ~0.5 km deeper and the volume ~16 % smaller than the homogeneous Mogi. Topography changes almost nothing (−0.05 km). For the reservoir, the NPE flow still gives a depth ~0.4 km shallower than MCMC (−1.7σ), and an axis ~6° closer to north. Length and volume agree.</p>
+
+  <h2 id="m-v3">7. NPE v3 vs the paper by Sigmundsson et al. 2024 (Science 383:1228)</h2>
+  <p>This is the main check “on a real event”. NISAR has not seen a dike yet, so we take an event the paper has already described: the dike of 10 November 2023 under Grindavík. We reproduce it <i>with other, poorer data</i> and see whether the method gives the same numbers.</p>
+  <h3>7.1. What differs in the setup</h3>
+  <table><tr><th></th><th>paper (reference)</th><th>us, NPE v3</th></tr>
+   <tr><td>InSAR</td><td>4 satellites, interferograms + <b>pixel offsets</b> (near field)</td><td>2 Sentinel-1 pairs (A016: 31 Oct → 12 Nov; D155: 10 Nov 07:59 UTC → 22 Nov), 1 km cells (436 + 605), graben ±1 km masked</td></tr>
+   <tr><td>GNSS</td><td>~20 IMO stations</td><td>4 NGL stations: SENG, NYLA, VOGS, REYK (a 0.97 m hardware jump at VOGS excluded)</td></tr>
+   <tr><td>Dike</td><td>distributed opening, homogeneous half-space</td><td>variable opening (5 nodes, 8 segments), Okada</td></tr>
+   <tr><td>Svartsengi</td><td>Mogi, homogeneous half-space</td><td>point source in a <b>layered crust with topography</b> (FEM Green’s functions), a separate \(\Delta V\) for each track</td></tr>
+   <tr><td>Noise</td><td>—</td><td>atmosphere from a quiet pair + model error; noise level unknown (hierarchical)</td></tr>
+   <tr><td>Method</td><td>inversion, days of work</td><td>NPE: 2 rounds × 60 thousand simulations, 256 PCA, 25 % “no dike”; 7 s per answer</td></tr></table>
+
+  <h3>7.2. The numbers</h3>
+  <table><tr><th>method</th><th>dike volume, million m³</th><th>Svartsengi depth, km</th><th>Svartsengi \(\Delta V\) (A016), million m³</th><th>time</th></tr>
+   <tr class="ours"><td><b>NPE v3</b> (noise unknown, InSAR + GNSS)</td><td class="n"><b>150 [131–170]</b></td><td class="n">6 [6–7]</td><td class="n"><b>−77 [−92…−63]</b></td><td class="n">7 s</td></tr>
+   <tr><td>NPE v2 (fixed noise, InSAR + GNSS)</td><td class="n">133 [113–157]</td><td class="n">6 [5–6]</td><td class="n">−56 [−72…−42]</td><td class="n">8 s</td></tr>
+   <tr><td>MCMC, same model, InSAR + GNSS</td><td class="n">153 [145–160]</td><td class="n">5 [5–6]</td><td class="n">−65 [−71…−60]</td><td class="n">7 min</td></tr>
+   <tr><td>MCMC, same model, InSAR only</td><td class="n">105 [91–118]</td><td class="n">5 [5–5]</td><td class="n">−16 [−21…−12]</td><td class="n">6 min</td></tr>
+   <tr><td>distributed opening, InSAR + GNSS, FEM</td><td class="n">169</td><td class="n">6.5</td><td class="n">−93</td><td class="n">0.2 s</td></tr>
+   <tr><td>distributed opening, InSAR + GNSS, Mogi</td><td class="n">162</td><td class="n">5.5</td><td class="n">−94</td><td class="n">0.2 s</td></tr>
+   <tr><td>distributed opening, InSAR only, FEM</td><td class="n">100</td><td class="n">5.0 (weak)</td><td class="n">−14</td><td class="n">0.1 s</td></tr>
+   <tr><td>NPE v4, blind mode (more complex kinematics)</td><td class="n">174 [115–241]</td><td class="n">6.1 [4.7–7.1]</td><td class="n">−82 [−119…−49]</td><td class="n">14 s</td></tr>
+   <tr class="paper"><td><b>Paper</b> (~20 GNSS, 4 satellites, pixel offsets)</td><td class="n"><b>130–139</b></td><td class="n">4.0–4.2 (Mogi)</td><td class="n"><b>−76…−82</b></td><td class="n">days</td></tr></table>
+  <div id="m-forest"></div>
+  <p class="note">The band is the paper’s range. Dot: median; bar: [16–84 %].</p>
+
+  <h3>7.3. Number by number</h3>
+  <div class="mbox"><b>Svartsengi \(\Delta V\): −77 [−92…−63] vs −76…−82: agreement.</b> This is the strongest result. v2 gave −56: the fixed noise, estimated on the huge 2023 dike, was too high, and the network “distrusted” the signal from the chamber. The hierarchical noise of v3 fixed this. Without GNSS, \(\Delta V\) is barely determined (−14…−16): InSAR alone cannot tell how much of the signal comes from the chamber and how much from the dike. This is exactly where SENG (−85 cm east, −27 cm vertical) and VOGS help.</div>
+  <div class="mbox"><b>Dike volume: 150 [131–170] vs 130–139: agreement at the edge.</b> The intervals overlap (131–139), but our median is ~8–15 % higher. The reason is a <i>trade-off</i> between chamber depth and dike volume. With GNSS the correlation \(\operatorname{corr}(V_\text{dike},\ \text{chamber depth})\) grows from +0.06 to +0.67: a deeper chamber gives a wider subsidence bowl, and to explain the same displacements near the dike the model needs a larger volume. Check: if we fix the chamber depth at 4.0–4.2 km, as in the paper, our Mogi gives <b>~138 million m³</b>, i.e. the same range.</div>
+  <div class="mbox"><b>Chamber depth: ~6 km vs 4.0–4.2 km: a disagreement we explain.</b> Two reasons. (1) The layered crust systematically pushes the source down by ~1 km (H8: our Mogi 5.5 km, FEM 6.5 km; on NISAR the same, 4.1 → 4.7 km). The paper uses Mogi, so the comparison should be with our Mogi (5.5). (2) ~1.3 km remains. We have only 4 GNSS stations, and SENG stands 2 km from the dike, where the simple model is weakest. The depth is determined mostly by a single station.</div>
+  <div class="mbox"><b>Maximum opening: 2.4–4.3 m vs ~8 m: a shortfall, and we know where it comes from.</b> Without the near field (graben masked, no pixel offsets) the data do not see how the opening is concentrated. The smoothing chosen by cross-validation smears out the maximum. A synthetic “dike like in the paper” test (8 m at 2–4 km, 159 million m³) with the noise of November 2023 gives: volume 197 (truth 159, inside the 68 % interval in 100 % of the realizations), max. opening 4.3 m (truth 8), depth of the maximum 4.3 km (truth 3.5).</div>
+  <div class="mbox warn"><b>A rough correction (for team discussion only).</b> On that synthetic test our pipeline overestimates the volume by a factor of \(197/159 \approx 1.24\). If the same bias applies to the real data, then 150–174 million m³ correspond to ~121–140 million m³ of “truth”, i.e. the paper’s range. This is one configuration of noise and geometry, so it does not go into the presentation as evidence.</div>
+  <div class="mbox warn"><b>What remains unreconciled (H2).</b> The NPE and MCMC medians agree within 1σ, but individual NPE samples explain the data worse: median \(\chi^2\) 2787 vs 865 for MCMC (1018 data points), residual along the dike 44 with noise ≤ 4. So the NPE posterior is wider than the true one: the network is centred correctly but “smeared”. Practical rule: <b>NPE is a fast first estimate in seconds; MCMC started from NPE is the accurate answer in minutes.</b></div>
+  <div class="mbox"><b>The history of errors that led to v3.</b> The first version (one rectangular dike with uniform opening) gave NPE 114 [87–146] and MCMC 61 [50–73] million m³ <i>for the same model</i>. MCMC found a much better fit (log-likelihood −270 vs −465), but a shorter dike in the wrong place. Conclusion: when the model does not describe the dike (the real opening varies, up to ~8 m), NPE and MCMC diverge, and an agreement of NPE with the literature then proves nothing. So the model was made more complex (variable opening, graben mask, GNSS, a “no dike” class), and the noise was made hierarchical.</div>
+
+  <h2 id="m-hyp">8. Hypotheses and verdicts</h2>
+  <table><tr><th></th><th>hypothesis</th><th>result</th><th>verdict</th></tr>
+   <tr><td>H1</td><td>GNSS removes the “dike volume ↔ Svartsengi” trade-off</td><td>68 % interval of \(V\) (MCMC): 27 → 15 million m³ (−46 %); depth determined; but \(\operatorname{corr}(V,\ \text{depth})\) +0.06 → +0.67</td><td><span class="verdict part">partly</span></td></tr>
+   <tr><td>H2</td><td>the NPE ↔ MCMC disagreement comes from the model, not from NPE</td><td>medians within 1σ, but \(\chi^2\) of the NPE samples 3832 vs 865</td><td><span class="verdict no">no</span></td></tr>
+   <tr><td>H3</td><td>the noise covariance is overestimated</td><td>quiet pair: rms 0.3–0.4 cm; model error 31–34 cm²; \(\chi^2\) 978 / 1018</td><td><span class="verdict">yes</span></td></tr>
+   <tr><td>H4</td><td>NPE does not invent dikes</td><td>quiet: P(no dike) 0.86; inflation 0.84</td><td><span class="verdict">yes (v3)</span></td></tr>
+   <tr><td>H5</td><td>NPE is calibrated (SBC)</td><td>15 of 16 parameters \(p &gt; 0.01\); small dikes of 1–30 million m³ detected in 82 %</td><td><span class="verdict part">mostly</span></td></tr>
+   <tr><td>H6</td><td>the signal does not come from the prior</td><td>wide prior: the dike is seen (P(none) 0.005), strike not confirmed (too little training)</td><td><span class="verdict part">partly</span></td></tr>
+   <tr><td>H7</td><td>NPE transfers to the 2024 events</td><td>2 Mar: 3 [1–8] (publ. ~1.3); 29 May: 7 [3–14] vs 13–19; 8 Feb and 16 Mar: uncertain</td><td><span class="verdict part">partly</span></td></tr>
+   <tr><td>H8</td><td>the layered crust is consistent with the paper</td><td>Mogi 5.5 km, FEM 6.5 km; paper 4.0–4.2 (Mogi)</td><td><span class="verdict">yes (~1 km offset)</span></td></tr></table>
+  <h3>Does the network find a dike where there is none?</h3>
+  <table><tr><th>pair</th><th>P(no dike) v2 / v3</th><th>volume, million m³ v3</th><th>literature</th></tr>
+   <tr><td>quiet, Oct 2023</td><td class="n">0.84 / 0.86</td><td class="n">2 [1–5]</td><td>no dike</td></tr>
+   <tr><td>inflation only, Jul 2024</td><td class="n">0.70 / 0.84</td><td class="n">2 [1–5]</td><td>no dike</td></tr>
+   <tr><td>2 Mar 2024 (no eruption)</td><td class="n">0.67 / 0.68</td><td class="n">3 [1–8]</td><td>~1.3</td></tr>
+   <tr><td>29 May 2024</td><td class="n">0.52 / 0.33</td><td class="n">7 [3–14]</td><td>13–19</td></tr></table>
+  <p class="note">The network sees the small 2024 events poorly: the model error (~31 cm²) was estimated on the huge 2023 dike, and for weak signals (\(\chi^2\) 19–222 on 1018 data points) the noise is overestimated several times over. The next step is a model error that scales with the signal.</p>
+
+  <h2 id="m-blind">9. Blind mode v4 and “data leakage”</h2>
+  <p>v4: 20 kinematic parameters, a prior over the whole area (centre ±15 km, any strike), no mask, noise level unknown. An independent check of the trace: the median distance to the VIIRS thermal hotspots of six eruptions is 1.9–2.9 km, to the HLS vent of 26 April 2024 1.4 km, and for random points 5.1 km. An accuracy of ~2 km is the honest price of a wide prior (v3 with a corridor: 0.1–1 km).</p>
+  <h3>Why the v4 trace moved relative to v3</h3>
+  <table><tr><th></th><th>NPE v3 (corridor)</th><th>NPE v4 (blind)</th><th>what it means</th></tr>
+   <tr><td>strike</td><td class="n">33.8° [31.7–35.8]</td><td class="n">33.2° [20.6–47.7]</td><td>the same direction</td></tr>
+   <tr><td>centre, east (km from Svartsengi)</td><td class="n">+3.0 [1.6–3.9]</td><td class="n">+3.3 [1.3–4.6]</td><td>almost the same</td></tr>
+   <tr><td>centre, north</td><td class="n">−1.0 [−2.9…+0.4]</td><td class="n">−2.5 [−5.6…−0.3]</td><td>a shift of ~1.5 km to the south; the intervals overlap</td></tr>
+   <tr><td>length, km</td><td class="n">17.0 [12.0–21.6]</td><td class="n">20.0 [11.3–26.8]</td><td>v4 is 3 km longer</td></tr>
+   <tr><td>southern end</td><td class="n">~3 km offshore</td><td class="n">~6 km offshore</td><td>the lengthening goes where there are no data</td></tr></table>
+  <p>The shift is not a new position of the dike but its <b>southern end, which the data do not constrain</b>:</p>
+  <ul>
+   <li><b>The sea.</b> South of Grindavík InSAR has no pixels. The dike’s field is not observed there, so extending it into the sea “costs nothing” in likelihood. The length shrinkage in v4 is only 0.29, and the dike centre lies at the middle of its length, so a southward extension pulls the centre south.</li>
+   <li><b>The prior.</b> In v3, a corridor: centre −5…+3 km north, strike 0–56°, length up to 24 km. In v4: ±12 km, any strike, length up to 30 km. A wider prior with weak data gives a wider and shifted posterior (in v4, SBC for “centre, north” gives \(p = 0.00\), i.e. this parameter is still poorly calibrated).</li>
+   <li><b>The graben without a mask.</b> In v3 a ±1 km band around the trace is masked. In v4 there is no mask, and the graben is modelled with two normal faults (slip 0.3 [0.1–0.7] m). The graben subsidence under Grindavík partly “takes” the signal that the dike explained in v3, and the network may move the dike itself.</li>
+   <li><b>A different Svartsengi model.</b> v3: a point source in a layered crust (FEM). v4: Mogi in a homogeneous half-space, as in the paper. A different field from the chamber means a different residual that the dike has to explain.</li>
+  </ul>
+  <p class="note">Check with independent data (none of them was used in training): the v4 trace lies 1.9–2.9 km from the FIRMS thermal hotspots, the v3 trace 0.1–1 km from the HLS vents, a random point 5.1 km. Both traces find the dike. v3 is more accurate because it was given a corridor in advance; v4 is the honest price of a blind search.</p>
+  <h3>v3 or v4: which is closer to the paper</h3>
+  <table><tr><th></th><th>v3 (corridor)</th><th>v4 (blind)</th><th>paper</th></tr>
+   <tr><td>dike volume, million m³</td><td class="n"><b>150</b> [131–170]</td><td class="n">174 [115–241]</td><td class="n">130–139</td></tr>
+   <tr><td>Svartsengi \(\Delta V\), million m³</td><td class="n">−77 [−92…−63]</td><td class="n">−82 [−119…−49]</td><td class="n">−76…−82</td></tr>
+   <tr><td>Svartsengi depth, km</td><td class="n">6.3</td><td class="n">6.1</td><td class="n">4.0–4.2</td></tr>
+   <tr><td>max. opening / its depth</td><td class="n">— (distributed: 2.4 m at 4.5 km)</td><td class="n"><b>4.3 m at 3.6 km</b></td><td class="n">~8 m at 2–4 km</td></tr>
+   <tr><td>physics</td><td>Okada + a source in a layered crust (FEM)</td><td><b>homogeneous half-space, Mogi, an opening patch, graben faults</b></td><td>homogeneous half-space, Mogi, distributed opening</td></tr>
+   <tr><td>setup</td><td><b>corridor, graben mask</b></td><td>whole area, no mask</td><td>dike location known; ~20 GNSS, pixel offsets</td></tr></table>
+  <div class="mbox"><b>How to phrase it in the team.</b> <b>v3 is the best estimate of the numbers:</b> volume and \(\Delta V\) closest to the paper, narrow intervals, because the network was given a corridor (just as the paper’s authors knew where the dike was). <b>v4 has the physics closest to the paper</b> (homogeneous half-space, Mogi, distributed opening, graben), and in the most honest setup, blind. So v4 reproduces details that v3 does not see (the opening patch at 2–4 km, the vertical dip, the graben slip), but pays for it with wider intervals and worse calibration. Neither v3 nor v4 repeats the paper’s <i>method</i>: there it is a classical inversion with much richer data (near field), not NPE.</div>
+  <div class="mbox warn"><b>Next test: “v4 physics + v3 corridor”.</b> The same kinematics and homogeneous half-space as in v4, but with the prior and the mask of v3. Then the v3↔v4 disagreement splits into two parts: how much comes from the <i>model</i> (layers vs half-space, patch vs segments) and how much from the <i>blind prior</i>. Separately, it is worth running v3 with Mogi instead of the FEM: then the Svartsengi depth can be compared with the paper honestly (we expect ~5.5 km instead of ~6.3, as in H8).</div>
+  <table><tr><th>well determined (shrinkage 0.9–1.0)</th><th>partly (0.3–0.5)</th><th>barely (≤ 0.06)</th></tr>
+   <tr><td>dike position and strike; all Svartsengi parameters</td><td>length, top, max. opening, graben slip</td><td>dip, shape of the opening patch, strike-slip, bend</td></tr></table>
+  <p>There are no obvious leaks in v4 (a prior or mask taken from the result, the 2024 vents). Three weak ones remain: the 40 cm² upper bound on the noise was chosen after we had seen ~30 cm²; the 5 % for GNSS and the 256 PCA components were chosen after the first inversions; and, most importantly, the model was made more complex because simpler ones described this very event poorly. So v4 is an <b>“almost blind”</b> test. Only a test on future NISAR pairs with a model fixed in advance will be fully blind.</p>
+
+  <h2 id="m-rt">10. A dike in 0.35 s: amortization</h2>
+  <p>The “thousands of identical tasks” scenario: a new pair every 12 days, and during a crisis the answer is needed at once. One network, trained once (simulations 72 s + training 5.5 min on 100 thousand Okada dikes), answers in 0.35 s. MCMC: ~49 s per event, ~14 h for 1000 events. Tested on 1000 synthetic dikes with real NISAR atmosphere.</p>
+  <table><tr><th>parameter</th><th>median error</th><th>in the 68 % interval</th><th>in the 95 % interval</th></tr>
+   <tr><td>east / north, km</td><td class="n">0.18 / 0.20</td><td class="n">65 / 66 %</td><td class="n">93 / 92 %</td></tr>
+   <tr><td>strike, °</td><td class="n">1.13</td><td class="n">66 %</td><td class="n">93 %</td></tr>
+   <tr><td>length / height, km</td><td class="n">1.06 / 1.06</td><td class="n">62 / 62 %</td><td class="n">92 / 91 %</td></tr>
+   <tr><td>opening, m</td><td class="n">0.09</td><td class="n">58 %</td><td class="n">92 %</td></tr></table>
+  <div class="eq">\[ \text{break-even point:}\quad N^* = \frac{T_\text{train}}{T_\text{MCMC} - T_\text{NPE}} \approx \frac{(72 + 329)\ \text{s}}{(49 - 0.35)\ \text{s}} \approx 8\ \text{events} \]<small>After ~8 new pairs the network has already paid for itself. On one of the two control events MCMC got stuck in a false mode, while NPE gave a close answer.</small></div>
+
+  <h2 id="m-lim">11. Limitations and next steps</h2>
+  <ul>
+   <li>Distant GPS stations disagree with NISAR by 4–7 cm/yr; the cause has not been established.</li>
+   <li>The crustal profile below 2.5 km is an assumption, and the absolute depth depends on it.</li>
+   <li>NPE is valid only for the same tracks, geometry and noise model; for a new window it has to be retrained.</li>
+   <li>The dikes in the NISAR test are synthetic; the real dike was checked on Sentinel-1.</li>
+   <li>There is no near field: pixel offsets from ASF HyP3 (AUTORIFT) did not work for Grindavík (it is a glacier pipeline). They have to be computed ourselves from SLC (ISCE2/GAMMA) or from L-band SAOCOM.</li>
+   <li>The model error does not scale with the signal, so the small 2024 dikes are barely visible.</li>
+   <li><b>Next:</b> model error \(\propto\) signal; NPE → MCMC as the standard pipeline; pixel offsets; a real blind test on the next NISAR pairs.</li>
+  </ul>
+ </div>
+</div>
+<script>
+(() => {
+  const box = document.getElementById("math");
+  // typeset the TeX once with KaTeX (loaded with defer above); if KaTeX is missing or fails, the raw TeX stays as text
+  let typeset = false;
+  const tex = () => {
+    if (typeset || typeof window.renderMathInElement !== "function") return;
+    typeset = true;
+    try {
+      window.renderMathInElement(box, {
+        delimiters: [{ left: "\\[", right: "\\]", display: true }, { left: "\\(", right: "\\)", display: false }],
+        throwOnError: false,
+      });
+    } catch (err) { console.warn("math window: KaTeX failed, the raw TeX stays", err); }
+  };
+  if (document.readyState === "complete") tex(); else window.addEventListener("load", tex);
+  const open = (on) => {
+    box.classList.toggle("hidden", !on); document.body.classList.toggle("math-open", on);
+    if (on) { tex(); box.querySelector(".mw").focus(); draw(); drawGnss(); }
+  };
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest(".mathbtn"); if (b) { e.preventDefault(); open(true); return; }
+    if (e.target === box || e.target.closest("#math .close")) open(false);
+  });
+  window.addEventListener("keydown", (e) => {
+    const on = !box.classList.contains("hidden");
+    if (on && e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); open(false); return; }
+    if (on && ["ArrowLeft", "ArrowRight", "PageUp", "PageDown"].includes(e.key)) { e.stopImmediatePropagation(); return; }
+    // M opens the window; "ь" is the same key on a Ukrainian keyboard layout
+    if (!on && (e.key === "m" || e.key === "M" || e.key === "ь" || e.key === "Ь") && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName || "")) open(true);
+  }, true);
+  // forest plot: our methods against the paper's range, three quantities
+  const R = [
+    ["NPE v3", [131, 150, 170], [6, 6, 7], [-92, -77, -63], 1],
+    ["NPE v2", [113, 133, 157], [5, 6, 6], [-72, -56, -42], 0],
+    ["MCMC, InSAR+GNSS", [145, 153, 160], [5, 5, 6], [-71, -65, -60], 0],
+    ["MCMC, InSAR only", [91, 105, 118], [5, 5, 5], [-21, -16, -12], 0],
+    ["distrib., FEM", [169, 169, 169], [6.5, 6.5, 6.5], [-93, -93, -93], 0],
+    ["distrib., Mogi", [162, 162, 162], [5.5, 5.5, 5.5], [-94, -94, -94], 0],
+    ["NPE v4 blind", [115, 174, 241], [4.7, 6.1, 7.1], [-119, -82, -49], 0],
+  ];
+  const P = [[130, 139], [4.0, 4.2], [-82, -76]];
+  const AX = [["dike volume, million m³", 80, 250], ["Svartsengi depth, km", 3.5, 7.5], ["Svartsengi ΔV, million m³", -125, 0]];
+  // NISAR vs GPS vertical rate at the four independent stations, ±1σ, ordered by distance from SENG
+  const G = [["SENG", 0, 20.1, 1.7, 21.0, 1.2], ["AUSV", 4.4, 3.5, 1.1, 7.6, 1.1], ["GEVK", 5.5, -0.3, 1.4, 7.0, 1.2], ["VOGC", 11.9, 4.3, 1.7, -1.8, 1.4]];
+  function drawGnss() {
+    const el = document.getElementById("m-gnss"); if (!el || el.dataset.done) return;
+    const W = 940, lw = 170, x1 = W - 90, top = 22, rh = 34, H = top + G.length * rh + 34, lo = -6, hi = 26;
+    const X = (v) => lw + (x1 - lw) * (v - lo) / (hi - lo), ink = "#3a2a1c", red = "#962c1a";
+    let s = `<text x="${lw}" y="12" font-size="12" font-style="italic" fill="${ink}">vertical rate, cm/yr (±1σ) · ● NISAR · ○ GPS</text>`;
+    for (let v = -5; v <= 25; v += 5) s += `<line x1="${X(v)}" x2="${X(v)}" y1="${top - 4}" y2="${top + G.length * rh - 8}" stroke="${ink}" stroke-width="${v ? .25 : .8}"/>` +
+      `<text x="${X(v)}" y="${top + G.length * rh + 6}" font-size="11" text-anchor="middle" fill="${ink}">${v}</text>`;
+    G.forEach(([n, d, a, sa, b, sb], i) => {
+      const y = top + i * rh + 6, z = (a - b) / Math.hypot(sa, sb), ok = Math.abs(z) < 2;
+      s += `<text x="0" y="${y + 4}" font-size="13" fill="${ink}"${ok ? ' font-weight="bold"' : ""}>${n}</text><text x="52" y="${y + 4}" font-size="11" fill="${ink}" opacity=".7">${d} km from SENG</text>` +
+        `<line x1="${X(a - sa)}" x2="${X(a + sa)}" y1="${y - 5}" y2="${y - 5}" stroke="${red}" stroke-width="2"/><circle cx="${X(a)}" cy="${y - 5}" r="4.5" fill="${red}"/>` +
+        `<line x1="${X(b - sb)}" x2="${X(b + sb)}" y1="${y + 6}" y2="${y + 6}" stroke="${ink}" stroke-width="2"/><circle cx="${X(b)}" cy="${y + 6}" r="4.5" fill="var(--paper)" stroke="${ink}" stroke-width="1.6"/>` +
+        `<text x="${W}" y="${y + 4}" font-size="12" text-anchor="end" fill="${ok ? ink : red}">z ${z >= 0 ? "+" : "−"}${Math.abs(z).toFixed(1)} · ${ok ? "match" : "no"}</text>`;
+    });
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`; el.dataset.done = 1;
+  }
+  function draw() {
+    const el = document.getElementById("m-forest"); if (!el || el.dataset.done) return;
+    const cs = getComputedStyle(document.documentElement), ink = cs.getPropertyValue("--ink").trim() || "#3a2a1c",
+          muted = cs.getPropertyValue("--muted").trim() || "#7b6650";
+    const W = 940, lw = 132, pw = (W - lw) / 3, rh = 24, top = 30, H = top + R.length * rh + 30;
+    let s = "";
+    AX.forEach(([name, lo, hi], k) => {
+      const x0 = lw + k * pw + 10, x1 = lw + (k + 1) * pw - 12, X = (v) => x0 + (x1 - x0) * (v - lo) / (hi - lo);
+      s += `<rect x="${X(P[k][0])}" y="${top - 6}" width="${Math.max(2, X(P[k][1]) - X(P[k][0]))}" height="${R.length * rh + 4}" fill="#8c2e1e" opacity=".16"/>`;
+      s += `<text x="${(x0 + x1) / 2}" y="14" text-anchor="middle" font-size="13" font-style="italic" fill="${ink}">${name}</text>`;
+      s += `<text x="${(X(P[k][0]) + X(P[k][1])) / 2}" y="${top + R.length * rh + 12}" text-anchor="middle" font-size="11" fill="#8c2e1e">paper</text>`;
+      const step = (hi - lo) > 50 ? 40 : (hi - lo) > 10 ? 5 : 1;
+      for (let v = Math.ceil(lo / step) * step; v <= hi; v += step)
+        s += `<line x1="${X(v)}" x2="${X(v)}" y1="${top - 6}" y2="${top + R.length * rh - 2}" stroke="${muted}" stroke-width=".3"/>` +
+             `<text x="${X(v)}" y="${H - 4}" text-anchor="middle" font-size="10" fill="${muted}">${v}</text>`;
+      R.forEach((r, i) => {
+        const [a, m, b] = r[k + 1], y = top + i * rh + 6;
+        s += `<line x1="${X(a)}" x2="${X(b)}" y1="${y}" y2="${y}" stroke="${ink}" stroke-width="${r[4] ? 2.4 : 1.4}"/>` +
+             `<circle cx="${X(m)}" cy="${y}" r="${r[4] ? 5 : 3.6}" fill="${r[4] ? "#8c2e1e" : "var(--paper)"}" stroke="${ink}" stroke-width="1.3"/>`;
+      });
+    });
+    R.forEach((r, i) => s += `<text x="0" y="${top + i * rh + 10}" font-size="12.5" fill="${ink}"${r[4] ? ' font-weight="bold"' : ""}>${r[0]}</text>`);
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%">${s}</svg>`; el.dataset.done = 1;
+  }
+})();
+</script>

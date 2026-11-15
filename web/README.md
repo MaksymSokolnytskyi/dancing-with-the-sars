@@ -72,10 +72,14 @@ that lifts a district and drops it back does not ring twice. Still rows stay sil
 
 ## Atlas pages (the plate tells its story)
 
-Page text: the first paragraph is shown, the rest sits behind "Tell me more" (`keep: n` on a page shows n paragraphs;
-"sure" pages show all of it, so doubts are never folded away). `cells` layers are drawn as a stipple: one dot per block,
-its size = the strength the ramp gives it (the ramp's alpha), solid ink; a theme can ask for plain squares with
-`"cells_as": "squares"`. The chimes of the score (`?sound=1`) have no button any more.
+Page text: the first paragraph is the page's one idea and stands on the card; the rest opens in a detail sheet beside
+the card ("Tell me more"; `keep: n` on a page keeps n paragraphs on the card). A "sure" page must say its main limit in
+that first paragraph. `cells` layers are drawn as an engraved tint: the blocks are read as one smooth field and long
+45° strokes are laid over it, denser where the value is stronger (theme `hatch`: `max` strokes per block, `min`
+strength below which the paper stays bare, `w` width, `ink` share of ink mixed into pale ramp colours). A theme can ask
+for `"cells_as": "dots"` or `"squares"`. While motion or cells are on the map, the terrain, context lines and town
+blocks are drawn at theme `quiet` strength (0.45 in scroll) and every label is drawn last, over the strokes. The score
+strip (layer kind `rhythm`, "the music") is left out of the atlas; `?score=1` brings it back.
 
 A plate is played as pages. Write `sites/<id>.story.json`, point the site at it (`"story": "sites/<id>.story.json"`), then
 

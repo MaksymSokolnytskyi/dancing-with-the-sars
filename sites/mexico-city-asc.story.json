@@ -13,12 +13,12 @@
    },
    "text": [
     {
-     "en": "Mexico City stands on the bed of the lakes the Aztecs once built on. Every 12 days the NISAR radar measured the ground from space, by day or night, through clouds.",
-     "uk": "Мехіко стоїть на дні озер, на яких колись будували ацтеки. Кожні 12 днів радар NISAR вимірював землю з космосу, вдень і вночі, крізь хмари."
+     "en": "Mexico City sits on an old lakebed; the red strokes show where it sank, in places about 30 cm in one year.",
+     "uk": "Мехіко стоїть на дні старого озера; червоні штрихи показують, де воно осіло, подекуди приблизно на 30 см за рік."
     },
     {
-     "en": "In one year, parts of the city went down by about 30 cm.",
-     "uk": "За один рік частини міста опустились приблизно на 30 см."
+     "en": "Every 12 days NISAR measured the ground from space, by day or night, through clouds.",
+     "uk": "Кожні 12 днів NISAR вимірював землю з космосу, вдень і вночі, крізь хмари."
     }
    ],
    "facts": [
@@ -66,8 +66,7 @@
     "lake",
     "peaks",
     "places",
-    "trees",
-    "blocks"
+    "trees"
    ],
    "day": "end"
   },
@@ -79,12 +78,12 @@
    },
    "text": [
     {
-     "en": "Each red wedge points downhill, into the sinking bowl. As the year plays, the wedges grow: every new ring of strokes is 2 cm more.",
-     "uk": "Кожен червоний клин вказує вниз, у чашу просідання. Поки програється рік, клини ростуть: кожне нове кільце штрихів — ще 2 см."
+     "en": "Press ▶ and watch the red wedges grow: every new ring of strokes is 2 cm more of sinking.",
+     "uk": "Натисніть ▶ і дивіться, як ростуть червоні клини: кожне нове кільце штрихів — ще 2 см просідання."
     },
     {
-     "en": "Dashed strokes mark places where the radar is less sure.",
-     "uk": "Пунктир позначає місця, де радар менш певний."
+     "en": "Each wedge points downhill, into the sinking bowl. Dashed strokes mark places where the radar is less sure.",
+     "uk": "Кожен клин вказує вниз, у чашу просідання. Пунктир позначає місця, де радар менш певний."
     }
    ],
    "camera": {
@@ -100,8 +99,7 @@
     "velocity",
     "contours",
     "peaks",
-    "trees",
-    "blocks"
+    "trees"
    ],
    "day": "start",
    "play": true,
@@ -115,12 +113,12 @@
    },
    "text": [
     {
-     "en": "The sinking follows the shores of the old lakes almost exactly. The city pumps most of its water from under its own feet, and the soft lake clay dries and compacts like a sponge.",
-     "uk": "Просідання майже точно повторює береги старих озер. Місто бере більшу частину води з-під власних ніг, і м'яка озерна глина висихає та стискається, як губка."
+     "en": "Compare the strokes with the old lake shores: the sinking follows them almost exactly, while the volcanic hills barely move.",
+     "uk": "Порівняйте штрихи з берегами старих озер: просідання майже точно їх повторює, а вулканічні пагорби майже не рухаються."
     },
     {
-     "en": "Volcanic hills stand on rock and barely move.",
-     "uk": "Вулканічні пагорби стоять на скелі й майже не рухаються."
+     "en": "The city pumps most of its water from under its own feet, and the soft lake clay dries and compacts like a sponge. The hills stand on rock.",
+     "uk": "Місто бере більшу частину води з-під власних ніг, і м'яка озерна глина висихає та стискається, як губка. Пагорби стоять на скелі."
     }
    ],
    "camera": {
@@ -191,12 +189,12 @@
    },
    "text": [
     {
-     "en": "Sinking alone does not break a house; bending does. Where the strokes crowd together the ground tilts most, stretching pipes, rails and walls.",
-     "uk": "Саме по собі опускання будинок не ламає, ламає згин. Де штрихи густішають, земля нахиляється найбільше і розтягує труби, рейки та стіни."
+     "en": "Where the strokes crowd together the ground bends most, and bending, not sinking alone, is what stretches pipes, rails and walls.",
+     "uk": "Де штрихи густішають, земля згинається найбільше, а труби, рейки та стіни розтягує саме згин, а не просто опускання."
     },
     {
-     "en": "The cut runs across the city from west to east; its little houses tilt, hugely exaggerated. The city has mapped ground cracks too; we expected them along the bends, but our test found no clear link yet.",
-     "uk": "Розріз іде містом із заходу на схід, його будиночки нахилені з величезним перебільшенням. Місто нанесло на мапу й тріщини; ми чекали їх уздовж згинів, але наш тест поки не знайшов явного зв'язку."
+     "en": "The cut runs across the city from west to east; its little houses tilt, hugely exaggerated. Whether damage really gathers at the bends is not shown: our test found no clear link yet.",
+     "uk": "Розріз іде містом із заходу на схід, його будиночки нахилені з величезним перебільшенням. Чи справді руйнування збираються на згинах, не доведено: наш тест поки не знайшов явного зв'язку."
     }
    ],
    "camera": {
@@ -210,9 +208,7 @@
    "layers": [
     "terrain",
     "velocity",
-    "surface",
-    "cracks",
-    "blocks"
+    "surface"
    ],
    "cut": "cut",
    "day": "end"
@@ -225,12 +221,12 @@
    },
    "text": [
     {
-     "en": "A GPS station at the airport measured −27.0 cm/yr; the radar says −27.8 cm/yr at the same spot.",
-     "uk": "GPS-станція в аеропорту виміряла −27.0 см/рік, радар у тій самій точці каже −27.8 см/рік."
+     "en": "Only one GPS station checks the radar here: it measured −27.0 cm/yr, the radar −27.8. Denser blue hatching means a larger error.",
+     "uk": "Радар тут перевіряє лише одна GPS-станція: вона виміряла −27.0 см/рік, радар −27.8. Густіше синє штрихування — більша похибка."
     },
     {
-     "en": "Blue dots show the remaining error: the bigger the dot, the larger the error. The evening pass is twice as noisy (the afternoon air over the city is restless, often stormy), so this map uses the morning one. Strokes below 3σ are dashed; noise below 1σ is not drawn.",
-     "uk": "Сині крапки показують похибку, що лишилась: що більша крапка, то більша похибка. Вечірній прохід удвічі шумніший (по обіді повітря над містом неспокійне, часто з грозами), тому ця мапа з ранкового. Штрихи нижче 3σ пунктирні, шум нижче 1σ не малюється."
+     "en": "The evening pass is twice as noisy (the afternoon air over the city is restless, often stormy), so this map uses the morning one. Strokes below 3σ are dashed; noise below 1σ is not drawn.",
+     "uk": "Вечірній прохід удвічі шумніший (по обіді повітря над містом неспокійне, часто з грозами), тому ця мапа з ранкового. Штрихи нижче 3σ пунктирні, шум нижче 1σ не малюється."
     }
    ],
    "camera": {
@@ -272,16 +268,16 @@
    },
    "text": [
     {
+     "en": "A fresh map every 12 days could warn the metro and the water network where the bending speeds up.",
+     "uk": "Свіжа мапа кожні 12 днів могла б попереджати метро і водогін, де згин пришвидшується."
+    },
+    {
      "en": "Both passes together split the motion into up-down and east-west.",
      "uk": "Два проходи разом розкладають рух на вертикаль і схід–захід."
     },
     {
      "en": "Its backscatter images (GCOV) follow water: near Xico a lake has been growing on the sunken plain. That is reported, not yet measured by us.",
      "uk": "Його знімки яскравості (GCOV) стежать за водою: біля Шико на просілій рівнині росте озеро. Це відомо з літератури, ми ще не вимірювали."
-    },
-    {
-     "en": "A fresh picture every 12 days could warn the metro and the water network where bending speeds up.",
-     "uk": "Свіжа картина кожні 12 днів може попереджати метро і водогін, де згин пришвидшується."
     }
    ],
    "camera": {
@@ -299,8 +295,7 @@
     "water",
     "canals",
     "places",
-    "trees",
-    "blocks"
+    "trees"
    ],
    "day": "end",
    "marks": [

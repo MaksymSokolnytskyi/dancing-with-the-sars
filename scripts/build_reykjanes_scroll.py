@@ -11,7 +11,7 @@ found under --src DIR:
   ml/*.json               dike traces (NPE v3, blind v4), crater row, coherence-loss zones, FIRMS summary
   data/dem/Copernicus_DSM_COG_10_N63_00_W023_00_DEM.tif, data/firms/firms_reykjanes.csv, data/osm/reykjanes_layers.json
 
-A separate "math for the team" window (scripts/reykjanes_math.html, Ukrainian, internal) is injected as an overlay.
+A separate "math behind the plate" window (docs/reykjanes-math.html, English, formulas typeset by KaTeX) is injected as an overlay.
 
 Usage: uv run python scripts/build_reykjanes_scroll.py --src <folder with output/reykjanes and data/>
        -> web/reykjanes-scroll.html (open the file; needs internet only for MapLibre, deck.gl and the font)
@@ -35,7 +35,7 @@ from scipy.ndimage import distance_transform_edt, gaussian_filter
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "web"
-MATH = ROOT / "docs" / "uk" / "reykjanes-math.html"   # internal Ukrainian math window (kept in test builds)
+MATH = ROOT / "docs" / "reykjanes-math.html"   # the math window, English, KaTeX (Ukrainian original: docs/uk/reykjanes-math.html)
 DST = WEB / "reykjanes-scroll.html"
 SRC = ROOT                                       # set by --src: folder holding output/reykjanes/ and data/
 OUT = SRC / "output" / "reykjanes"
@@ -159,8 +159,8 @@ def patch_app(app, with_math):
         'score_sound_t: "кожен дзвін — ще 2 см опускання: що швидше район сідає, то частіше дзвонить; нерухомі мовчать"':
             'score_sound_t: "кожен дзвін — ще 2 см підняття: що швидше місце здіймається, то частіше дзвонить; нерухомі мовчать"',
         'story_next: "що ще може NISAR"': 'story_next: "що ще може NISAR", story_exhale: "видих", story_math: "для команди"',
-        'story_open: "Читати таблицю ▸" }': 'story_open: "Читати таблицю ▸", math_open: "∑ Математика для команди", '
-                                            'test_build: "ТЕСТОВА ВЕРСІЯ" }',
+        'story_open: "Читати таблицю ▸",': 'story_open: "Читати таблицю ▸", math_open: "∑ Математика таблиці", '
+                                           'test_build: "ТЕСТОВА ВЕРСІЯ",',
     }
     en = {
         'stroke: "each ring of strokes = {b} cm of sinking"': 'stroke: "each ring of strokes = {b} cm of uplift"',
@@ -176,8 +176,8 @@ def patch_app(app, with_math):
         'score_sound_t: "each chime = 2 more cm of sinking: the faster a district sinks, the more often it chimes; still ground stays silent"':
             'score_sound_t: "each chime = 2 more cm of uplift: the faster a place rises, the more often it chimes; still ground stays silent"',
         'story_next: "what else NISAR can do"': 'story_next: "what else NISAR can do", story_exhale: "exhale", story_math: "for the team"',
-        'story_open: "Read the plate ▸" }': 'story_open: "Read the plate ▸", math_open: "∑ Math for the team (Ukrainian)", '
-                                           'test_build: "TEST BUILD" }',
+        'story_open: "Read the plate ▸",': 'story_open: "Read the plate ▸", math_open: "∑ The math behind the plate", '
+                                          'test_build: "TEST BUILD",',
     }
     for k, v in {**uk, **en}.items():
         app = must(app, k, v)
@@ -208,7 +208,7 @@ def patch_head(head, with_math):
     head = re.sub(r"<title>.*?</title>", "<title>Reykjanes · The ground breathes</title>", head, count=1)
     extra = '\n      <div class="testbuild" data-i18n="test_build">TEST BUILD</div>'
     if with_math:
-        extra += '\n      <button class="mathbtn" id="math-open" data-i18n="math_open">∑ Math for the team (Ukrainian)</button>'
+        extra += '\n      <button class="mathbtn" id="math-open" data-i18n="math_open">∑ The math behind the plate</button>'
     # the atlas link of index.html leads back to the atlas cover from this separate page
     head = must(head, '<a href="#" id="to-cover" class="small">☰ Edelweiss</a>', '<a href="index.html?cover=1" id="back-atlas" style="display:inline-block;margin-bottom:6px;color:var(--muted);text-decoration:none;letter-spacing:.04em;font-size:12px">☰ Edelweiss</a>')
     head = must(head, '<button id="story-open" class="hidden"></button>', '<button id="story-open" class="hidden"></button>' + extra)
@@ -698,11 +698,11 @@ def story(V, dates, with_math=True):
               "camera": cam_all, "layers": ["terrain", "velocity", "dike_blind", "firms", "coast", "sea", "places", "infra"], "day": "end"})
     if with_math:
         P.append({"section": "math", "title": L("Математика для команди", "Math for the team"),
-                  "text": [L("Тестова версія: внутрішній розділ для команди (українською). Як ми рахували, чому NPE і MCMC іноді розходяться, "
+                  "text": [L("Тестова версія: внутрішній розділ для команди (англійською). Як ми рахували, чому NPE і MCMC іноді розходяться, "
                              "і як наш NPE v3 порівнюється зі статтею Sigmundsson et al. 2024 (Science) по кожному числу.",
-                             "Test build: an internal section for the team (in Ukrainian). How we computed, why NPE and MCMC sometimes disagree, "
+                             "Test build: an internal section for the team (in English). How we computed, why NPE and MCMC sometimes disagree, "
                              "and how our NPE v3 compares with Sigmundsson et al. 2024 (Science), number by number."),
-                           L('<button class="mathbtn bigbtn">∑ Відкрити математичне вікно</button>', '<button class="mathbtn bigbtn">∑ Open the math window (Ukrainian)</button>'),
+                           L('<button class="mathbtn bigbtn">∑ Відкрити математичне вікно</button>', '<button class="mathbtn bigbtn">∑ Open the math window</button>'),
                            L("Клавіша M відкриває вікно з будь-якої сторінки; Esc закриває.", "Key M opens the window from any page; Esc closes it.")],
                   "camera": {"bbox": [-22.58, 63.80, -22.28, 63.93]}, "layers": ["terrain", "dike", "source", "coast", "sea", "places"], "day": "end"})
     return {"title": L("Рейк'янес", "Reykjanes"), "pages": P,
