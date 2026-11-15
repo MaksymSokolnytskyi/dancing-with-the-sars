@@ -2150,10 +2150,12 @@ In a dense canopy the echo depends on the scattering-to-extinction ratio, which 
 term alone. A fail is a usable result: it bounds what NISAR can see of tree water from orbit.
 
 **Timing note.** The pre-registration text says "~15:50"; its commit (ebab20e) is stamped 15:43 Dnipro time and was pushed
-right after, before `experiments/tw_tests.py` existed. The first run of the script returned no passes at all (an hour key
+right after, before `experiments/tw_tests.py` existed. GitHub records the branch creation with that commit at 15:43:17;
+the Open-Meteo VPD and rain files were first downloaded at 15:44:29, after it. The first run of the script returned no passes at all (an hour key
 kept fractional microseconds, so no VPD value matched); the fix touched only that key, no rule or threshold.
 
-**Results TW (2026-11-15 ~16:10, `experiments/tw_tests.py`).** 53 passes in season, 38 dry (24 h rule): evening 21
+**Results TW (2026-11-15 15:45 Dnipro time, `experiments/tw_tests.py`; this line said "~16:10" until the PR, the output
+files are stamped 15:45 and the results commit 15:46).** 53 passes in season, 38 dry (24 h rule): evening 21
 (Wisconsin D41 4, D113 5; Bakota D94 6, D166 6), morning 17 (Wisconsin A76 5; Bakota A100 5, A172 7). All release P05023.
 Class pixels per scene: Wisconsin deciduous 15 684 (80 m), Bakota flat forest ≥ 7 291 (20 m). Afternoon VPD ranged
 0.38 – 2.62 kPa; its detrended anomalies ±0.6 kPa.
