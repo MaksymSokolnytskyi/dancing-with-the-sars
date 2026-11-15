@@ -41,7 +41,7 @@ def classes(L, prefix=""):
             "crop": (L["wc_crop"] >= 0.9) & (L["wc_water"] == 0)}
 
 
-def on_grid(w, tf, shape):
+def on_grid(w, tf, shape, epsg=EPSG):
     """Window layers (linear) averaged onto the 80 m analysis grid; invalid samples dropped."""
     dx, dy = w.x[1] - w.x[0], w.y[1] - w.y[0]
     src_tf = rasterio.Affine(dx, 0, w.x[0] - dx / 2, 0, dy, w.y[0] - dy / 2)
@@ -52,7 +52,7 @@ def on_grid(w, tf, shape):
         v[bad | ~np.isfinite(v)] = np.nan
         if k in ("hh", "hv", "vv", "vh"):
             v[v <= 0] = np.nan
-        out[k] = warp(v, src_tf, f"EPSG:{w.epsg}", tf, shape)
+        out[k] = warp(v, src_tf, f"EPSG:{w.epsg}", tf, shape, epsg=epsg)
     return out
 
 

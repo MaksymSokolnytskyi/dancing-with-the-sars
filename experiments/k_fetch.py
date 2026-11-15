@@ -63,22 +63,22 @@ def target_grid():
     return from_origin(w, n, RES, RES), (H, W)
 
 
-def warp(src, src_tf, src_crs, dst_tf, shape, how=Resampling.average):
+def warp(src, src_tf, src_crs, dst_tf, shape, how=Resampling.average, epsg=EPSG):
     out = np.full(shape, np.nan, "float32")
     reproject(src.astype("float32"), out, src_transform=src_tf, src_crs=src_crs, dst_transform=dst_tf,
-              dst_crs=f"EPSG:{EPSG}", resampling=how, src_nodata=np.nan, dst_nodata=np.nan)
+              dst_crs=f"EPSG:{epsg}", resampling=how, src_nodata=np.nan, dst_nodata=np.nan)
     return out
 
 
-def read_cog(url, dst_tf, shape, fn):
+def read_cog(url, dst_tf, shape, fn, epsg=EPSG):
     """Window of a remote COG covering the grid, mapped by fn (per-pixel), then averaged onto the grid."""
     with rasterio.Env(GDAL_HTTP_USERAGENT="space-apps-research", GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR"):
         with rasterio.open("/vsicurl/" + url) as src:
             gb = rasterio.transform.array_bounds(*shape, dst_tf)
-            b = transform_bounds(f"EPSG:{EPSG}", src.crs, gb[0], gb[1], gb[2], gb[3])
+            b = transform_bounds(f"EPSG:{epsg}", src.crs, gb[0], gb[1], gb[2], gb[3])
             win = rasterio.windows.from_bounds(*b, src.transform).round_offsets().round_lengths()
             a = src.read(1, window=win, boundless=True, fill_value=0)
-            return warp(fn(a), src.window_transform(win), src.crs, dst_tf, shape)
+            return warp(fn(a), src.window_transform(win), src.crs, dst_tf, shape, epsg=epsg)
 
 
 def s2_item(date):
@@ -111,9 +111,9 @@ def grid_layers(dst_tf, shape):
     return out
 
 
-def temps(scenes):
+def temps(scenes, bbox=BBOX):
     days = sorted({s.date.date() for s in scenes})
-    lon, lat = (BBOX[0] + BBOX[2]) / 2, (BBOX[1] + BBOX[3]) / 2
+    lon, lat = (bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2
     r = requests.get("https://archive-api.open-meteo.com/v1/archive",
                      params={"latitude": lat, "longitude": lon, "start_date": str(days[0] - timedelta(days=1)),
                              "end_date": str(days[-1]), "hourly": "temperature_2m", "timezone": "UTC"},
