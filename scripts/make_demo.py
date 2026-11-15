@@ -75,10 +75,10 @@ def main():
     mdir = Path(sys.argv[2])                                  # title.jpg, end.jpg (web/demo/cards.html), m1a.. m4c (plates)
     shot = lambda p: Image.open(p).convert("RGB").resize((W, H), Image.LANCZOS)  # noqa: E731
     title, end = shot(mdir / "title.jpg"), shot(mdir / "end.jpg")
-    seq = [(title, 4.5), (duf, 4.0)] + [(f, 8.0 / len(frames)) for f in frames]
-    for k in range(1, 5):                                      # each plate 2.5 s, its frames in turn (the map comes alive)
+    seq = [(title, 4.5), (duf, 4.0)] + [(f, 6.5 / len(frames)) for f in frames]
+    for k, secs in zip(range(1, 5), (4.0, 2.5, 2.5, 2.5)):     # each plate's frames in turn (the year plays, then a zoom)
         fs = sorted(mdir.glob(f"m{k}*.jpg"))
-        seq += [(shot(f), 2.5 / len(fs)) for f in fs]
+        seq += [(shot(f), secs / len(fs)) for f in fs]
     seq += [(end, 3.5)]
     out = ROOT / "web" / "demo"
     out.mkdir(exist_ok=True)
@@ -92,8 +92,9 @@ def main():
         i = next(j for j, (a, b) in enumerate(t_edges) if t < b or j == len(t_edges) - 1)
         a, b = t_edges[i]
         im = seq[i][0]
-        if i + 1 < len(seq) and t > b - 0.35:
-            im = Image.blend(im, seq[i + 1][0], (t - (b - 0.35)) / 0.35)
+        x = min(0.35, (b - a) * 0.6)                          # short frames of a playing year blend most of the way
+        if i + 1 < len(seq) and t > b - x:
+            im = Image.blend(im, seq[i + 1][0], (t - (b - x)) / x)
         im.save(tmp / f"f{k:04d}.jpg", quality=90)
     vdir = Path(sys.argv[3])
     clips = sorted(vdir.glob("c*.wav"), key=lambda q: int(q.stem[1:]))
