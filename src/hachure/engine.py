@@ -170,6 +170,48 @@ def tropo_correct(cfg, v: Velocity, verbose: bool = True) -> Velocity:
     return out
 
 
+def highpass_correct(cfg, v: Velocity, verbose: bool = True) -> Velocity:
+    """Remove long-wavelength residuals (atmosphere, ionosphere left after the plane): cfg['highpass'] = {sigma_km, mask_cm_yr, grow_m, detect_m}.
+
+    A Gaussian low-pass (sigma_km) of the rate and of each date's displacement is subtracted. Small fast features must not
+    leak into the low-pass, so pixels whose rate departs from a first, unmasked low-pass by more than mask_cm_yr (grown by
+    grow_m) are left out of it; broad patches are not masked and are removed. Off unless the site asks for it.
+    """
+    p = cfg.get("highpass") or {}
+    if not p:
+        return v
+    from scipy.ndimage import binary_dilation
+    px = abs(float(v.x[1] - v.x[0]))
+    sig = p.get("sigma_km", 5) * 1000 / px
+
+    def lowpass(a, skip, s=sig):
+        w = np.isfinite(a) & ~skip
+        num = gaussian_filter(np.where(w, a, 0.0), s, mode="nearest")
+        den = gaussian_filter(w.astype(float), s, mode="nearest")
+        return np.where(den > 0.05, num / np.maximum(den, 1e-6), 0.0)
+
+    none = np.zeros(v.rate.shape, bool)
+    # the per-pixel rate is noisy, so fast features are found on a lightly smoothed rate (detect_m)
+    resid = (lowpass(v.rate, none, p.get("detect_m", 400) / px) - lowpass(v.rate, none)) * 100
+    moving = binary_dilation(np.abs(np.nan_to_num(resid)) > p.get("mask_cm_yr", 8),
+                             iterations=max(1, int(round(p.get("grow_m", 500) / px))))
+    lp_rate = lowpass(v.rate, moving)
+    cum = v.cum.copy()
+    for k in range(1, len(cum)):
+        cum[k] = cum[k] - lowpass(cum[k] - cum[0], moving)
+    if verbose:
+        r = lp_rate[np.isfinite(v.rate)] * 100
+        print(f"  highpass: sigma {p.get('sigma_km', 5)} km, masked {moving.mean():.1%} of pixels, "
+              f"removed rate p5/p50/p95 {np.percentile(r, 5):+.1f} / {np.percentile(r, 50):+.1f} / {np.percentile(r, 95):+.1f} cm/yr")
+    out = Velocity(rate=v.rate - lp_rate, sigma=v.sigma, segments=v.segments, coherence=v.coherence, cum=cum, dates=v.dates,
+                   x=v.x, y=v.y, epsg=v.epsg, n_pairs=v.n_pairs)
+    if getattr(v, "tropo", None):
+        out.tropo = v.tropo
+    out.highpass = {"sigma_km": p.get("sigma_km", 5), "mask_cm_yr": p.get("mask_cm_yr", 8), "grow_m": p.get("grow_m", 500),
+                    "detect_m": p.get("detect_m", 400)}
+    return out
+
+
 # ------------------------------------------------------------------ helpers
 
 def _smooth_nan(a, sig, valid):
@@ -966,7 +1008,8 @@ def export_site(cfg, v: Velocity | None, out_dir, verbose: bool = True) -> Path:
         n = Counter(f["properties"]["trust"] for f in fc["features"])
         stats["velocity"] = {"strokes": len(fc["features"]), "trust": dict(n), "deepest_cm": round(st["deepest_cm"], 1),
                              "band_cm": cfg["velocity"].get("band_m", 0.02) * 100}
-        stats["velocity"]["headline"] = headline(cfg, v)
+        # "headline": false in velocity{} = no "sure it sinks at least" number (e.g. features smaller than its 1.5 km window)
+        stats["velocity"]["headline"] = headline(cfg, v) if cfg["velocity"].get("headline", True) else {}
         layers.append({"id": "velocity", "kind": "hachures-time", "file": "velocity.geojson",
                        "label": {"en": "Ground motion", "uk": "Рух ґрунту"},
                        "props": ["rate_cm_yr", "sigma_cm_yr", "snr", "segments", "trust", "dark", "sense", "t"]})
@@ -1052,6 +1095,8 @@ def export_site(cfg, v: Velocity | None, out_dir, verbose: bool = True) -> Path:
         layers.append(extra)
     if v is not None and getattr(v, "tropo", None):
         stats["tropo"] = v.tropo
+    if v is not None and getattr(v, "highpass", None):
+        stats["highpass"] = v.highpass
     story = write_story(cfg, out)
     gn = gnss_check(cfg, v) if v is not None else []
     w, s, e, n_ = cfg["bbox"]

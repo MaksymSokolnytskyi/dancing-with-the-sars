@@ -86,6 +86,7 @@ def main():
             engine.save_velocity(v, vf)
     if v is not None:
         v = engine.tropo_correct(cfg, v)        # no-op unless the site asks for it
+        v = engine.highpass_correct(cfg, v)     # no-op unless the site asks for it
     man = engine.export_site(cfg, v, Path(a.out) / cfg["id"])
     # scene index for the front-end
     idx_p = Path(a.out) / "scenes.json"

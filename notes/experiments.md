@@ -2096,6 +2096,65 @@ that do not care about the wanted answer.
   three-track bowls (1 %) are the ones a plate may call reliable. H uses the detector's own 3-track set, which here equals
   the first condition of the O3a rule; it will be repeated for the full O3a rule.
 
+### O3b result (run 2026-11-15): **PARTIAL**, and mostly uninformative for the PL half
+`scripts/ostrava/egms_fetch.py` (EGMS L3 Ortho vertical, release 2019–2023, tiles E49N29 and E49N30, 100 m) and
+`scripts/ostrava/egms_o3b.py` (mean of the EGMS cells inside each bowl; output `output/ostrava_karvina/egms_o3b.csv`).
+- PL half: **1 of 10** bowls of O1 has an EGMS mean ≤ −2 cm/yr (M03, −4.1 cm/yr from 5 of 120 cells): fail. But **8 of the
+  10 have no EGMS cell inside at all** (M01, M02, M05–M09, M18); M04 has one cell (−0.9). So EGMS does not say these
+  bowls are stable: it has no measurement there. Likely reason (not tested): C-band Sentinel-1 loses coherence over fast
+  motion on fields, and EGMS leaves such cells out. The pre-registration did not say how to count a bowl without data;
+  counting it as "not ≤ −2" (as here) was decided when the script was written, after the test was set, before the run.
+- CZ half: **0 of 4** ≤ −2 cm/yr: pass. M14 (−0.07, 6 of 133 cells) and M16 (−0.02, 2 of 67 cells) have data and are
+  still; M13 and M20 have none. By the reading fixed in O3b, the CZ bowls are **not confirmed: treated as possible NISAR
+  artefacts**, including **M16**, the one CZ bowl that passes rule O3a.
+- Other bowls (not part of the prediction): M11 −4.8, M12 −2.6, M22 −2.4 cm/yr (≤ −2); M10 −0.1; the rest no data.
+- **Post-hoc** (added after seeing the empty bowls): EGMS in a ring 0–500 m outside each bowl. Around 9 of the 10 PL bowls
+  of O1 the median is −1.1 to −2.5 cm/yr (M02: −0.6), while over both tiles only 0.5 % of cells reach ≤ −2 cm/yr and the
+  median is −0.05. Around the CZ bowls the ring median is −0.02 to −0.08 cm/yr. So the PL bowls sit inside ground that
+  EGMS saw sinking in 2019–2023; the CZ ones do not. This supports the PL bowls and weakens the CZ ones; it is not a test.
+- Consequence for the plate: M16 is no longer called "the one reliable Czech bowl" without the EGMS caveat.
+
+**Why EGMS has no data inside the bowls** (post-hoc diagnostic, `scripts/ostrava/egms_nodata.py`, 2026-11-15; EGMS,
+WorldCover and the study's NISAR vertical on the EGMS 100 m grid over the study box):
+- **Not land cover.** Far from the bowls (> 3 km) EGMS has data in 98.5 % of built-up cells, 51 % of grassland, 40 % of
+  forest and 17 % of cropland. Inside the bowls every class drops: built-up 11 % (47 cells), forest 7 %, cropland 2 %,
+  grassland 1 %. Built-up land, which EGMS almost always measures, is missing inside the bowls too.
+- **It follows the motion.** With land cover held fixed (cropland and grassland), the share of cells with EGMS data falls
+  with the NISAR 2026 vertical rate: 34 % where it is above −5 cm/yr, 15 % at −5…−10, 6 % at −10…−15, 5 % at −15…−25,
+  2 % at −25…−40 and 0 % (228 cells) below −40. By distance to the nearest bowl: 30 % beyond 1 km, 22 % at 300–600 m,
+  13 % at 0–300 m, 2 % inside.
+- **EGMS saw the same places sinking in 2019–2023.** The cells that survive near the Polish bowls sink faster the
+  closer they are: median −1.1 cm/yr at 400–600 m, −1.4 at 200–400 m, −1.7 at 0–200 m, −2.7 cm/yr for the 40 cells left
+  inside; the same in every year 2019, 2020, 2021, 2022, 2023 (no step when the revisit went from 6 to 12 days in
+  Dec 2021). Their fit residual grows towards the bowls (rmse 1.0 → 1.9 mm). So the bowls sit in ground that was already
+  subsiding in 2019–2023; they are not new after 2023. EGMS keeps only the slow edge and drops the faster centre.
+- **Not the plain phase limit.** Sentinel-1 can follow λ/4 = 1.39 cm of LOS change between two acquisitions, i.e. 84 cm/yr
+  with 6 days and 42 cm/yr with 12 days, yet the cells disappear from about −3 cm/yr on. The loss must come from the EGMS
+  processing (scatterer selection, quality thresholds, unwrapping between neighbours, or the L3 step that needs both an
+  ascending and a descending point in a cell). Which step it is cannot be told from L3; the per-track L2a/L2b points would
+  show it. Not tested.
+- Reading: EGMS cannot validate fast mining bowls; it can only confirm that the ground around them subsides. A test of
+  the bowls' size needs another source (levelling, GNSS, or an L-band series). The CZ bowls stay unconfirmed: around them
+  EGMS sees still ground (ring median −0.02 to −0.08 cm/yr), not missing ground.
+
+### O4. Atlas plate `ostrava-karvina-asc` (built 2026-11-15): choices, all post-hoc
+- Bowls on the plate are split by the O3a rule (as pre-registered): **12 reliable (11 PL, 1 CZ: M16), 10 candidates**.
+  Reliable PL bowls: 9.45 km², 1,143 OSM buildings, 33.6 km of roads, 3.2 km of rail, area-weighted vertical −41.1 cm/yr.
+- The motion strokes are the engine's: one ascending track (158, frame 27, 8 pairs 25 Jun – 11 Oct 2026), LOS taken as
+  vertical. The single-track rates are smaller than the study's two-track vertical in the bowls (e.g. M01 grid cell vs
+  the study's −68 cm/yr mean are not comparable one to one); the plate quotes the study's numbers only.
+- The first build showed a broad −10…−16 cm/yr patch in the south-east (around 18.75 E, 49.75 N) where all three study
+  tracks give ~0 (−2…+1 cm/yr). The engine got a long-wavelength filter (`highpass` in the site config: σ 5 km, fast
+  features masked at 8 cm/yr + 0.5 km, the study's HP values; detection on a 400 m smoothed rate, chosen on this plate).
+  It brings the patch to −2…−7 cm/yr and leaves the bowl centres within ~5 %. Chosen after seeing the map: post-hoc.
+- `coh_min_draw` lowered from 0.45 to 0.3 (the study's coherence threshold) because the bowls have median coherence
+  0.41–0.45 and half of their pixels were not drawn. Post-hoc.
+- The engine's "sure it sinks at least" headline is switched off (`velocity.headline: false`): with bowls smaller than
+  its 1.5 km window it picked an edge artefact (−7.8 ± 0.3 cm/yr at 18.82 E, 49.71 N).
+- Zero point: Frýdek-Místek (south of the mined field), chosen after looking at the study's vertical map. Post-hoc.
+- A height-correlated tropospheric term was tried (stable above 330 m) and dropped: +1.9 cm/yr per 100 m, too small to
+  matter on this low relief.
+
 ### O3. Next tests, pre-registered 2026-11-14 (before running)
 - **O3a. Rule-based reliable set (a fixed rule, not a test).** Reliable = confirmed by 3 tracks AND no-data share < 0.6 AND
   water share < 0.10, fixed now. It is written after seeing O1, so it is not a blind test: it only replaces the hand-picked
