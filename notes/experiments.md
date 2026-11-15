@@ -2007,3 +2007,103 @@ zone 16 (EPSG 32616), so the band A class layers are built on each window's own 
   text says (it was median dB minus median dB); W1a reports broken-layer and finite counts separately; the Faraday sign
   convention is fixed and stated (the W8 values above flipped sign, magnitudes unchanged); `experiments/w_selfcheck.py`
   reruns the synthetic checks of the polarimetry helpers.
+
+## WS. Northern Wisconsin through the year: the story tests (`edoTenseii` + Claude)
+
+Goal: turn section W into a story that changes in time and can be drawn on the map: crops, swamps, lakes, frost and the
+ionosphere, each with a test written before the data. Same windows, grids and classes as section W unless said otherwise.
+
+**Pre-registered 2026-11-15 ~17:00 (Dnipro time), committed and pushed on its own before any value used below is read.**
+Seen before writing:
+- Everything in section W: band B class medians per date (deciduous, conifer, cropland, the 76-px water class), band A
+  class means on SUB, and the Faraday estimate Ω of the 27 band A scenes (W8). So WS9 is blind on the TEC side only.
+- Radar-independent layers: CDL 2025 and NWI shares (`experiments/ws_refs.py`: corn 7.6 %, soybean 6.1 %, forested
+  wetland 18 % of the window) and the choice of SUB2 from them.
+- Lists only: GUNW pairs (A76: 16, D113: 15, D41: 16, A148: 11; 12-day except one 24-day pair), the CODE GIM file list
+  of one day on CDDIS, and the name, units (rad) and shape of the GUNW `ionospherePhaseScreen` dataset.
+- Not seen: any GUNW value, any band A value on SUB2, any field-, swamp- or lake-level radar value, any TEC value,
+  any Sentinel-2 value of 2026 or of the lakes.
+
+**New layers and windows.**
+- *CDL 2025* (USDA NASS, Wisconsin state file): corn = code 1, soybean = code 5, as fractions on the 80 m grid.
+  *NWI* (USFWS): forested (PFO), scrub-shrub (PSS) and emergent (PEM) wetland fractions on the 80 m grid.
+- *SUB2* = W −90.863, S 45.140, E −90.759, N 45.214: the 8 × 8 km box with the most corn + soybean (32 %) that keeps
+  ≥ 5 % forested wetland (it has 14.5 %), chosen from CDL and NWI only. Band A full covariance for every QPDH scene
+  (52) on SUB and SUB2; the missing SUB scenes are fetched too.
+- *GUNW*: every pair of the four tracks, window = the full W window, HH: unwrapped phase, coherence, connected
+  components, `ionospherePhaseScreen`.
+- *Classes* (≥ 0.9 fraction on the grid; band A: the 80 m class layers resampled to 20 m by nearest):
+  corn (CDL), soybean (CDL), swamp forest (NWI PFO), upland forest (W deciduous ∪ conifer with zero NWI wetland of any
+  kind), lake (WorldCover water ≥ 0.9, eroded by one 80 m pixel), cropland (W class).
+- *Freeze state* per date: the section K rule (W4). A scene enters a test only with ≥ 50 class pixels.
+- *Weather*: Open-Meteo hourly archive at the window centre (temperature, precipitation). *TEC*: CODE final global
+  ionosphere maps (IONEX, CDDIS).
+
+**WS1. Do the corn stalks stand up?** Band A, SUB2, scenes from 22 Oct – 30 Nov 2025, unfrozen (CDL 2025 is the
+truth for that autumn). Vertical stalks, standing crop or tall stubble, attenuate V and add an H stalk–ground double
+bounce; soybean stubble is short and flat. Per scene: (corn − soybean) of the class median 10·log10(HH/VV).
+- WS1a. ≥ +1.0 dB in ≥ 2/3 of the scenes.
+- WS1b. Corn − soybean HV ≥ +1.0 dB in ≥ 2/3 of the scenes.
+- Fewer than 3 scenes: inconclusive. 2026 scenes: reported only (no 2026 crop map; fields rotate).
+
+**WS2. Trunks standing in water (double bounce).** Swamp forest against upland forest, unfrozen scenes.
+- WS2a. Band B, every unfrozen scene: swamp − upland median HH ≥ +1.0 dB in ≥ 2/3 of the scenes.
+- WS2b. Band A, SUB and SUB2 pooled per scene: the co-pol phase φ = arg⟨S_HH·S_VV*⟩ of the class-mean covariance;
+  |φ_swamp| − |φ_upland| ≥ 10° in ≥ 2/3 of the scenes (a dihedral turns the HH–VV phase towards 180°).
+- Fewer than 5 scenes: inconclusive. Reported: the same by season (leaf-off Oct – Nov, leaf-on Jun – Sep).
+
+**WS3. Lakes freezing.** Band B, lake class. Ice dates from Sentinel-2 L2A SCL on clear lake pixels: the first scene
+after 1 Nov 2025 with ≥ 50 % of the clear lake pixels classed snow/ice (SCL 11) is the *ice date*; the last scene
+before it with ≥ 50 % water (SCL 6) is the *open date*. Radar dates after the ice date are *ice*, dates before the
+open date are *open*; between them: dropped.
+- WS3. Per track with ≥ 1 ice and ≥ 1 open date: median HH(ice) − median HH(open) ≥ +3.0 dB on ≥ half of the tracks
+  (floating lake ice is bright at L-band: rough ice–water interface and bubbles).
+- No S2 ice date or fewer than 2 eligible tracks: inconclusive. Risk: new, clear, bubble-free ice may be dark.
+
+**WS4. Harvest seen twice.** Band B, 2026 dates, 1 km blocks (12 × 12 px) with ≥ 50 corn or soybean px (CDL 2025
+used only to find crop fields; the crop itself may have rotated). Per block and track:
+- *radar harvest date*: the first date when the block median HV falls ≥ 3 dB below its 2026 maximum on that track
+  and stays there on the next date of the track;
+- *optical harvest date*: the first clear Sentinel-2 date (block ≥ 50 % clear) when the block median NDVI falls below
+  0.4 after a 2026 peak ≥ 0.7.
+- WS4. |radar − optical| ≤ 24 days in ≥ 60 % of the (block, track) pairs that have both. Fewer than 30 pairs:
+  inconclusive. Reported: the map of radar harvest dates, the median lag (radar − optical).
+
+**WS5. Rain wakes the bare fields.** Band B, cropland, unfrozen dates of 15 Oct – 30 Nov 2025 and 1 Oct – 10 Nov
+2026 (mostly after harvest). HH anomaly = HH minus the mean of its own track and season. Pooled Spearman ρ between
+the HH anomaly and the rain over the 72 h before the pass. WS5. ρ ≥ +0.4 and one-sided permutation p ≤ 0.05
+(permutations within track and season). Fewer than 12 dates: inconclusive.
+
+**WS6. Frozen ground holds still (coherence).** GUNW 12-day pairs. A pair is *frozen* when both dates are frozen, and
+*unfrozen* when both are unfrozen. Per track and class (upland forest, cropland), median coherence of the class.
+- WS6. Frozen − unfrozen (medians over pairs) ≥ +0.10 on ≥ 2/3 of the (track, class) cases with ≥ 1 frozen and
+  ≥ 2 unfrozen pairs. Fewer than 2 cases: inconclusive.
+
+**WS7. Frost heave of the fields.** GUNW, 12-day pairs from 1 Nov 2025 to 31 Jan 2026, per track. Per pair:
+LOS change (unwrapped phase minus `ionospherePhaseScreen`, in mm, positive = towards the satellite) of cropland minus
+upland forest (class medians, same connected component only). Summed over the track's pairs.
+- WS7. Cropland − forest cumulative ≥ +5 mm on ≥ 2 tracks with ≥ 4 pairs in that period, and no track ≤ −5 mm.
+- Fewer than 2 such tracks: inconclusive. Risk: tropospheric and snow-related phase can be larger than heave.
+
+**WS8. Two ionosphere meters inside one radar.** For every GUNW pair whose two dates both have a band A scene on SUB:
+ΔΩ = Ω(second) − Ω(first) (forest class mean, Bickel–Bates, W8 convention) against the median
+`ionospherePhaseScreen` over SUB (rad).
+- WS8. |Spearman ρ| ≥ 0.5 with permutation p ≤ 0.05 (two-sided), n ≥ 8 pairs. The sign is reported, not judged.
+- If the screen median over the window is 0 for every pair (a constant removed by the processor): inconclusive.
+- Reported: the slope against the one expected from B∥ and the two dispersion laws (Faraday ∝ B∥·TEC/f²,
+  phase ∝ TEC/f).
+
+**WS9. Faraday against the global TEC maps.** For every band A scene on SUB: predicted
+Ω_p = 2.365·10⁴ · B∥ · STEC / f² (SI units, f = band A centre frequency). STEC = CODE VTEC at the ionospheric pierce
+point (450 km, along the scene's line of sight) × the thin-shell obliquity factor, interpolated in time to the pass.
+B∥ = projection on the line of sight of a fixed field at 450 km above the site: 45 400 nT, inclination 69.5° (down),
+declination −1.5° (a dipole-scaled approximation of the WMM values for 45° N, 91° W; the same for all scenes, so it
+scales Ω_p but does not change the ranking).
+- WS9a. Spearman ρ(|Ω|, |Ω_p|) ≥ 0.5, n ≥ 15, one-sided permutation p ≤ 0.05.
+- WS9b. The sign of Ω equals the sign of Ω_p in ≥ 80 % of the scenes with |Ω_p| ≥ 1°.
+- Reported: the regression slope of Ω on Ω_p (1 = perfect), the scatter, crosstalk not corrected (section K).
+
+**WS10. Monthly maps (reported, not judged).** For SUB and SUB2: per-pixel (5 × 5 boxcar) entropy H, ᾱ and the Pauli
+power (|HH − VV|², 2|HV|², |HH + VV|²) of the first scene of each month. For the map: block medians of band B HH and HV per
+date, each relative to the block's own summer (Jun – Sep 2026) median on the same track, and the class strips per date.
+These are pictures and data for the plate, not claims.
