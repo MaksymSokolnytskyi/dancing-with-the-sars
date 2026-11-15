@@ -2070,16 +2070,30 @@ that do not care about the wanted answer.
   with several centres.
 - **Changed after looking at the results (post-hoc):** the frame-coverage threshold (because of D080), the swath-edge trim,
   the long-wavelength noise filter, the bowl threshold −15 cm/yr (instead of −10), and the water mask (because of a pond).
-- **Checks of these choices** (as reported by the analyst; the scripts for them are **not in the repo yet**, so they cannot
-  be re-run by others until added to `scripts/ostrava/`):
-  - coverage: the distribution of frame coverage is bimodal, so any threshold from 0.22 to 0.83 selects the same frames;
-  - noise: σ of the vertical ≈ 3.5 cm/yr, so −15 cm/yr is about 4σ, stricter than the classic 3σ;
-  - null test: subtract each pixel's mean velocity, put random signs on the pairs, and count how many bowls the method
-    "finds" where there is no motion. Result: false discovery rate **2 % for bowls confirmed by three tracks and 20 % for
-    two tracks**. The first version of this test had a bug (residual motion leaked into the "null"); it was fixed;
-  - robustness: changing each parameter one at a time leaves the reliable bowls the same.
-- Reading: the 20 % FDR for two-track bowls supports keeping them as candidates only. The robustness check refers to the
-  hand-picked reliable set (O2); it will be repeated for the rule-based set of O3a.
+- **Checks of these choices**: `scripts/ostrava/ostrava_thresholds.ipynb` (added 2026-11-15; it reads the saved stacks,
+  no download). The numbers below are from the analyst's run of that notebook (seed 42, `N_PERM` = 30). That run had **no
+  water mask** (the water file was not attached), and its copy of the detector finds 24 bowls, 17 of them confirmed by 3
+  tracks, not the 22 of O1. It has **not yet been re-run from the repo**.
+  - A, coverage: frame coverage is bimodal (0.21 for D080, then 0.83 and above), so any threshold from 0.22 to 0.83 selects
+    the same frames;
+  - C, noise: σ of the vertical in stable places (1.4826·MAD) = 3.6 cm/yr, so −15 cm/yr ≈ 4.2σ (3σ = −10.7);
+  - D, null test: subtract each pixel's mean rate, put random signs on the pair deviations, and count the bowls the method
+    "finds" where there is no motion. At −15 cm/yr the FDR is **2 % for bowls confirmed by ≥ 3 tracks, 12 % for ≥ 2 tracks
+    (the default rule) and 20 % for ≥ 1 track**. Under the default rule the FDR is ≤ 10 % only from −20 cm/yr down
+    (6 % at −20). The test is conservative (random signs break the partial cancellation of shared acquisitions). The first
+    version of this test had a bug (~27 % of the motion leaked into the "null"); it was fixed;
+  - E, injected bowls at −15: found 82 % of −60, 71 % of −45, 75 % of −30, 73 % of −20 and 54 % of −10 cm/yr bowls; only
+    ~14 bowls per cell, so these shares are rough (they are not monotonic);
+  - B, coherence: per-pair noise is 1.6× larger at γ ≈ 0.3 than at 0.7 (theory: 3.1×); only γ ≥ 0.3 is in the stacks;
+  - F, noise filter: with the mask the injected bowl keeps 100 % of its amplitude for σ = 1–12 km (73 % at 1 km without it);
+  - G, split depth: the bowl count is flat (24) from 8 to 12 cm/yr around the default 10;
+  - H, robustness: changing one parameter at a time recovers all 17 three-track bowls for most values, and 12–15 of 17 at
+    the edges (threshold −10/−12: 15; −20: 14; −25: 12; split depth 15–20: 15; min. size 40 px: 15). So "the same" holds
+    near the defaults, not over the whole range.
+- Reading: the 12 % FDR for two-track bowls (above the notebook's own 10 % line) supports keeping them as candidates only.
+  H uses the detector's own 3-track set, not the hand-picked reliable list of O2; it will be repeated for the rule-based set
+  of O3a. Before any of these numbers goes on a plate or into the pitch, re-run the notebook from the repo with the water
+  mask and write the result here.
 
 ### O3. Next tests, pre-registered 2026-11-14 (before running)
 - **O3a. Rule-based reliable set (a fixed rule, not a test).** Reliable = confirmed by 3 tracks AND no-data share < 0.6 AND

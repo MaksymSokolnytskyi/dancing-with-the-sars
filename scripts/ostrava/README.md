@@ -12,10 +12,11 @@ Not part of the `sars` CLI yet. Tests and their status are logged in `notes/expe
 | 2 | `node scripts/ostrava/ostrava_osm.mjs`: per bowl, buildings, roads, rail, land use, nearest mine and settlement, country (Overpass API) | `zones_vertical_osm.{csv,geojson}`, `zones_vertical_osm_groups.csv`, `osm_summary.json`, `osm_buildings_in_bowls.json` |
 | 3 | `node scripts/ostrava/ostrava_map.mjs`: the map (vertical rate, heaps, bowl outlines, buildings) without GDAL | `map_vertical_osm_full.png`, `map_vertical_osm_zoom.png`, `map_vertical_osm_labels.json` |
 | 4 | `node scripts/ostrava/build_ostrava_results.mjs`: the results page | `results_ostrava.html` |
+| 1b | `scripts/ostrava/ostrava_thresholds.ipynb`: checks of the thresholds from the saved stacks, no download (A coverage, B coherence vs noise, C σ and variogram, D null test / FDR, E injected bowls / recall, F noise filter, G split plateau, H robustness); see `notes/experiments.md` O2b | `thresholds/A_coverage.png` … `H_robustness.csv`, `summary_thresholds.csv` |
 | – | `node scripts/ostrava/ostrava_checks.mjs` (optional): odd objects (is M02 one bowl or two, a linear feature, a profile across M01) | `checks_odd_objects.json` |
 
 Step 1 needs Python with the extra packages listed in the notebook's first cell, pinned to versions resolved on
-14 Nov 2026 (run it with `uv run --with ...==...`, no change to the project lock). Steps 2–4 need Node 18 or newer and nothing else (no npm packages). Overpass answers are cached in
+14 Nov 2026 (run it with `uv run --with ...==...`, no change to the project lock); step 1b has its own pinned command in its first cell. Steps 2–4 need Node 18 or newer and nothing else (no npm packages). Overpass answers are cached in
 `data/ostrava/osm_cache/` (ignored by git); delete it to refresh OSM. Requests send the User-Agent `space-apps-research`.
 
 ## Secrets
