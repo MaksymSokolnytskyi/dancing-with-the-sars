@@ -1,6 +1,9 @@
 """Build the 7-slide deck (web/demo/edelweiss-slides.pdf) from the demo cards and plate screenshots.
 
-    uv run python scripts/make_slides.py <montage_dir>
+    uv run python scripts/make_slides.py <montage_dir> [--large]
+
+--large: the maps cropped closer (x1.25, kept to the top so the title cartouche stays) and bigger type, for a projector;
+written to web/demo/edelweiss-slides-large.pdf.
 
 montage_dir: the same folder scripts/make_demo.py reads (title.jpg, end.jpg, m0*..m4*). Numbers on the slides are the
 plates' own numbers, with their errors and the failed tests (see notes/submission-2026.md).
@@ -14,6 +17,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 W, H = 1280, 720
+LARGE = "--large" in sys.argv
+ZOOM, T1, T2 = (1.25, 40, 29) if LARGE else (1.0, 30, 23)
 PAPER, INK, MUTED, RED = (239, 230, 210), (40, 28, 18), (110, 92, 70), (150, 52, 36)
 
 
@@ -21,20 +26,22 @@ def font(size, italic=False):
     return ImageFont.truetype("C:/Windows/Fonts/georgiai.ttf" if italic else "C:/Windows/Fonts/georgia.ttf", size)
 
 
-def shot(p):
-    return Image.open(p).convert("RGB").resize((W, H), Image.LANCZOS)
+def shot(p, zoom=1.0):
+    im = Image.open(p).convert("RGB")
+    w, h = im.width / zoom, im.height / zoom
+    return im.crop(((im.width - w) / 2, 0, (im.width + w) / 2, h)).resize((W, H), Image.LANCZOS)
 
 
 def plate(p, title, lines):
     """A plate screenshot with a paper band at the foot: the claim and its numbers."""
-    im = shot(p)
+    im = shot(p, ZOOM)
     d = ImageDraw.Draw(im)
-    band = 46 + 34 * len(lines)
+    band = T1 + 20 + (T2 + 12) * len(lines)
     d.rectangle([0, H - band, W, H], fill=PAPER)
     d.line([0, H - band, W, H - band], fill=INK, width=1)
-    d.text((40, H - band + 12), title, font=font(30), fill=INK)
+    d.text((40, H - band + 10), title, font=font(T1), fill=INK)
     for i, t in enumerate(lines):
-        d.text((40, H - band + 52 + 34 * i), t, font=font(23, i == len(lines) - 1), fill=INK if i < len(lines) - 1 else MUTED)
+        d.text((40, H - band + T1 + 22 + (T2 + 12) * i), t, font=font(T2, i == len(lines) - 1), fill=INK if i < len(lines) - 1 else MUTED)
     return im
 
 
@@ -67,7 +74,7 @@ def main():
                "failed tests (rain, lake ice, frost heave, swamp forest, dry afternoons) stay on the plates"]),
         shot(m / "end.jpg"),
     ]
-    out = ROOT / "web" / "demo" / "edelweiss-slides.pdf"
+    out = ROOT / "web" / "demo" / ("edelweiss-slides-large.pdf" if LARGE else "edelweiss-slides.pdf")
     slides[0].save(out, save_all=True, append_images=slides[1:], resolution=96)
     print(f"{out.relative_to(ROOT)}: {len(slides)} slides, {out.stat().st_size / 1e6:.1f} MB")
 
