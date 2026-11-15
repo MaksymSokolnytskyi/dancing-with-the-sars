@@ -43,6 +43,7 @@ uv run sars fetch <plate>                 # DEM, NISAR windows (pinned by the lo
 uv run sars build <plate>                 # -> web/data/<plate>/
 uv run sars serve                         # http://localhost:8765/?scene=<plate>&theme=scroll
 uv run python tests/smoke.py              # before every push
+uv run python scripts/publish_site.py     # committed web/ -> public site https://maksymsokolnytskyi.github.io/edelweiss-atlas/
 ```
 
 Datasets, licences, cache formats and per-plate needs are in [docs/data-guide.md](docs/data-guide.md).

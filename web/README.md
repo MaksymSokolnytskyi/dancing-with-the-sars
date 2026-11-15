@@ -104,6 +104,9 @@ and the last plate back to the contents; "☰ Contents" in the story card and in
 text. The first use of each term on a page gets a dotted underline; hovering, focusing or tapping it opens the card.
 English forms take only a plural ending (`pass` matches "passes", not "passed"); Ukrainian forms are stems.
 
+Publish: `uv run python scripts/publish_site.py` copies the committed `web/` (nothing else) to the public repository
+`MaksymSokolnytskyi/edelweiss-atlas`, served at https://maksymsokolnytskyi.github.io/edelweiss-atlas/.
+
 ## Send one place as one file
 
     uv run sars pack mexico-city-asc --theme scroll   # extra pack_scene.py options pass through
