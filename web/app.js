@@ -42,6 +42,7 @@ const STR = {
         lg_up: "синій: земля піднімається",
         score_note: "клин = опускання району за 12 днів · угорі найшвидші, внизу нерухомі",
         score_still: "тиша", score_ref: "еталон, 0", score_sound: "звук", score_play: "програти рік",
+        more: "Детальніше ▾", less: "Коротше ▴", notes: "Нотатки до розрахунку",
         score_sound_t: "кожен дзвін — ще 2 см опускання: що швидше район сідає, то частіше дзвонить; нерухомі мовчать",
         lg_change: "радар втратив відбиток між двома прольотами (сніг, вода, обвал)", lg_change_event: "пляма, що лишається: селевий потік",
         story_intro: "таблиця", story_what: "що змінилось", story_why: "чому", story_sure: "наскільки певні",
@@ -80,6 +81,7 @@ const STR = {
         lg_up: "blue: the ground rises",
         score_note: "wedge = how far the district went down in 12 days · fastest on top, still at the bottom",
         score_still: "still", score_ref: "reference, 0", score_sound: "sound", score_play: "play the year",
+        more: "Tell me more ▾", less: "Less ▴", notes: "Notes on the build",
         score_sound_t: "each chime = 2 more cm of sinking: the faster a district sinks, the more often it chimes; still ground stays silent",
         lg_change: "the radar lost the ground's fingerprint between two passes (snow, water, a slide)", lg_change_event: "the patch that stays: the debris flow",
         story_intro: "plate", story_what: "what changed", story_why: "why", story_sure: "how sure",
@@ -139,6 +141,7 @@ function applyThemeCSS(th) {
   const r = document.documentElement.style;
   r.setProperty("--paper", th.paper); r.setProperty("--ink", th.ink); r.setProperty("--muted", th.muted);
   r.setProperty("--panel-bg", th.panel.bg); r.setProperty("--panel-border", th.panel.border); r.setProperty("--font", th.font);
+  r.setProperty("--font-body", th.font_body || th.font);          // running text: a plainer face than the display one
 }
 
 function mapStyle(th) {
@@ -443,10 +446,23 @@ function buildLayers() {
       const color = m.categorical ? ((c) => (th.categorical[m.categorical] || [])[cellValue(d, m, c)] || [0, 0, 0, 0])
                                   : ((c) => ramp(th.ramps[m.ramp], cellValue(d, m, c)));
       const tkey = m.time ? seriesIndex(d) : 0;
-      L.push(new deck.PolygonLayer({ id: lay.id + "-" + m.key, data: d.cells, stroked: false, pickable: false,
-        getPolygon: (c) => { const k = half / Math.cos(c[1] * Math.PI / 180);
-          return [[c[0] - k, c[1] - half], [c[0] + k, c[1] - half], [c[0] + k, c[1] + half], [c[0] - k, c[1] + half]]; },
-        getFillColor: color, updateTriggers: { getFillColor: [th.name, m.key, tkey] } }));
+      if (th.cells_as === "squares") {
+        L.push(new deck.PolygonLayer({ id: lay.id + "-" + m.key, data: d.cells, stroked: false, pickable: false,
+          getPolygon: (c) => { const k = half / Math.cos(c[1] * Math.PI / 180);
+            return [[c[0] - k, c[1] - half], [c[0] + k, c[1] - half], [c[0] + k, c[1] + half], [c[0] - k, c[1] + half]]; },
+          getFillColor: color, updateTriggers: { getFillColor: [th.name, m.key, tkey] } }));
+      } else {
+        // stipple, the engraver's way to lay a tone: one dot per block, its size carries the strength (the ramp's own
+        // alpha), the ink stays solid; weak or neutral blocks leave the paper bare instead of a pale square
+        const pal = m.categorical ? (th.categorical[m.categorical] || []) : (th.ramps[m.ramp] || []).map((x) => x[1]);
+        const amax = Math.max(1, ...pal.map((c) => c[3] ?? 255)), rMax = d.cell_km * 1000 / 2 * 0.96;
+        L.push(new deck.ScatterplotLayer({ id: lay.id + "-" + m.key, data: d.cells, pickable: false, radiusUnits: "meters",
+          getPosition: (c) => [c[0], c[1]],
+          getRadius: (c) => { const a = (color(c)[3] ?? 0) / amax; return a <= 0.05 ? 0 : rMax * Math.min(1, a); },
+          getFillColor: (c) => { const k = color(c), a = Math.min(1, (k[3] ?? 0) / amax);
+            return [k[0], k[1], k[2], Math.round((th.cells_alpha ?? 220) * (0.45 + 0.55 * a))]; },
+          updateTriggers: { getFillColor: [th.name, m.key, tkey], getRadius: [th.name, m.key, tkey] } }));
+      }
     } else if (lay.kind === "image") {
       // a white+alpha raster (town blocks) tinted with the theme ink; crisp cells up close, a tone when zoomed out
       const s = (th.lines || {})[lay.style] || { color: [0, 0, 0], alpha: 120 };
@@ -644,7 +660,7 @@ function renderStats() {
   if (st.footprint) parts.push(`${T("event")} ${st.footprint.event_date} · ${T("largest")} ${st.footprint.largest_km2} ${T("km2")} · ` +
     `${T("false_alarm")}: ` + st.footprint.false_alarm_check.map((c) => `${c.largest_km2} ${T("km2")}`).join(", "));
   parts.push(`engine v${man.engine_version}`);
-  $("stats").innerHTML = parts.join(" · ") + (man.notes?.length ? `<div style="margin-top:4px">${man.notes.join("<br>")}</div>` : "");
+  $("stats").innerHTML = parts.join(" · ") + (man.notes?.length ? `<details><summary>${T("notes")}</summary>${man.notes.join("<br>")}</details>` : "");
 }
 
 function renderPanel() {
@@ -1055,11 +1071,11 @@ function drawFrame() {
     const man = state.man, yrs = [man.dates[0], man.dates.at(-1)].map((d) => (d || man.generated || "").slice(0, 4));   // a quake card has no dates
     const name = [...label(man.title).toLocaleUpperCase()].join("\u2009");
     const sub = (state.man.frame_sub ? label(state.man.frame_sub) : T("frame_sub")).replace("{a}", yrs[0]).replace("{b}", yrs[1]);
-    const cx = (R.x0 + R.x1) / 2, w = Math.max(name.length * 9.5, sub.length * 5.6) + 44, h = 40;
+    const cx = (R.x0 + R.x1) / 2, w = Math.max(name.length * 9.5, sub.length * 6.3) + 44, h = 42;
     s += `<rect class="cart" data-i="0" x="${cx - w / 2}" y="${R.y0 + 2}" width="${w}" height="${h}" fill="${paper}" stroke="${ink}" stroke-width="0.8"/>` +
          `<rect class="cart" data-i="3" x="${cx - w / 2 + 3}" y="${R.y0 + 5}" width="${w - 6}" height="${h - 6}" fill="none" stroke="${ink}" stroke-width="0.4"/>` +
          `<text x="${cx}" y="${R.y0 + 22}" text-anchor="middle" class="ft cart" style="font-size:16px;letter-spacing:.06em">${name}</text>` +
-         `<text x="${cx}" y="${R.y0 + 35}" text-anchor="middle" class="ft cart" style="font-size:11px;font-style:italic">${sub}</text>`;
+         `<text x="${cx}" y="${R.y0 + 35}" text-anchor="middle" class="ft cart" style="font-size:12.5px;font-style:italic">${sub}</text>`;
   }
   svg.innerHTML = `<style>.ft{font-family:${th.font.replace(/"/g, "'")};font-size:11px;fill:${ink}}</style>${s}`;
   const ct = [...svg.querySelectorAll("text.cart")];
@@ -1200,11 +1216,11 @@ function renderScore() {
        `<line id="sc-cur" x1="${x}" y1="${top - 4}" x2="${x}" y2="${H}" stroke="${ink}" stroke-width="1"/><g id="sc-flash" fill="${red}"></g>`;
   box.innerHTML = `<div class="sc-head"><b>${label(lay.label)}</b><span class="sc-note">${d.note ? label(d.note) : T("score_note")}</span>` +
     `<button id="sc-play" title="${T("score_play")}">${state.playing ? "❚❚" : "▶"}</button>` +
-    (bars ? "" : `<button id="sc-sound" class="${state.sound ? "on" : ""}" title="${T("score_sound_t")}">♪ ${T("score_sound")}</button>`) + `</div>` +
+    `</div>` +
     `<svg viewBox="0 0 ${W} ${H}" height="${H}">${s}</svg>`;
   box.dataset.x0 = LW; box.dataset.w = W - LW - RW; box.dataset.span = span; box.dataset.top = top; box.dataset.rh = RH;
   $("sc-play").onclick = togglePlay;
-  if (!bars) $("sc-sound").onclick = () => { state.sound = !state.sound; if (state.sound) audioCtx(); $("sc-sound").classList.toggle("on", state.sound); };
+  if ($("sc-sound")) $("sc-sound").onclick = () => { state.sound = !state.sound; if (state.sound) audioCtx(); $("sc-sound").classList.toggle("on", state.sound); };
   box.querySelectorAll(".sc-row").forEach((el) => {
     const i = +el.dataset.i;
     el.onmouseenter = () => { state.scoreHover = i; markScoreRows(); redraw(); };
@@ -1399,8 +1415,12 @@ function renderStoryCard() {
   const legend = p.legend ? [...$("legend").querySelectorAll(".legend-item")].map((e) => e.outerHTML).join("") : "";
   const tabs = S.pages.map((q, k) => `<button class="tab${k === i ? " on" : ""}" data-k="${k}" title="${label(q.title)}">${ROMAN[k] || k + 1}</button>`).join("");
   const timed = needsTime() && state.man.dates.length > 1;
+  // one paragraph up front, the rest behind "Tell me more"; "How sure" pages show everything (doubts are never folded away)
+  const keep = p.keep ?? (p.section === "sure" ? 99 : 1);
   box.innerHTML = `<div class="st-kicker">${label(S.title)} · ${T("story_" + (p.section || "intro"))}</div>` +
-    `<h2>${label(p.title)}</h2>${(p.text || []).map((t) => `<p>${label(t)}</p>`).join("")}` +
+    `<h2>${label(p.title)}</h2>${(p.text || []).slice(0, keep).map((t) => `<p>${label(t)}</p>`).join("")}` +
+    ((p.text || []).length > keep ? `<div class="st-more${state.moreOpen ? " open" : ""}">${p.text.slice(keep).map((t) => `<p>${label(t)}</p>`).join("")}</div>` +
+      `<button class="st-more-btn" id="st-more">${state.moreOpen ? T("less") : T("more")}</button>` : "") +
     (facts ? `<div class="facts">${facts}</div>` : "") + (legend ? `<div class="st-legend">${legend}</div>` : "") +
     (timed ? `<div class="st-time"><button id="st-play">${state.playing ? "❚❚" : "▶"}</button><span id="st-date"></span></div>` : "") +
     `<nav><button id="st-prev"${i ? "" : " disabled"}>← ${T("story_back")}</button><span class="tabs">${tabs}</span>` +
@@ -1411,6 +1431,9 @@ function renderStoryCard() {
   $("st-next").onclick = () => applyPage(i + 1);
   box.querySelectorAll(".tab").forEach((b) => (b.onclick = () => applyPage(+b.dataset.k)));
   $("st-explore").onclick = (e) => { e.preventDefault(); storyOpen(false); };
+  if ($("st-more")) $("st-more").onclick = () => {             // the choice is kept from page to page
+    state.moreOpen = !state.moreOpen; box.querySelector(".st-more").classList.toggle("open", state.moreOpen);
+    $("st-more").textContent = state.moreOpen ? T("less") : T("more"); };
   if (timed) $("st-play").onclick = togglePlay;
 }
 

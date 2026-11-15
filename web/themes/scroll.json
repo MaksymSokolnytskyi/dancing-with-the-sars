@@ -3,7 +3,7 @@
  "label": "Scroll (parchment)",
  "paper": "#e8dcbf",
  "ink": "#3a2a1c",
- "muted": "#7b6650",
+ "muted": "#6a5540",
  "font": "'IM Fell English', Georgia, serif",
  "basemap": null,
  "terrain": {
@@ -521,13 +521,13 @@
    ],
    "alpha": 0,
    "width": 0,
-   "label_size": 12,
+   "label_size": 13,
    "label_bold": false,
    "legend": false,
    "italic": true,
    "spaced": true,
    "caps_rank": 3,
-   "caps_size": 13,
+   "caps_size": 14,
    "collide": true
   },
   "station": {
@@ -579,12 +579,12 @@
     42,
     28
    ],
-   "alpha": 75,
+   "alpha": 48,
    "blocks": true,
    "zoom_fade": [
     10,
     12.5,
-    0.55
+    0.45
    ]
   },
   "glacier": {
@@ -676,5 +676,6 @@
  "layers_on": [
   "trees",
   "blocks"
- ]
+ ],
+ "font_body": "'EB Garamond', Georgia, serif"
 }

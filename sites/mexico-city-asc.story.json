@@ -218,39 +218,6 @@
    "day": "end"
   },
   {
-   "section": "listen",
-   "title": {
-    "en": "Every district has its own rhythm",
-    "uk": "У кожного району свій ритм"
-   },
-   "text": [
-    {
-     "en": "Each row below is one district, each wedge 12 days. Press play with the sound on: a district chimes every time it sinks 2 cm more.",
-     "uk": "Кожен ряд унизу — один район, кожен клин — 12 днів. Натисніть ▶ з увімкненим звуком: район дзвонить щоразу, коли опускається ще на 2 см."
-    },
-    {
-     "en": "Nezahualcóyotl chimes 14 times a year, the old centre 6; the volcanic hill stays silent.",
-     "uk": "Несауалькойотль дзвонить 14 разів за рік, старий центр — 6, вулканічний пагорб мовчить."
-    }
-   ],
-   "camera": {
-    "bbox": [
-     -99.2,
-     19.22,
-     -98.86,
-     19.58
-    ]
-   },
-   "layers": [
-    "terrain",
-    "velocity",
-    "rhythm",
-    "lake",
-    "blocks"
-   ],
-   "day": "start"
-  },
-  {
    "section": "sure",
    "title": {
     "en": "How sure are we?",
@@ -262,8 +229,8 @@
      "uk": "GPS-станція в аеропорту виміряла −27.0 см/рік, радар у тій самій точці каже −27.8 см/рік."
     },
     {
-     "en": "Blue cells show the remaining error. The evening pass is twice as noisy (the afternoon air over the city is restless, often stormy), so this map uses the morning one. Strokes below 3σ are dashed; noise below 1σ is not drawn.",
-     "uk": "Сині клітинки показують похибку, що лишилась. Вечірній прохід удвічі шумніший (по обіді повітря над містом неспокійне, часто з грозами), тому ця мапа з ранкового. Штрихи нижче 3σ пунктирні, шум нижче 1σ не малюється."
+     "en": "Blue dots show the remaining error: the bigger the dot, the larger the error. The evening pass is twice as noisy (the afternoon air over the city is restless, often stormy), so this map uses the morning one. Strokes below 3σ are dashed; noise below 1σ is not drawn.",
+     "uk": "Сині крапки показують похибку, що лишилась: що більша крапка, то більша похибка. Вечірній прохід удвічі шумніший (по обіді повітря над містом неспокійне, часто з грозами), тому ця мапа з ранкового. Штрихи нижче 3σ пунктирні, шум нижче 1σ не малюється."
     }
    ],
    "camera": {

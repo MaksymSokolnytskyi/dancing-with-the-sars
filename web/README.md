@@ -72,6 +72,11 @@ that lifts a district and drops it back does not ring twice. Still rows stay sil
 
 ## Atlas pages (the plate tells its story)
 
+Page text: the first paragraph is shown, the rest sits behind "Tell me more" (`keep: n` on a page shows n paragraphs;
+"sure" pages show all of it, so doubts are never folded away). `cells` layers are drawn as a stipple: one dot per block,
+its size = the strength the ramp gives it (the ramp's alpha), solid ink; a theme can ask for plain squares with
+`"cells_as": "squares"`. The chimes of the score (`?sound=1`) have no button any more.
+
 A plate is played as pages. Write `sites/<id>.story.json`, point the site at it (`"story": "sites/<id>.story.json"`), then
 
     uv run sars story <id>      # seconds: copies the pages, no layer rebuild

@@ -86,8 +86,8 @@
    },
    "text": [
     {
-     "en": "Each square is about 2 km. Its colour says how far the ground moved toward or away from the satellite between the two dates: up to about 40 cm.",
-     "uk": "Кожен квадрат — близько 2 км. Його колір показує, наскільки земля зсунулася до супутника чи від нього між двома датами: до ~40 см."
+     "en": "Each dot is a block of about 2 km. Its colour and size say how far the ground moved toward or away from the satellite between the two dates: up to about 40 cm.",
+     "uk": "Кожна крапка — блок близько 2 км. Її колір і розмір показують, наскільки земля зсунулася до супутника чи від нього між двома датами: до ~40 см."
     },
     {
      "en": "Tropical forest blurs the radar: only about a third of the morning image and a fifth of the evening image can be used. The gaps are where we could not see.",

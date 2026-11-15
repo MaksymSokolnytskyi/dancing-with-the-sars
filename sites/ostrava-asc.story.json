@@ -213,8 +213,8 @@
    },
    "text": [
     {
-     "en": "Blue cells show the error left in our one track: about 4.5 cm/yr in the middle. Strokes below 3σ are dashed; noise below 1σ is not drawn.",
-     "uk": "Сині клітинки показують похибку, що лишилась у нашому одному треку: близько 4,5 см/рік у середньому. Штрихи нижче 3σ пунктирні, шум нижче 1σ не малюється."
+     "en": "Blue dots show the error left in our one track (the bigger the dot, the larger the error): about 4.5 cm/yr in the middle. Strokes below 3σ are dashed; noise below 1σ is not drawn.",
+     "uk": "Сині крапки показують похибку, що лишилась у нашому одному треку (що більша крапка, то більша похибка): близько 4,5 см/рік у середньому. Штрихи нижче 3σ пунктирні, шум нижче 1σ не малюється."
     },
     {
      "en": "In the south-east, around Cieszyn, our track shows a broad, slow sinking (about −7 cm/yr), some 15 km from any bowl, where there are no deep mines. The three-track study would not catch a signal this slow and broad, so it neither confirms nor rules it out. It may be weather or a leftover tilt; not tested (seen after the build).",

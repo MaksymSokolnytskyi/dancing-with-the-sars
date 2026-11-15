@@ -72,8 +72,8 @@
    },
    "text": [
     {
-     "en": "Each square is 2 km of farmland. Its colour says how well it matched its own echo 12 days earlier, measured against town blocks that barely change: 1 means as steady as the town.",
-     "uk": "Кожен квадрат — 2 км ріллі. Колір показує, наскільки він збігся з власним відлунням 12 днів тому, у порівнянні з міськими кварталами, які майже не змінюються: 1 означає «стабільний, як місто»."
+     "en": "Each dot is a 2 km block of farmland. Its colour and size say how well it matched its own echo 12 days earlier, measured against town blocks that barely change: 1 means as steady as the town.",
+     "uk": "Кожна крапка — блок ріллі 2 км. Її колір і розмір показують, наскільки він збігся з власним відлунням 12 днів тому, у порівнянні з міськими кварталами, які майже не змінюються: 1 означає «стабільний, як місто»."
     },
     {
      "en": "From December to February the fields stay calm (0.85–0.95). Through March the match breaks step by step, down to about 0.6 from mid-April to May. In July–September it comes back part of the way, to about 0.73.",

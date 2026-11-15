@@ -17,8 +17,8 @@
      "uk": "Хвиля NISAR L-діапазону має довжину 24 см. Вона проходить крізь листя і розсіюється на гілках, стеблах і ґрунті. Тут вона спостерігає рік лісу, полів, боліт і озер."
     },
     {
-     "en": "Each square is a 1 km block. Its colour is the echo against the same block's own summer, seen from the same track: red is darker than summer, blue is brighter.",
-     "uk": "Кожен квадрат — блок 1 км. Його колір — відлуння порівняно з власним літом цього ж блоку, з того самого треку: червоне темніше за літо, синє яскравіше."
+     "en": "Each dot is a 1 km block. Its colour is the echo against the same block's own summer, seen from the same track: red is darker than summer, blue is brighter; the bigger the dot, the bigger the change.",
+     "uk": "Кожна крапка — блок 1 км. Її колір — відлуння порівняно з власним літом цього ж блоку, з того самого треку: червоне темніше за літо, синє яскравіше; що більша крапка, то більша зміна."
     }
    ],
    "facts": [
