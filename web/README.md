@@ -105,7 +105,13 @@ pixels; `icon` adds an engraved sign from `SIGNS` in app.js: tree, corn, soy, sh
 rings that many metres on the ground with a dashed ink loop), `focus` (layer ids that swell and fade three times, about
 2.4 s, once the camera arrives, so the eye finds what the page talks about), `appendix` (the page leaves the reading
 order: tabs number only the main pages and the last one offers the appendix as "Questions you may have"; Mexico City
-keeps its "how sure" pages there). Playing a year takes theme `play_ms` (11 s in scroll); between two dates the tints,
+keeps its "how sure" pages there). A mark may draw `curve` (a yearly series) as an engraved line in its seal instead of
+an icon, tinted with `color` (Central Valley's four rhythms). `voice` (`{en, uk}`) is the narrator's line for the page,
+in its own words rather than the card's: "🔈 Narrator" on the card (or `?narrate=1`) reads it with the browser's own
+speech (Web Speech API, a British voice where the system has one; nothing is sent anywhere) and turns the page when the
+line and the playing year are done, so a demo can be recorded hands-free. Browsers speak only after a click on the page.
+`scripts/add_countries.py <plate>` washes the two sides of a border plate in two pale tones with a stronger ribbon
+inside the border (layer `countries`, theme `polygons.country.fills`), like a political map. Playing a year takes theme `play_ms` (11 s in scroll); between two dates the tints,
 contours and block tints cross-fade, so change flows instead of jumping.
 
 The plate opens on its pages (`?page=n` for a page, `?story=0` for the free map). ← → or PageUp/PageDown (a presentation
