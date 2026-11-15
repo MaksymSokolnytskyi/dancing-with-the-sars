@@ -151,7 +151,8 @@ def main():
     entry = {"id": cfg["id"], "title": cfg.get("title", cfg["id"]), "subtitle": cfg.get("subtitle", ""), "kind": "quake"}
     ids = [s["id"] for s in idx["scenes"]]
     if cfg["id"] in ids:                       # rebuilding keeps the scene's place in the menu
-        idx["scenes"][ids.index(cfg["id"])] = entry
+        old = idx["scenes"][ids.index(cfg["id"])]   # keep keys the build does not write (blurb, href)
+        idx["scenes"][ids.index(cfg["id"])] = {**old, **entry}
     else:
         idx["scenes"].append(entry)
     idx_p.write_text(json.dumps(idx, indent=1, ensure_ascii=False), encoding="utf-8")

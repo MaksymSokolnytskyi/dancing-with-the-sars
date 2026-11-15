@@ -86,6 +86,7 @@ def main():
             engine.save_velocity(v, vf)
     if v is not None:
         v = engine.tropo_correct(cfg, v)        # no-op unless the site asks for it
+        v = engine.highpass_correct(cfg, v)     # no-op unless the site asks for it
     man = engine.export_site(cfg, v, Path(a.out) / cfg["id"])
     # scene index for the front-end
     idx_p = Path(a.out) / "scenes.json"
@@ -93,7 +94,8 @@ def main():
     entry = {"id": cfg["id"], "title": cfg.get("title", cfg["id"]), "subtitle": cfg.get("subtitle", ""), "kind": "+".join(cfg["layers"])}
     ids = [s["id"] for s in idx["scenes"]]
     if cfg["id"] in ids:                       # rebuilding keeps the scene's place in the menu
-        idx["scenes"][ids.index(cfg["id"])] = entry
+        old = idx["scenes"][ids.index(cfg["id"])]   # keep keys the build does not write (blurb, href)
+        idx["scenes"][ids.index(cfg["id"])] = {**old, **entry}
     else:
         idx["scenes"].append(entry)
     idx_p.write_text(json.dumps(idx, indent=1, ensure_ascii=False), encoding="utf-8")

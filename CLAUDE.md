@@ -27,7 +27,7 @@ Each plate also says how sure it is.
 | `scripts/` | pipeline steps the CLI calls (`build_site`, `story`, `pack_scene`, fetchers, `export_quake`, `sbi_*`) | |
 | `scripts/reykjanes/` | Reykjanes research pipeline (uplift source, MCMC vs NPE, the 2023 dike); outside the CLI, writes `data/` and `output/` | `scripts/reykjanes/README.md` |
 | `web/` | the map app (MapLibre + deck.gl, no build step); `web/data/<plate>/` = built plates, in git | `web/README.md` |
-| `web/reykjanes-scroll.html` | the Reykjanes plate as one packed page (test build with the math window; `--no-math` for the jury) | `scripts/build_reykjanes_scroll.py` |
+| `web/reykjanes-scroll.html` | the Reykjanes plate as one packed page, jury build (no math window); `scripts/repack_reykjanes.py --no-math` re-packs it on a new engine | `scripts/build_reykjanes_scroll.py` |
 | `experiments/` | one-off pre-registered tests behind `notes/experiments.md` | |
 | `notes/` | plans, research, experiment log; index in `notes/README.md` | |
 | `docs/` | data guide; `docs/uk/` = Ukrainian onboarding | `docs/data-guide.md` |
@@ -43,6 +43,7 @@ uv run sars fetch <plate>                 # DEM, NISAR windows (pinned by the lo
 uv run sars build <plate>                 # -> web/data/<plate>/
 uv run sars serve                         # http://localhost:8765/?scene=<plate>&theme=scroll
 uv run python tests/smoke.py              # before every push
+uv run python scripts/publish_site.py     # committed web/ -> public site https://maksymsokolnytskyi.github.io/edelweiss-atlas/
 ```
 
 Datasets, licences, cache formats and per-plate needs are in [docs/data-guide.md](docs/data-guide.md).

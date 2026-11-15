@@ -72,6 +72,19 @@ that lifts a district and drops it back does not ring twice. Still rows stay sil
 
 ## Atlas pages (the plate tells its story)
 
+Page text: the first paragraph is the page's one idea and stands on the card; the rest opens in a detail sheet beside
+the card ("Tell me more"; `keep: n` on a page keeps n paragraphs on the card). A "sure" page must say its main limit in
+that first paragraph. `cells` layers are drawn as a smooth tint (theme `"cells_as": "tint"`): the block values are read as
+one field, bilinear between block centres, and painted into a bitmap with the mode's ramp; categorical modes fall back to
+the engraved hatch (theme `hatch`). A theme can also ask for `"hatch"`, `"dots"` or `"squares"`. On motion plates the
+ground's total move since the first date (the `cum_cm` series of the `grid` cells) is laid under the strokes as layer
+tints, one band per `tint.step` cm (10; a manifest may set `tint_step`, Ostrava-Karviná uses 5): umber for sinking, slate
+for uplift (Reykjanes swaps them to match its strokes), darker = further. Contours are then drawn only at band edges, so
+lines and tints agree. While motion or cells are on the map, the terrain, context lines and town blocks are drawn at
+theme `quiet` strength (0.65 in scroll) and every label is drawn last, over the strokes. Build numbers under the
+legend show only with `?debug=1`. The score
+strip (layer kind `rhythm`, "the music") is left out of the atlas; `?score=1` brings it back.
+
 A plate is played as pages. Write `sites/<id>.story.json`, point the site at it (`"story": "sites/<id>.story.json"`), then
 
     uv run sars story <id>      # seconds: copies the pages, no layer rebuild
@@ -86,6 +99,21 @@ and reload. Each page: `section` (intro | what | why | sure | next | listen, sho
 The plate opens on its pages (`?page=n` for a page, `?story=0` for the free map). ← → or PageUp/PageDown (a presentation
 clicker) turn pages, Esc leaves; "explore the map yourself" opens the usual panel and "Read the plate" comes back.
 Text is short on purpose: a page should read in about 20 seconds.
+
+## The atlas: cover, chapters, glossary
+
+`data/scenes.json` may carry an `atlas` block (cover words, `{en, uk}`) and `chapters` (`id`, `title`, `intro`, `scenes`
+in reading order). With them, `index.html` without `?scene=` (or with `?cover=1`) opens the title page *Edelweiss*:
+the engraved flower (`edelweiss.svg`, drawn by `scripts/draw_edelweiss.py`), the three chapters with their plates
+(`blurb` per scene), the glossary and the credits. The last page of a plate leads on to the next plate in reading order,
+and the last plate back to the contents; "☰ Contents" in the story card and in the panel reopen the cover.
+
+`data/glossary.json` holds the hover help: per term the forms to find (`match.en`, `match.uk`), a title and a short
+text. The first use of each term on a page gets a dotted underline; hovering, focusing or tapping it opens the card.
+English forms take only a plural ending (`pass` matches "passes", not "passed"); Ukrainian forms are stems.
+
+Publish: `uv run python scripts/publish_site.py` copies the committed `web/` (nothing else) to the public repository
+`MaksymSokolnytskyi/edelweiss-atlas`, served at https://maksymsokolnytskyi.github.io/edelweiss-atlas/.
 
 ## Send one place as one file
 

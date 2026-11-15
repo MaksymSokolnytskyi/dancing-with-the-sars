@@ -13,6 +13,8 @@ Not part of the `sars` CLI yet. Tests and their status are logged in `notes/expe
 | 3 | `node scripts/ostrava/ostrava_map.mjs`: the map (vertical rate, heaps, bowl outlines, buildings) without GDAL | `map_vertical_osm_full.png`, `map_vertical_osm_zoom.png`, `map_vertical_osm_labels.json` |
 | 4 | `node scripts/ostrava/build_ostrava_results.mjs`: the results page | `results_ostrava.html` |
 | 1b | `scripts/ostrava/ostrava_thresholds.ipynb`: checks of the thresholds from the saved stacks, no download (A coverage, B coherence vs noise, C σ and variogram, D null test / FDR, E injected bowls / recall, F noise filter, G split plateau, H robustness); see `notes/experiments.md` O2b | `thresholds/A_coverage.png` … `H_robustness.csv`, `summary_thresholds.csv` |
+| 5 | `uv run python scripts/ostrava/plate_layers.py`: bowl outlines (reliable = rule O3a, candidates), labels and spoil heaps for the atlas plate `sites/ostrava-karvina-asc.json`; then `sars fetch` / `sars build ostrava-karvina-asc` | `data/ostrava/plate/*.geojson` (ignored) |
+| 6 | `uv run python scripts/ostrava/egms_fetch.py` (needs `EGMS_TOKEN`), then `uv run python scripts/ostrava/egms_o3b.py`: test O3b, EGMS 2019–2023 vertical inside and around each bowl; `uv run --with pandas==3.1.1 python scripts/ostrava/egms_nodata.py`: why EGMS has no data inside the bowls (land cover, NISAR rate, distance, EGMS series) | `data/ostrava/egms/` (ignored), `egms_o3b.csv`, console |
 | – | `node scripts/ostrava/ostrava_checks.mjs` (optional): odd objects (is M02 one bowl or two, a linear feature, a profile across M01) | `checks_odd_objects.json` |
 
 Step 1 needs Python with the extra packages listed in the notebook's first cell, pinned to versions resolved on
@@ -22,7 +24,7 @@ Step 1 needs Python with the extra packages listed in the notebook's first cell,
 ## Secrets
 
 Only the Earthdata login, read from the environment: `EARTHDATA_TOKEN`, else `~/.edl_token`, else `~/.netrc`. Nothing secret
-is stored in the notebook, the scripts or the outputs. Overpass needs no key.
+is stored in the notebook, the scripts or the outputs. Overpass needs no key. EGMS needs the personal download key from the EGMS Explorer in `EGMS_TOKEN` (step 6).
 
 ## Checked
 

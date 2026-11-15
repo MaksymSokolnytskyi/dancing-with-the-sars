@@ -13,12 +13,16 @@
    },
    "text": [
     {
-     "en": "Under the Polish–Czech border lies one coal basin. Where coal is taken from deep below, the ground above settles into bowls, and ponds fill them.",
-     "uk": "Під польсько-чеським кордоном лежить один вугільний басейн. Там, де вугілля виймають з глибини, земля над ним осідає мульдами, і їх заповнюють ставки."
+     "en": "Where coal is mined deep under the Polish–Czech border, the ground settles into bowls; the dashed outlines mark them.",
+     "uk": "Там, де глибоко під польсько-чеським кордоном видобувають вугілля, земля осідає мульдами; пунктирні контури їх позначають."
     },
     {
-     "en": "NISAR flies over every 12 days. From June to October 2026 it saw the ground go down here by tens of centimetres a year.",
-     "uk": "NISAR пролітає тут кожні 12 днів. З червня по жовтень 2026 року він бачив, як земля тут опускається на десятки сантиметрів на рік."
+     "en": "From June to October 2026 NISAR saw the ground here go down by tens of centimetres a year.",
+     "uk": "З червня по жовтень 2026 року NISAR бачив, як земля тут опускається на десятки сантиметрів на рік."
+    },
+    {
+     "en": "11 of the 12 bowls lie on the Polish side, where the deep mines still work; on the Czech side, one (M16). Is the Czech side really calmer? Not tested yet.",
+     "uk": "11 з 12 мульд лежать на польському боці, де глибокі шахти досі працюють; на чеському — одна (M16). Чи справді чеський бік спокійніший? Ще не перевірено."
     }
    ],
    "facts": [
@@ -82,12 +86,16 @@
    },
    "text": [
     {
-     "en": "Each stroke points down the slope of the sinking, and it is darker where the ground goes down faster. This is one track, flying north, 8 pairs from 25 June to 11 October 2026.",
-     "uk": "Кожен штрих вказує вниз схилом просідання і темніший там, де земля опускається швидше. Це один трек, проліт на північ, 8 пар з 25 червня по 11 жовтня 2026 року."
+     "en": "Press ▶ and watch the strokes grow as the ground keeps going down; darker strokes mean faster sinking.",
+     "uk": "Натисніть ▶ і дивіться, як ростуть штрихи, поки земля опускається; темніший штрих — швидше просідання."
     },
     {
-     "en": "Where we are sure, the fastest place sinks 30 ± 3 cm a year. The very centres of the bowls move faster than the radar can follow, so they drop out of the picture: the true peaks are deeper.",
-     "uk": "Там, де ми впевнені, найшвидше місце опускається на 30 ± 3 см на рік. Самі центри мульд рухаються швидше, ніж радар встигає відстежити, тому випадають з картини: справжні піки глибші."
+     "en": "One track, flying north: 8 pairs from 25 June to 11 October 2026.",
+     "uk": "Один трек, проліт на північ: 8 пар з 25 червня по 11 жовтня 2026 року."
+    },
+    {
+     "en": "Where we are sure, the fastest place sinks 30 ± 3 cm a year. The centres of the bowls move faster than the radar can follow and drop out of the picture: the true peaks are deeper.",
+     "uk": "Там, де ми впевнені, найшвидше місце опускається на 30 ± 3 см на рік. Центри мульд рухаються швидше, ніж радар встигає відстежити, і випадають з картини: справжні піки глибші."
     }
    ],
    "camera": {
@@ -117,16 +125,16 @@
    },
    "text": [
     {
-     "en": "Our team looked from three tracks: two flying north and one flying south. The study kept only the places that sink faster than 15 cm a year: 22 bowls.",
-     "uk": "Наша команда подивилась з трьох треків: двох на північ і одного на південь. Дослідження лишило тільки місця, що опускаються швидше за 15 см на рік: 22 мульди."
+     "en": "The 12 dashed bowls are seen from all three tracks; the 10 dotted ones are only candidates.",
+     "uk": "12 пунктирних мульд видно з усіх трьох треків; 10 позначених крапками — лише кандидати."
     },
     {
-     "en": "A fixed rule keeps a bowl only if all three tracks see it, with enough data and little open water: 12 bowls, drawn dashed. The other 10 are dotted: candidates. The rule was written after a first look at the data, so it is a rule, not a test.",
-     "uk": "Зафіксоване правило лишає мульду, лише якщо її бачать усі три треки, даних досить, а відкритої води мало: 12 мульд, вони пунктирні. Решта 10 — крапками: кандидати. Правило записали після першого погляду на дані, тож це правило, а не тест."
+     "en": "Of 22 places sinking faster than 15 cm a year, a fixed rule kept those all three tracks see, with enough data and little open water. The rule was written after a first look at the data: a rule, not a test.",
+     "uk": "Із 22 місць, що опускаються швидше за 15 см на рік, зафіксоване правило лишило ті, що їх бачать усі три треки, з достатніми даними й малою кількістю відкритої води. Правило записали після першого погляду на дані: це правило, а не тест."
     },
     {
-     "en": "A test on shuffled data finds a false bowl about 1 time in 100 for three tracks, but 12 in 100 for two. It also misses about half of the moderate bowls, so the list is not complete.",
-     "uk": "Тест на перемішаних даних знаходить хибну мульду приблизно 1 раз зі 100 для трьох треків, але 12 зі 100 для двох. Він також пропускає приблизно половину помірних мульд, тож список не повний."
+     "en": "On shuffled data the method finds a false bowl about 1 time in 100 with three tracks, but 12 in 100 with two. It also misses about half of the moderate bowls, so the list is not complete.",
+     "uk": "На перемішаних даних метод знаходить хибну мульду приблизно 1 раз зі 100 для трьох треків, але 12 зі 100 для двох. Він також пропускає приблизно половину помірних мульд, тож список не повний."
     }
    ],
    "camera": {
@@ -160,52 +168,6 @@
    ]
   },
   {
-   "section": "listen",
-   "title": {
-    "en": "Two sides of one basin",
-    "uk": "Два боки одного басейну"
-   },
-   "text": [
-    {
-     "en": "11 of the 12 bowls lie on the Polish side, where the deep mines still work. On the Czech side there is one (M16), and three candidates.",
-     "uk": "11 з 12 мульд лежать на польському боці, де глибокі шахти досі працюють. На чеському боці одна (M16) і три кандидати."
-    },
-    {
-     "en": "Is the Czech side really calmer? Not tested yet. The check against Europe's ground-motion service (EGMS, 2019–2023) is written down in advance, but not run. Until then this is a picture, not a finding.",
-     "uk": "Чи справді чеський бік спокійніший? Ще не перевірено. Перевірку за європейською службою руху ґрунту (EGMS, 2019–2023) записано наперед, але не виконано. Доти це картина, а не висновок."
-    }
-   ],
-   "camera": {
-    "bbox": [
-     18.3,
-     49.8,
-     18.8,
-     50.06
-    ]
-   },
-   "layers": [
-    "terrain",
-    "velocity",
-    "rivers",
-    "places",
-    "bowls",
-    "bowls_candidate"
-   ],
-   "day": "end",
-   "marks": [
-    {
-     "lon": 18.35888,
-     "lat": 49.93502,
-     "text": {
-      "en": "M16: the one Czech bowl",
-      "uk": "M16: єдина чеська мульда"
-     },
-     "dx": -40,
-     "dy": 44
-    }
-   ]
-  },
-  {
    "section": "sure",
    "title": {
     "en": "How sure are we?",
@@ -213,16 +175,16 @@
    },
    "text": [
     {
-     "en": "Blue cells show the error left in our one track: about 4.5 cm/yr in the middle. Strokes below 3σ are dashed; noise below 1σ is not drawn.",
-     "uk": "Сині клітинки показують похибку, що лишилась у нашому одному треку: близько 4,5 см/рік у середньому. Штрихи нижче 3σ пунктирні, шум нижче 1σ не малюється."
+     "en": "The strokes come from one track and four months of data: every number is provisional. Denser blue hatching means a larger error.",
+     "uk": "Штрихи — з одного треку і чотирьох місяців даних: кожне число попереднє. Густіше синє штрихування — більша похибка."
     },
     {
-     "en": "In the south-east, around Cieszyn, our track shows a broad, slow sinking (about −7 cm/yr), some 15 km from any bowl, where there are no deep mines. The three-track study would not catch a signal this slow and broad, so it neither confirms nor rules it out. It may be weather or a leftover tilt; not tested (seen after the build).",
-     "uk": "На південному сході, біля Цешина, наш трек показує широке повільне опускання (близько −7 см/рік) приблизно за 15 км від будь-якої мульди, де глибоких шахт немає. Дослідження з трьох треків не ловить такий повільний і широкий сигнал, тож не підтверджує і не виключає його. Можливо, це погода або залишковий нахил; не перевірено (помічено після побудови)."
+     "en": "The error left is about 4.5 cm/yr in the middle. Strokes below 3σ are dashed; noise below 1σ is not drawn. Slow trends are not visible yet.",
+     "uk": "Похибка, що лишилась, — близько 4,5 см/рік у середньому. Штрихи нижче 3σ пунктирні, шум нижче 1σ не малюється. Повільних трендів ще не видно."
     },
     {
-     "en": "Four months is short: slow trends are not visible yet, and every number here is provisional.",
-     "uk": "Чотири місяці — це мало: повільних трендів ще не видно, і кожне число тут попереднє."
+     "en": "Near Cieszyn, in the south-east, our track shows a broad, slow sinking (about −7 cm/yr) some 15 km from any bowl, with no deep mines. The three-track study can neither confirm nor rule it out. Weather or a leftover tilt? Not tested (seen after the build).",
+     "uk": "Біля Цешина, на південному сході, наш трек показує широке повільне опускання (близько −7 см/рік) приблизно за 15 км від будь-якої мульди, де глибоких шахт немає. Дослідження з трьох треків не може ні підтвердити, ні виключити його. Погода чи залишковий нахил? Не перевірено (помічено після побудови)."
     }
    ],
    "camera": {
@@ -265,8 +227,8 @@
    },
    "text": [
     {
-     "en": "Run the EGMS check, and see if the Czech side stays calm.",
-     "uk": "Виконати перевірку за EGMS і подивитися, чи чеський бік лишиться спокійним."
+     "en": "Next: check against Europe's ground-motion service (EGMS, 2019–2023) whether the Czech side is really calmer.",
+     "uk": "Далі: перевірити за європейською службою руху ґрунту (EGMS, 2019–2023), чи справді чеський бік спокійніший."
     },
     {
      "en": "Join the morning and evening passes into up-down and east-west motion: the walls of a bowl move sideways towards its centre.",

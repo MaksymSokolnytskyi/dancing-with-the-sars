@@ -39,6 +39,7 @@ def main():
 
     idx = json.loads((WEB / "data/scenes.json").read_text(encoding="utf-8"))
     idx["scenes"] = [s for s in idx["scenes"] if s["id"] == a.scene]
+    idx.pop("atlas", None); idx.pop("chapters", None)          # one packed plate has no cover
     assert idx["scenes"], f"scene {a.scene} not in web/data/scenes.json"
     man = json.loads((WEB / f"data/{a.scene}/manifest.json").read_text(encoding="utf-8"))
     man["layers"] = [l for l in man["layers"] if l["id"] not in a.drop]
