@@ -13,20 +13,20 @@
    },
    "text": [
     {
-     "en": "Press ▶ and watch the fields: calm in winter, restless from March to May, partly calm again in late summer.",
-     "uk": "Натисніть ▶ і дивіться на поля: спокійні взимку, неспокійні з березня до травня, знову частково спокійні наприкінці літа."
+     "en": "Press ▶: each ink dot is a block of fields. Small in winter, when nothing changes; large in spring, when the fields change (farm work is the likely cause).",
+     "uk": "Натисніть ▶: кожна чорнильна крапка — блок полів. Дрібна взимку, коли нічого не міняється; велика навесні, коли поля змінюються (імовірна причина — польові роботи)."
     },
     {
-     "en": "The tint lies over the farmland: the radar shows whether it stayed the same over 12 days or changed.",
-     "uk": "Тон лягає на ріллю: радар показує, чи лишилась вона такою самою за 12 днів, чи змінилась."
+     "en": "The dots lie over the farmland: the radar shows whether it stayed the same over 12 days or changed.",
+     "uk": "Крапки лягають на ріллю: радар показує, чи лишилась вона такою самою за 12 днів, чи змінилась."
     },
     {
      "en": "Where nothing changed, two radar echoes 12 days apart match. When a field is ploughed, grows, is watered or harvested, the match breaks. Radar people call this match coherence.",
      "uk": "Де нічого не змінилося, два відлуння радара з різницею в 12 днів збігаються. Коли поле орють, на ньому ростуть рослини, його поливають чи збирають урожай, збіг руйнується. Фахівці називають цю міру збігу когерентністю."
     },
     {
-     "en": "The colour and strength of the tint compare each block's 12-day match with town blocks that barely change: 1 means as steady as the town.",
-     "uk": "Колір і сила тону порівнюють 12-денний збіг кожного блоку з міськими кварталами, які майже не змінюються: 1 означає «стабільний, як місто»."
+     "en": "The colour and size of each dot compare each block's 12-day match with town blocks that barely change: 1 means as steady as the town.",
+     "uk": "Колір і розмір кожної крапки порівнюють 12-денний збіг кожного блоку з міськими кварталами, які майже не змінюються: 1 означає «стабільний, як місто»."
     },
     {
      "en": "From December to February the fields stay at 0.85–0.95. Through March the match breaks step by step, down to about 0.6 from mid-April to May. In July–September it comes back part of the way, to about 0.73.",
@@ -75,7 +75,22 @@
    "voice": {
     "en": "In the great valley of California the year has a heartbeat. In winter the fields lie still, and the radar finds them unchanged from one visit to the next. Then spring comes, with ploughs, seed, water and growth, and the stillness breaks, field by field.",
     "uk": "У великій долині Каліфорнії рік має серцебиття. Взимку поля лежать нерухомо, і радар бачить їх незмінними від прольоту до прольоту. Потім приходить весна: оранка, сівба, вода й ріст, і спокій ламається, поле за полем."
-   }
+   },
+   "cells_as": "dots",
+   "marks": [
+    {
+     "lon": -119.5596,
+     "lat": 36.098,
+     "icon": "field",
+     "r_m": 3000,
+     "dx": 50,
+     "dy": 46,
+     "text": {
+      "en": "one dot = a 2 km block of fields; bigger = changed more in 12 days",
+      "uk": "одна крапка = блок полів 2 км; більша = більше змінився за 12 днів"
+     }
+    }
+   ]
   },
   {
    "section": "what",

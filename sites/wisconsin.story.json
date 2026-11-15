@@ -13,8 +13,8 @@
    },
    "text": [
     {
-     "en": "Red tint: the ground echoes darker than in its own summer, blue: brighter; the stronger the tone, the bigger the change.",
-     "uk": "Червоний тон: земля відлунює темніше, ніж власним літом, синій — яскравіше; що сильніший тон, то більша зміна."
+     "en": "Each dot is a 1 km block. Red: it echoes darker than in its own summer, blue: brighter; the bigger the dot, the bigger the change.",
+     "uk": "Кожна крапка — блок 1 км. Червона: відлуння темніше, ніж власним літом, синя: яскравіше; що більша крапка, то більша зміна."
     },
     {
      "en": "NISAR's L-band wave is 24 cm long: it passes through leaves and is scattered by branches, stalks and the ground. Each block is compared with its own summer, seen from the same track.",
@@ -103,7 +103,8 @@
    "voice": {
     "en": "Far to the north, in Wisconsin, the woods and fields live by the seasons. Here the radar listens not for sinking ground, but for the echo of the land itself: how brightly it answers, visit after visit, through a whole year.",
     "uk": "Далеко на півночі, у Вісконсині, ліси й поля живуть за порами року. Тут радар слухає не осідання землі, а відлуння самої землі: наскільки яскраво вона відповідає, проліт за прольотом, цілий рік."
-   }
+   },
+   "cells_as": "dots"
   },
   {
    "section": "what",
@@ -189,7 +190,8 @@
      }
     }
    ],
-   "appendix": true
+   "appendix": true,
+   "cells_as": "dots"
   },
   {
    "section": "what",
@@ -258,67 +260,93 @@
      "lon": -90.8384,
      "lat": 45.2036,
      "icon": "corn",
-     "r_m": 700,
+     "r_m": 650,
      "dx": 46,
      "dy": 24,
      "text": {
       "en": "corn: 3–8 dB brighter than soy (HV)",
       "uk": "кукурудза: на 3–8 дБ яскравіша за сою (HV)"
-     }
+     },
+     "color": [
+      176,
+      44,
+      36
+     ]
     },
     {
      "lon": -90.7909,
      "lat": 45.1681,
      "icon": "soy",
-     "r_m": 700,
+     "r_m": 650,
      "dx": 46,
      "dy": 40,
      "text": {
       "en": "soybean",
       "uk": "соя"
-     }
+     },
+     "color": [
+      120,
+      80,
+      160
+     ]
     },
     {
      "lon": -90.8285,
      "lat": 45.1429,
      "icon": "field",
-     "r_m": 700,
+     "r_m": 650,
      "dx": -40,
      "dy": 40,
      "text": {
       "en": "other fields",
       "uk": "інші поля"
-     }
+     },
+     "color": [
+      190,
+      150,
+      50
+     ]
     },
     {
      "lon": -90.813,
      "lat": 45.229,
      "icon": "swamp",
-     "r_m": 700,
+     "r_m": 650,
      "dx": -44,
      "dy": -6,
      "text": {
       "en": "swamp forest",
       "uk": "болотний ліс"
-     }
+     },
+     "color": [
+      30,
+      120,
+      120
+     ]
     },
     {
      "lon": -90.7037,
      "lat": 45.2096,
      "icon": "lake",
-     "r_m": 900,
+     "r_m": 650,
      "dx": 44,
      "dy": -26,
      "text": {
       "en": "lake",
       "uk": "озеро"
-     }
+     },
+     "color": [
+      40,
+      80,
+      160
+     ]
     }
    ],
    "voice": {
     "en": "Each crop answers in its own voice. Tall stalks of corn scatter the radar back like a thicket, far brighter than the low soybeans beside them. Swamp forest and lake each have their own reply.",
     "uk": "Кожна культура відповідає своїм голосом. Високі стебла кукурудзи розсіюють радар, як хащі, значно яскравіше за низьку сою поруч. Болотний ліс і озеро мають свою відповідь."
-   }
+   },
+   "cells_as": "parcels"
   },
   {
    "section": "what",
@@ -365,11 +393,50 @@
    "marks": [
     {
      "lon": -90.8384,
-     "lat": 45.1763,
+     "lat": 45.2036,
+     "icon": "corn",
+     "r_m": 650,
+     "color": [
+      176,
+      44,
+      36
+     ],
+     "dx": 46,
+     "dy": 24,
+     "text": {
+      "en": "corn",
+      "uk": "кукурудза"
+     }
+    },
+    {
+     "lon": -90.7909,
+     "lat": 45.1681,
+     "icon": "soy",
+     "r_m": 650,
+     "color": [
+      120,
+      80,
+      160
+     ],
+     "dx": 46,
+     "dy": 40,
+     "text": {
+      "en": "soybean",
+      "uk": "соя"
+     }
+    },
+    {
+     "lon": -90.8773,
+     "lat": 45.1438,
      "icon": "sheaf",
-     "r_m": 3000,
-     "dx": 48,
-     "dy": -30,
+     "r_m": 650,
+     "color": [
+      190,
+      150,
+      50
+     ],
+     "dx": -40,
+     "dy": 44,
      "text": {
       "en": "crop fields: green standing, ochre cut",
       "uk": "поля: зелене стоїть, охра скошене"
@@ -379,7 +446,8 @@
    "voice": {
     "en": "Then comes the harvest. One by one the fields fall silent as the stalks are cut. Watch them turn from green to ochre, as the radar notices they are gone.",
     "uk": "Потім настають жнива. Одне за одним поля стихають, коли стебла скошено. Дивіться, як вони змінюються із зеленого на охру, коли радар помічає, що їх уже немає."
-   }
+   },
+   "cells_as": "parcels"
   },
   {
    "section": "what",
@@ -432,7 +500,8 @@
    "voice": {
     "en": "After the harvest, bare soil lies open to the weather. When rain falls in the days before the satellite passes, the wet ground gleams a little brighter in the radar's eye.",
     "uk": "Після жнив гола земля відкрита негоді. Коли за кілька днів до прольоту супутника падає дощ, мокрий ґрунт трохи яскравіше блищить в очах радара."
-   }
+   },
+   "cells_as": "dots"
   },
   {
    "section": "what",
@@ -489,7 +558,8 @@
    "voice": {
     "en": "Winter. As the forest freezes, the water in every tree and every handful of soil turns to ice, and the echo fades by about two decibels. The woods, in their way, fall asleep.",
     "uk": "Зима. Коли ліс замерзає, вода в кожному дереві й кожній жмені ґрунту стає льодом, і відлуння слабне приблизно на два децибели. Ліс по-своєму засинає."
-   }
+   },
+   "cells_as": "dots"
   },
   {
    "section": "why",
@@ -616,7 +686,8 @@
     "harvest": "radar_cut"
    },
    "day": "2026-10-27",
-   "appendix": true
+   "appendix": true,
+   "cells_as": "dots"
   }
  ]
 }
