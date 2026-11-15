@@ -2054,3 +2054,37 @@ if within ±5 days. Both as area (km²) over the whole window on the 20 m grid.
 - B3a. Radar area / optical area within 0.85–1.15 in ≥ 70 % of the matched pairs (≥ 6 pairs, else inconclusive).
 - B3b. Spearman ρ between the radar and the optical areas over the matched pairs ≥ 0.5 (the radar follows the same
   rise and fall of the water area).
+
+**Results B (2026-11-15, `experiments/b_fetch.py`, `experiments/b_tests.py`; pre-registration pushed at 13:54 before
+the data run).** 47 band A windows (one SHSH scene left out: no HV), all on one 20 m grid: A100 10, A172 11, D94 11,
+D166 15; releases P05023/P05036, plus 5 X05009 scenes on D166. 16 Sentinel-2 dates matched a radar date within ±5 days.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| B1 facing − away γ⁰, HH | 0.79, 1.25, 0.42, 1.89 dB (D94, A100, D166, A172) | \|Δ\| ≤ 1 | 2 of 4 |
+| B1 facing − away γ⁰, HV | 3.07, 2.29, 2.47, 2.79 dB | \|Δ\| ≤ 1 | 0 of 4 |
+| B1 (both pols, ≥ 3 of 4 tracks) | | | **fail** |
+| B2a water HV / NEB_HV within ±2 dB | 43 of 47 (median +1.1 dB; outside: +2.2, +3.8, +4.7, +10.0); NEB layer complete under the water in all 47 | ≥ 80 % | **pass** |
+| B2b water HH ≥ HV − 0.5 dB | 34 of 47 | ≥ 80 % | **fail** |
+| B3a radar / optical water area within 0.85–1.15 | 0 of 33 (ratios 1.2–1.7 on 17 pairs, 6.6–9.0 on 13, 3.4 once, ~60 twice) | ≥ 70 % | **fail** |
+| B3b Spearman radar vs optical area | −0.20 (33 pairs) | ≥ 0.5 | **fail** |
+
+Reported (B1): σ⁰ = γ⁰ × `rtcGammaToSigmaFactor`, facing − away: HH −1.5 … −2.4 dB, HV −0.8 … +0.1 dB.
+
+**Post-hoc (not pre-registered).**
+- *B1 sign check (after the results, no change made).* The sides are as intended: NISAR looks **left** (`lookDirection`)
+  and the product defines its line-of-sight vector from the target to the sensor, which is how `b_geometry.py` used it.
+  So, after RTC, forested slopes that face the radar stay brighter than slopes that face away, by ~2.3–3.1 dB in HV and
+  0.4–1.9 dB in HH. The terrain correction under-corrects these slopes, more in the volume channel. The σ⁰ numbers are
+  reported only: we did not check what `rtcGammaToSigmaFactor` normalises to, so we draw nothing from their sign.
+- *B2: the first site where the stated noise floor holds.* Across the 47 scenes the product NEB (HV) ranges from
+  −22.9 to −10.9 dB (it changes by ~12 dB between tracks and dates), and calm canyon water follows it within ±2 dB in 43.
+  Compare Wisconsin (W1a: layer often broken, water 3–5 dB above where finite) and the Balaton control (+2.2 … +3.2 dB).
+  B2b fails because the water HH also sits near the floor: there is little wind-driven Bragg return in the canyon.
+- *B3: the optical reference is not stable.* Sentinel-2 SCL water in the window jumps between ~19 km² (close to
+  WorldCover's ~17 km²) and ~3.6 km² (once 0.5 km²) from one date to the next, which the reservoir cannot do; the SCL
+  class drops most of the water on those dates (likely turbid or algae-rich summer water, not checked). The radar area is
+  steady at 24–33 km² (one outlier, 64 km², on a date where water HH and cropland HH were equal). On the 17 pairs with a
+  plausible optical area, the radar threshold gives 1.2–1.7 × more water: dark, smooth ground and mixed shore pixels
+  pass the HH threshold. B3 as designed cannot show a water-level "breathing"; it would need a stable optical water mask
+  (e.g. NDWI with a per-date threshold) or gauge data.
