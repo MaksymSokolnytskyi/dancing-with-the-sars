@@ -1,12 +1,13 @@
 """Build the 30-second demo video (web/demo/edelweiss-demo.mp4) from plate screenshots, a Dufour sample and a narration.
 
-    uv run python scripts/make_demo.py <shots_dir> <montage_dir> <voice_dir>
+    uv run python scripts/make_demo.py <montage_dir> <voice_dir>
 
-shots_dir: screenshots of the Reykjanes plate, page II, at increasing dates (sorted by name);
-montage_dir: m1..m4 = full maps of Mexico City, Ostrava-Karvina, Central Valley, Wisconsin (story card hidden);
-voice_dir: c1..c8.wav, the narration lines in order (placed at the times in VOICE_AT).
+montage_dir: title.jpg and end.jpg (web/demo/cards.html), then m0*..m4* = Reykjanes, Mexico City, Ostrava-Karvina,
+Central Valley, Wisconsin, screenshots of the plates without the frame, each opening on the town map (OSM) and then
+the data playing through the year, with a zoom at the end;
+voice_dir: c1..c7.wav, the narration lines in order (placed at the times in VOICE_AT).
 The narration is read by the Windows speech synthesizer (System.Speech); the script was drafted with AI (Claude),
-which the end card says. The Dufour sample is © swisstopo (free use with credit).
+which the end card says. The Dufour sample is (c) swisstopo (free use with credit).
 """
 from __future__ import annotations
 
@@ -23,8 +24,10 @@ W, H, FPS, DUR = 1280, 720, 24, 30.0
 PAPER, INK, MUTED, RED = (239, 230, 210), (40, 28, 18), (110, 92, 70), (150, 52, 36)
 FONT = "C:/Windows/Fonts/georgia.ttf"
 FONT_I = "C:/Windows/Fonts/georgiai.ttf"
-# when each narration line starts (s): title, Dufour, Reykjanes, then one word per plate, and the close
-VOICE_AT = [0.3, 4.8, 8.8, 16.7, 19.3, 21.8, 24.3, 26.7]
+# when each narration line starts (s): title and Dufour, Reykjanes, then a few words per plate, and the close
+VOICE_AT = [0.2, 4.9, 11.3, 17.0, 21.0, 24.6, 27.1]
+# seconds per part: title, Dufour, then the five plates, then the end card
+TITLE_S, DUFOUR_S, PLATE_S, END_S = 2.2, 2.6, (5.6, 6.0, 4.2, 3.6, 3.2), 2.6
 
 
 def font(size, italic=False):
@@ -45,41 +48,23 @@ def spaced(t):
 
 
 def main():
-    shots = sorted(p for p in Path(sys.argv[1]).iterdir() if p.suffix.lower() in (".png", ".jpg"))
-    title = card([(spaced("EDELWEISS"), 230, 76, False, INK),
-                  ("an atlas of the moving ground", 340, 40, True, INK),
-                  ("drawn from NISAR, the NASA–ISRO L-band radar · every 12 days", 420, 26, False, MUTED),
-                  ("NASA Space Apps Challenge 2026 · Dancing with the SARs", 600, 22, False, MUTED)])
     duf = card([])
     dimg = Image.open(ROOT / "notes" / "img" / "dufour_jungfrau_z13.png").convert("RGB").resize((560, 560))
     duf.paste(dimg, (90, 80))
     d = ImageDraw.Draw(duf)
     for text, y, size, italic, col in [("Inspired by", 210, 34, True, MUTED), ("Dufour's engraved", 260, 46, False, INK),
-                                        ("maps of the Alps", 318, 46, False, INK), ("1845–1865", 380, 30, True, MUTED),
+                                        ("maps of the Alps", 318, 46, False, INK), ("1845â€“1865", 380, 30, True, MUTED),
                                         ("radar data drawn as ink hachures,", 470, 26, False, INK),
-                                        ("not rainbow fringes", 506, 26, False, INK), ("Dufour map: © swisstopo", 650, 18, False, MUTED)]:
+                                        ("not rainbow fringes", 506, 26, False, INK), ("Dufour map: Â© swisstopo", 650, 18, False, MUTED)]:
         d.text((720, y), text, font=font(size, italic), fill=col)
-    end = card([("Every plate tells its story,", 220, 46, True, INK),
-                ("and says how sure it is.", 284, 46, True, INK),
-                ("maksymsokolnytskyi.github.io/edelweiss-atlas", 420, 30, False, RED),
-                ("Mexico City · Ostrava–Karviná · Reykjanes · Central Valley · Wisconsin", 490, 22, False, MUTED),
-                ("Narration: synthetic voice; script drafted with AI (Claude) and checked by the team", 620, 18, False, MUTED)])
-    def plate(p, cap):
-        im = Image.open(p).convert("RGB")
-        im = im.resize((W, round(im.height * W / im.width)), Image.LANCZOS).crop((0, 0, W, H))
-        d = ImageDraw.Draw(im)
-        d.rectangle([0, H - 64, W, H], fill=PAPER)
-        d.text(((W - d.textlength(cap, font=font(26, True))) / 2, H - 50), cap, font=font(26, True), fill=INK)
-        return im
-    frames = [plate(p, "Reykjanes, Iceland: the dome rises up to 23.5 ± 1.0 cm a year  (NISAR, 2025–2026)") for p in shots]
-    mdir = Path(sys.argv[2])                                  # title.jpg, end.jpg (web/demo/cards.html), m1a.. m4c (plates)
+    mdir = Path(sys.argv[1])
     shot = lambda p: Image.open(p).convert("RGB").resize((W, H), Image.LANCZOS)  # noqa: E731
     title, end = shot(mdir / "title.jpg"), shot(mdir / "end.jpg")
-    seq = [(title, 4.5), (duf, 4.0)] + [(f, 6.5 / len(frames)) for f in frames]
-    for k, secs in zip(range(1, 5), (4.0, 2.5, 2.5, 2.5)):     # each plate's frames in turn (the year plays, then a zoom)
+    seq = [(title, TITLE_S), (duf, DUFOUR_S)]
+    for k, secs in enumerate(PLATE_S):                        # each plate's frames in turn: the town, the year playing, a zoom
         fs = sorted(mdir.glob(f"m{k}*.jpg"))
         seq += [(shot(f), secs / len(fs)) for f in fs]
-    seq += [(end, 3.5)]
+    seq += [(end, END_S)]
     out = ROOT / "web" / "demo"
     out.mkdir(exist_ok=True)
     tmp = out / "_frames"
@@ -96,7 +81,7 @@ def main():
         if i + 1 < len(seq) and t > b - x:
             im = Image.blend(im, seq[i + 1][0], (t - (b - x)) / x)
         im.save(tmp / f"f{k:04d}.jpg", quality=90)
-    vdir = Path(sys.argv[3])
+    vdir = Path(sys.argv[2])
     clips = sorted(vdir.glob("c*.wav"), key=lambda q: int(q.stem[1:]))
     for c, at in zip(clips, VOICE_AT):
         with wave.open(str(c)) as w:
