@@ -14,7 +14,8 @@ Claude Code sessions start from [CLAUDE.md](CLAUDE.md). Ukrainian onboarding: [d
 
 1. Install [uv](https://docs.astral.sh/uv/) and clone the repo. On Windows clone into a short folder (e.g. `C:\sars`):
    NISAR file names are ~125 characters and Windows stops at 260 per path unless long paths are enabled.
-2. `uv sync` (add `--group ml` only if you need the GPU/ML experiments; it pulls PyTorch).
+2. `uv sync`. Optional groups: `--group ml` (PyTorch, zuko) for the GPU/ML experiments, `--group research` (shapely, osmium, pyproj, scikit-fem)
+   for `scripts/reykjanes/`. Name every group you need in one call: `uv sync` removes packages of groups you leave out.
 3. Earthdata token, once: log in at https://urs.earthdata.nasa.gov, Generate Token, and save it as **one line** in
    `~/.edl_token` (Windows: `C:\Users\<you>\.edl_token`) or in the env var `EARTHDATA_TOKEN`.
    Use your own account. Never commit the token or paste it into chats, docs or issues.
@@ -57,7 +58,7 @@ All site keys, layer kinds, themes and the page format are in [web/README.md](we
 |---|---|
 | `src/hachure/` | the engine: NISAR access (`nisar.py` GUNW, `gcov.py` backscatter), hachures (`field.py`, `trace.py`), layers for the web (`engine.py`), CLI (`cli.py`) |
 | `sites/` | one JSON per plate, its pages (`.story.json`) and pinned pairs (`.lock.json`) |
-| `scripts/` | pipeline steps the CLI calls (build, story, pack, OSM, WorldCover, quake card); `scripts/reykjanes/` = the Reykjanes research pipeline (see `docs/data-guide.md`) |
+| `scripts/` | pipeline steps the CLI calls (build, story, pack, OSM, WorldCover, quake card); `scripts/reykjanes/` = the Reykjanes research pipeline, `scripts/ostrava/` = the Ostrava–Karviná study (see `docs/data-guide.md`) |
 | `web/` | the map app (MapLibre + deck.gl, no build step); `web/data/` holds built plates; `web/reykjanes-scroll.html` is the packed Reykjanes plate, a **test build** with the internal math window (open the file; rebuild with `scripts/build_reykjanes_scroll.py`, `--no-math` for the jury). It carries a frozen, patched copy of `app.js`: engine fixes reach it only after a rebuild |
 | `experiments/` | one-off tests behind the numbers in `notes/experiments.md` (pre-registered thresholds, results) |
 | `notes/` | research notes and the experiment log (index: `notes/README.md`) |
@@ -80,6 +81,8 @@ All site keys, layer kinds, themes and the page format are in [web/README.md](we
 - Reykjanes plate (`web/reykjanes-scroll.html`): Copernicus Sentinel-1 interferograms of November 2023 processed by ASF HyP3
   (dike check only); NASA FIRMS VIIRS 375 m active fires; NASA HLS (LP DAAC) vents; ASTER GDEM v3 (NASA/METI) for the FE model; reference values from Sigmundsson et al.
   2024, Science 383:1228 (doi 10.1126/science.adn2838).
+- Ostrava–Karviná study (`scripts/ostrava/`): NISAR L2 GUNW PROVISIONAL (NASA/JPL and ISRO, ASF DAAC); OpenStreetMap
+  (ODbL) via the Overpass API and osmnx.
 
 NASA does not endorse any non-U.S. Government entity. Each non-NASA source is used under its own terms.
 
