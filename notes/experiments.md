@@ -2007,3 +2007,50 @@ zone 16 (EPSG 32616), so the band A class layers are built on each window's own 
   text says (it was median dB minus median dB); W1a reports broken-layer and finite counts separately; the Faraday sign
   convention is fixed and stated (the W8 values above flipped sign, magnitudes unchanged); `experiments/w_selfcheck.py`
   reruns the synthetic checks of the polarimetry helpers.
+
+## B. Bakota, Dniester canyon: water and terrain geometry with GCOV (`edoTenseii` + Claude)
+
+Goal: a Ukrainian site far from any front, with a drowned village (Bakota, flooded in 1981 by the Dniester reservoir)
+and a ~150 m deep canyon. Three questions: does the product's radiometric terrain correction (RTC) flatten slopes that
+face the radar; does calm canyon water sit at the stated noise floor; does the radar see the reservoir's water area
+change the way optical images do.
+
+**Pre-registered before any GCOV backscatter value over this site was read; this commit is pushed to GitHub before the
+data run (the push time is the check).** Seen before writing, and nothing else:
+- ASF lists: 48 GCOV scenes (`2005_DHDH`, HH + HV) from 4 tracks (A100/26: 11, A172/26: 11, D94/64: 11, D166/64: 15),
+  Oct 2025 – Nov 2026; 39 GUNW pairs. One file's layer list: no layover/shadow layer in GCOV.
+- `experiments/b_geometry.py` (DEM + the line-of-sight and incidence cubes only, no backscatter): Copernicus DEM 30 m,
+  heights 117–307 m, slope p50 2.5°, p99 30.5°, max 48.4°. Predicted radar shadow and layover cover 0–32 of 130 869
+  pixels per track, so a shadow/layover test is **not** run here: the canyon walls are not steep enough for NISAR's
+  36–47° incidence. Forested slopes ≥ 15° facing the sensor / facing away: 1 351 / 2 170 (D94), 2 437 / 1 992 (A100),
+  1 365 / 2 188 (D166), 2 443 / 2 004 (A172) pixels.
+- ESA WorldCover 2021 shares, and the list of clear, full-coverage Sentinel-2 L2A dates (31, Oct 2025 – Nov 2026).
+
+**Window.** W 26.90, S 48.55, E 27.06, N 48.64 (Bakota bay and the canyon around it; the Dniester HPP dam, ~30 km
+downstream, is outside and is not studied). GCOV band A (20 m), all 48 scenes; terrain height 260 m above the ellipsoid
+for the incidence cube. dB = 10·log10 of gamma0. A window is used for a class only with ≥ 50 class pixels.
+
+**Classes** (radar-independent):
+- *forest slope, facing / away*: on the 30 m DEM grid, WorldCover tree fraction ≥ 0.9, slope ≥ 15°, and the slope
+  component toward the sensor (per track, from its line-of-sight vector) > tan 15° (*facing*) or < −tan 15° (*away*).
+- *water*: Sentinel-2 SCL = 6 for every S2 pixel under the radar pixel on both 2026-08-15 and 2026-03-10, eroded by one
+  band A pixel (no NDWI rule: section W showed it can empty a summer water class).
+
+**B1. Terrain flattening.** Dates 2026-06-01 … 2026-09-30. Per track, Δ = median over dates of
+[median γ⁰(facing) − median γ⁰(away)] in dB, for HH and for HV.
+- B1: |Δ| ≤ 1.0 dB in HH and in HV on ≥ 3 of 4 tracks (RTC removes the brightening of slopes that face the radar).
+- Reported, not judged: the same difference for σ⁰ = γ⁰ × `rtcGammaToSigmaFactor`, to show how much RTC changes.
+
+**B2. Noise floor on canyon water** (repeat of K1 / W1 on a Ukrainian site, band A).
+- B2a. Water HV / NEB_HV (median of 10·log10 of the per-pixel ratio) within ±2 dB in ≥ 80 % of the scenes where the
+  NEB layer is finite and > 0 under all water pixels; fewer than 5 such scenes: inconclusive. The number of scenes with a
+  broken NEB layer is reported.
+- B2b. Water HH ≥ water HV − 0.5 dB in ≥ 80 % of scenes.
+
+**B3. Does the radar see the reservoir's water area change?** Radar water per scene: band A HH (dB) below a scene
+threshold set halfway between the median HH of the *water* class and the median HH of WorldCover cropland
+(fraction ≥ 0.9) in the same scene. Optical water: S2 SCL = 6 on the clear S2 date nearest the radar date, used only
+if within ±5 days. Both as area (km²) over the whole window on the 20 m grid.
+- B3a. Radar area / optical area within 0.85–1.15 in ≥ 70 % of the matched pairs (≥ 6 pairs, else inconclusive).
+- B3b. Spearman ρ between the radar and the optical areas over the matched pairs ≥ 0.5 (the radar follows the same
+  rise and fall of the water area).
