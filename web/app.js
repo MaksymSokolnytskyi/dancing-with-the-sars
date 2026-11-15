@@ -47,7 +47,8 @@ const STR = {
         lg_change: "радар втратив відбиток між двома прольотами (сніг, вода, обвал)", lg_change_event: "пляма, що лишається: селевий потік",
         story_intro: "таблиця", story_what: "що змінилось", story_why: "чому", story_sure: "наскільки певні",
         story_next: "що ще може NISAR", story_listen: "послухати", story_back: "Назад", story_next_btn: "Далі",
-        story_explore: "досліджувати мапу самому ✕", story_open: "Читати таблицю ▸" },
+        story_explore: "досліджувати мапу самому ✕", story_open: "Читати таблицю ▸",
+        contents: "☰ Зміст", glossary: "Слова, вжиті в атласі", next_plate: "Наступна таблиця", the_end: "Кінець атласу: до змісту" },
   en: { scene: "Place", theme: "Style", trust: "Trust", trust_fade: "weak strokes faded", trust_strong: "reliable only",
         trust_all: "all, no trust", off: "off", radar_only: "radar only", tied: "tied to GNSS",
         strong: "reliable stroke (signal ≥ 3σ)", weak: "weak (1–3σ)", hidden: "noise (< 1σ) not drawn",
@@ -86,7 +87,8 @@ const STR = {
         lg_change: "the radar lost the ground's fingerprint between two passes (snow, water, a slide)", lg_change_event: "the patch that stays: the debris flow",
         story_intro: "plate", story_what: "what changed", story_why: "why", story_sure: "how sure",
         story_next: "what else NISAR can do", story_listen: "listen", story_back: "Back", story_next_btn: "Next",
-        story_explore: "explore the map yourself ✕", story_open: "Read the plate ▸" },
+        story_explore: "explore the map yourself ✕", story_open: "Read the plate ▸",
+        contents: "☰ Contents", glossary: "Words used in the atlas", next_plate: "Next plate", the_end: "End of the atlas: back to the contents" },
 };
 const q = new URLSearchParams(location.search);
 const lang = q.get("lang") || "en";                       // ?lang=uk for the Ukrainian interface
@@ -1349,6 +1351,111 @@ function togglePlay() {
   requestAnimationFrame(step);
 }
 
+// ---------------------------------------------------------------- the atlas: cover, chapters, glossary
+// web/data/scenes.json may carry an "atlas" (cover words) and "chapters" (scene ids in reading order). Without them (a
+// packed single plate) there is no cover and the plates simply follow the scene list.
+const atlas = { idx: null, order: [], gloss: [], forms: [] };
+const sceneById = (id) => atlas.idx?.scenes.find((s) => s.id === id);
+const chapterOf = (id) => (atlas.idx?.chapters || []).findIndex((c) => c.scenes.includes(id));
+const coverOn = () => !$("cover").classList.contains("hidden");
+
+function goPlate(id) {
+  const sc = sceneById(id);
+  if (!sc) { showCover(true); return; }
+  if (sc.href) { location.href = sc.href + (lang !== "en" ? `?lang=${lang}` : ""); return; }
+  showCover(false); $("scene").value = id;
+  if (id !== state.scene) loadScene(id); else if (state.storyData) storyOpen(true, 0, true);
+}
+
+function showCover(on) {
+  if (on && !atlas.idx?.atlas) return;
+  if (on) renderCover();
+  $("cover").classList.toggle("hidden", !on); glossTip(null);
+  setParam("cover", on ? "1" : null);
+  if (on) $("cover").scrollTop = 0;
+  else if (map) { map.resize(); redraw(); drawFrame(); }      // the map may have been laid out while the cover hid it
+}
+
+function renderCover() {
+  const A = atlas.idx.atlas, other = lang === "uk" ? "en" : "uk";
+  const chapters = (atlas.idx.chapters || []).map((c, k) => `<section class="cv-ch"><div class="cv-num">${ROMAN[k]}</div>` +
+    `<h2>${label(c.title)}</h2><p class="cv-intro">${label(c.intro)}</p><ol>` +
+    c.scenes.map((id) => { const sc = sceneById(id); return sc ? `<li><a href="?scene=${id}" data-id="${id}">${label(sc.title)}</a>` +
+      `<span>${label(sc.blurb || sc.subtitle)}</span></li>` : ""; }).join("") + `</ol></section>`).join("");
+  const words = [...atlas.gloss].sort((a, b) => label(a.title).localeCompare(label(b.title)))
+    .map((g) => `<div><b>${label(g.title)}.</b> ${label(g.text)}</div>`).join("");
+  $("cover").innerHTML = `<div class="cv-page"><div class="cv-kicker">${label(A.kicker)}</div>` +
+    `<img class="cv-flower" src="edelweiss.svg" alt="" width="200" height="222">` +
+    `<h1>${label(A.title)}</h1><div class="cv-sub">${label(A.subtitle)}</div><div class="cv-rule"></div>` +
+    `<p class="cv-lede">${label(A.lede)}</p><div class="cv-chapters">${chapters}</div>` +
+    (words ? `<details class="cv-words"><summary>${T("glossary")}</summary><div class="cv-wgrid">${words}</div></details>` : "") +
+    `<footer><div>${label(A.credits)}</div><a class="cv-lang" href="?cover=1&lang=${other}">${other === "uk" ? "Українська" : "English"}</a></footer></div>`;
+  $("cover").querySelectorAll("a[data-id]").forEach((a) => (a.onclick = (e) => { e.preventDefault(); goPlate(a.dataset.id); }));
+  glossify([$("cover").querySelector(".cv-sub"), $("cover").querySelector(".cv-lede")]);
+}
+
+// Glossary: the first use of a term on a page gets a dotted underline; hovering, focusing or tapping it opens a short
+// card. A form with capitals matches exactly, a lower-case one in any case. An English form takes a plural ending only
+// ("pass" -> "passes", never "passed"); a Ukrainian stem takes any ending ("іоносфер" -> "іоносфері"). One-character
+// forms (σ, ρ, ±) match anywhere.
+const LETTER = /[\p{L}\p{N}]/u;
+function glossForms() {
+  atlas.forms = [];
+  for (const g of atlas.gloss) for (const f of g.match?.[lang] || g.match?.en || []) atlas.forms.push({ f, id: g.id, ci: f === f.toLowerCase() });
+  atlas.forms.sort((a, b) => b.f.length - a.f.length);
+}
+function glossFind(s, t) {
+  const hay = t.ci ? s.toLowerCase() : s, one = [...t.f].length === 1;
+  for (let k = hay.indexOf(t.f); k >= 0; k = hay.indexOf(t.f, k + 1)) {
+    if (!one && k > 0 && LETTER.test(s[k - 1])) continue;
+    let e = k + t.f.length;
+    if (!one && LETTER.test(t.f.at(-1))) while (e < s.length && LETTER.test(s[e])) e++;
+    if (/^[\x20-\x7e]+$/.test(t.f) && !["", "s", "es"].includes(s.slice(k + t.f.length, e).toLowerCase())) continue;   // English: pass(es), not passed
+    return [k, e];
+  }
+  return null;
+}
+function glossify(els) {
+  if (!atlas.forms.length) return;
+  const used = new Set();
+  for (const el of els) {
+    if (!el) continue;
+    const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), texts = [];
+    while (w.nextNode()) if (!w.currentNode.parentElement.closest(".gl, a, button")) texts.push(w.currentNode);
+    for (let node of texts) {
+      for (;;) {
+        let best = null;
+        for (const t of atlas.forms) {
+          if (used.has(t.id)) continue;
+          const m = glossFind(node.nodeValue, t);
+          if (m && (!best || m[0] < best.k)) best = { k: m[0], e: m[1], id: t.id };
+        }
+        if (!best) break;
+        used.add(best.id);
+        const mid = node.splitText(best.k), rest = mid.splitText(best.e - best.k);
+        const span = document.createElement("span");
+        span.className = "gl"; span.dataset.g = best.id; span.tabIndex = 0;
+        mid.replaceWith(span); span.append(mid); node = rest;
+      }
+    }
+  }
+}
+function glossTip(el) {
+  const tip = $("gloss"), g = el && atlas.gloss.find((x) => x.id === el.dataset.g);
+  if (!g) { tip.classList.add("hidden"); return; }
+  tip.innerHTML = `<b>${label(g.title)}</b>${label(g.text)}`; tip.classList.remove("hidden");
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left - 12)) + "px";
+  tip.style.top = (r.bottom + 8 + h < innerHeight - 8 ? r.bottom + 8 : Math.max(8, r.top - h - 8)) + "px";
+}
+function glossEvents() {
+  document.addEventListener("mouseover", (e) => { const g = e.target.closest?.(".gl"); if (g) glossTip(g); });
+  document.addEventListener("mouseout", (e) => { if (e.target.closest?.(".gl") && !e.relatedTarget?.closest?.(".gl")) glossTip(null); });
+  document.addEventListener("focusin", (e) => glossTip(e.target.closest?.(".gl") || null));
+  document.addEventListener("click", (e) => glossTip(e.target.closest?.(".gl") || null));     // a tap opens it, a tap elsewhere closes
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("gloss").classList.contains("hidden")) { glossTip(null); e.stopImmediatePropagation(); } }, true);
+}
+
 // ---------------------------------------------------------------- atlas pages: a plate plays its pages (sites/<id>.story.json)
 // A page sets the camera, the layers (exact list; theme-only layers still follow the theme), cell modes, the cut, the date
 // and the words. People write pages; this code only plays them. Keys: ← → / PageUp PageDown (presentation clickers), Esc.
@@ -1417,18 +1524,27 @@ function renderStoryCard() {
   const timed = needsTime() && state.man.dates.length > 1;
   // one paragraph up front, the rest behind "Tell me more"; "How sure" pages show everything (doubts are never folded away)
   const keep = p.keep ?? (p.section === "sure" ? 99 : 1);
-  box.innerHTML = `<div class="st-kicker">${label(S.title)} · ${T("story_" + (p.section || "intro"))}</div>` +
+  const ch = chapterOf(state.scene), last = i === n - 1, at = atlas.order.indexOf(state.scene);
+  const nextId = last && at >= 0 ? atlas.order[at + 1] : null, nextSc = nextId && sceneById(nextId);
+  const onward = !last || at < 0 ? "" : nextSc
+    ? `<div class="st-onward">${T("next_plate")}${chapterOf(nextId) !== ch ? ` · ${ROMAN[chapterOf(nextId)]}` : ""}: <a href="#" data-go="${nextId}">${label(nextSc.title)} →</a></div>`
+    : (atlas.idx?.atlas ? `<div class="st-onward"><a href="#" data-go="">${T("the_end")}</a></div>` : "");
+  box.innerHTML = `<div class="st-kicker">` + (atlas.idx?.atlas ? `<a href="#" class="st-toc" id="st-toc" title="Edelweiss">${T("contents")}</a>` : "") +
+    `${ch >= 0 ? ROMAN[ch] + " · " : ""}${label(S.title)} · ${T("story_" + (p.section || "intro"))}</div>` +
     `<h2>${label(p.title)}</h2>${(p.text || []).slice(0, keep).map((t) => `<p>${label(t)}</p>`).join("")}` +
     ((p.text || []).length > keep ? `<div class="st-more${state.moreOpen ? " open" : ""}">${p.text.slice(keep).map((t) => `<p>${label(t)}</p>`).join("")}</div>` +
       `<button class="st-more-btn" id="st-more">${state.moreOpen ? T("less") : T("more")}</button>` : "") +
     (facts ? `<div class="facts">${facts}</div>` : "") + (legend ? `<div class="st-legend">${legend}</div>` : "") +
-    (timed ? `<div class="st-time"><button id="st-play">${state.playing ? "❚❚" : "▶"}</button><span id="st-date"></span></div>` : "") +
+    (timed ? `<div class="st-time"><button id="st-play">${state.playing ? "❚❚" : "▶"}</button><span id="st-date"></span></div>` : "") + onward +
     `<nav><button id="st-prev"${i ? "" : " disabled"}>← ${T("story_back")}</button><span class="tabs">${tabs}</span>` +
-    `<button id="st-next"${i < n - 1 ? "" : " disabled"}>${T("story_next_btn")} →</button></nav>` +
+    `<button id="st-next"${i < n - 1 || onward ? "" : " disabled"}>${T("story_next_btn")} →</button></nav>` +
     `<div class="st-foot"><a href="#" id="st-explore">${T("story_explore")}</a></div>`;
   box.classList.remove("turn"); void box.offsetWidth; box.classList.add("turn");      // a short page-turn
   $("st-prev").onclick = () => applyPage(i - 1);
-  $("st-next").onclick = () => applyPage(i + 1);
+  $("st-next").onclick = () => (last ? goPlate(nextId) : applyPage(i + 1));
+  box.querySelectorAll("[data-go]").forEach((a) => (a.onclick = (e) => { e.preventDefault(); goPlate(a.dataset.go); }));
+  if ($("st-toc")) $("st-toc").onclick = (e) => { e.preventDefault(); showCover(true); };
+  glossify([...box.querySelectorAll("p, .fl")]);
   box.querySelectorAll(".tab").forEach((b) => (b.onclick = () => applyPage(+b.dataset.k)));
   $("st-explore").onclick = (e) => { e.preventDefault(); storyOpen(false); };
   if ($("st-more")) $("st-more").onclick = () => {             // the choice is kept from page to page
@@ -1500,7 +1616,8 @@ async function loadScene(id) {
     map.fitBounds([[man.bbox[0], man.bbox[1]], [man.bbox[2], man.bbox[3]]],
                   { padding: wide ? { top: 20, bottom: 20 + sh, right: 20, left: 330 } : { top: 20, bottom: 20 + sh, left: 20, right: 20 }, duration: 0 });
     setDay(state.maxDay);
-    if (state.storyData && q.get("story") !== "0") storyOpen(true, (+q.get("page") || 1) - 1, true);
+    const first = !state.loadedOnce; state.loadedOnce = true;
+    if (state.storyData && q.get("story") !== "0") storyOpen(true, first ? (+q.get("page") || 1) - 1 : 0, true);
     else storyOpen(false);
     const u = new URL(location); u.searchParams.set("scene", id); try { history.replaceState(null, "", u); } catch (e) { /* file:// pages may refuse */ }
   } finally { $("loading").classList.add("hidden"); }
@@ -1525,8 +1642,13 @@ async function main() {
   const idx = await getJSON("data/scenes.json");
   const sceneSel = $("scene"), themeSel = $("theme");
   idx.scenes.forEach((s) => sceneSel.add(new Option(label(s.title), s.id)));
+  atlas.idx = idx; atlas.order = (idx.chapters || []).flatMap((c) => c.scenes);
+  try { atlas.gloss = (await getJSON("data/glossary.json")).terms || []; } catch (e) { atlas.gloss = []; }   // optional
+  glossForms(); glossEvents();
+  if (idx.atlas && (!q.get("scene") || q.get("cover") === "1")) showCover(true);             // the title page comes first
+  if ($("to-cover")) { if (idx.atlas) $("to-cover").onclick = (e) => { e.preventDefault(); showCover(true); }; else $("to-cover").remove(); }
   THEMES.forEach((t) => themeSel.add(new Option(t, t)));
-  const scene = q.get("scene") || idx.scenes.find((s) => !s.href).id, theme = q.get("theme") || THEMES[0];
+  const scene = q.get("scene") || idx.scenes.find((s) => !s.href).id, theme = q.get("theme") || (idx.atlas ? "scroll" : THEMES[0]);
   sceneSel.value = scene; themeSel.value = theme;
   await setTheme(theme);
   map = new maplibregl.Map({ container: "map", style: mapStyle(state.theme), center: [0, 0], zoom: 2, attributionControl: false });
@@ -1553,6 +1675,7 @@ async function main() {
   sceneSel.onchange = () => {                       // a scene with "href" is its own page (Reykjanes)
     const sc = idx.scenes.find((s) => s.id === sceneSel.value);
     if (sc?.href) location.href = sc.href; else loadScene(sceneSel.value);
+    sceneSel.blur();
   };
   themeSel.onchange = () => setTheme(themeSel.value);
   $("trustmode").onchange = (e) => { state.trust = e.target.value; redraw(); };
@@ -1560,6 +1683,7 @@ async function main() {
   $("play").onclick = togglePlay;
   $("story-open").onclick = () => storyOpen(true, state.page);
   addEventListener("keydown", (e) => {
+    if (coverOn()) return;                          // the title page is read with the mouse
     if (!state.storyOn || /INPUT|SELECT|TEXTAREA/.test(document.activeElement?.tagName || "")) return;
     if (["ArrowRight", "PageDown"].includes(e.key)) { e.preventDefault(); applyPage(state.page + 1); }
     else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); applyPage(state.page - 1); }

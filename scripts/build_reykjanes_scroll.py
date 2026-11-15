@@ -209,6 +209,8 @@ def patch_head(head, with_math):
     extra = '\n      <div class="testbuild" data-i18n="test_build">TEST BUILD</div>'
     if with_math:
         extra += '\n      <button class="mathbtn" id="math-open" data-i18n="math_open">∑ Math for the team (Ukrainian)</button>'
+    # the atlas link of index.html leads back to the atlas cover from this separate page
+    head = must(head, '<a href="#" id="to-cover" class="small">☰ Edelweiss</a>', '<a href="index.html?cover=1" id="back-atlas" style="display:inline-block;margin-bottom:6px;color:var(--muted);text-decoration:none;letter-spacing:.04em;font-size:12px">☰ Edelweiss</a>')
     head = must(head, '<button id="story-open" class="hidden"></button>', '<button id="story-open" class="hidden"></button>' + extra)
     head = must(head, "</head>", "<style>.testbuild{display:inline-block;margin:8px 6px 0 0;padding:2px 7px;border:1px dashed #8c2e1e;"
                 "color:#8c2e1e;font-size:11px;letter-spacing:.08em}</style>\n</head>")

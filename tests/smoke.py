@@ -74,7 +74,12 @@ def _sites():
 
 @check("built plates in web/data")
 def _web():
-    scenes = json.loads((ROOT / "web/data/scenes.json").read_text(encoding="utf-8"))["scenes"]
+    idx = json.loads((ROOT / "web/data/scenes.json").read_text(encoding="utf-8"))
+    scenes, ids = idx["scenes"], {s["id"] for s in idx["scenes"]}
+    for ch in idx.get("chapters", []):                            # the atlas contents name only listed plates
+        assert set(ch["scenes"]) <= ids, f"chapter {ch['id']}: unknown {set(ch['scenes']) - ids}"
+    gl = json.loads((ROOT / "web/data/glossary.json").read_text(encoding="utf-8"))["terms"]
+    assert len({g["id"] for g in gl}) == len(gl) and all(g["title"].get("uk") and g["text"].get("uk") for g in gl), "glossary"
     for sc in scenes:
         if sc.get("href"):                                       # a packed page of its own (Reykjanes)
             assert (ROOT / "web" / sc["href"]).exists(), f"{sc['id']}: missing {sc['href']}"

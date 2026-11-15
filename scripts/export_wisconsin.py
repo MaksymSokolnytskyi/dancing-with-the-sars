@@ -106,7 +106,11 @@ def main(src: Path = SRC):
     sc_path = ROOT / "web/data/scenes.json"
     sc = json.loads(sc_path.read_text(encoding="utf-8"))
     entry = {"id": "wisconsin", "title": story["title"], "subtitle": man["subtitle"], "kind": "cells"}
-    sc["scenes"] = [x for x in sc["scenes"] if x["id"] != "wisconsin"] + [entry]
+    ids = [x["id"] for x in sc["scenes"]]
+    if "wisconsin" in ids:                                 # keep its place and hand-written keys (title, blurb)
+        sc["scenes"][ids.index("wisconsin")] = {**entry, **sc["scenes"][ids.index("wisconsin")]}
+    else:
+        sc["scenes"].append(entry)
     sc_path.write_text(json.dumps(sc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     import add_context                                       # OSM context + cartouche subtitle from sites/wisconsin.json
     add_context.main("wisconsin")

@@ -92,6 +92,18 @@ The plate opens on its pages (`?page=n` for a page, `?story=0` for the free map)
 clicker) turn pages, Esc leaves; "explore the map yourself" opens the usual panel and "Read the plate" comes back.
 Text is short on purpose: a page should read in about 20 seconds.
 
+## The atlas: cover, chapters, glossary
+
+`data/scenes.json` may carry an `atlas` block (cover words, `{en, uk}`) and `chapters` (`id`, `title`, `intro`, `scenes`
+in reading order). With them, `index.html` without `?scene=` (or with `?cover=1`) opens the title page *Edelweiss*:
+the engraved flower (`edelweiss.svg`, drawn by `scripts/draw_edelweiss.py`), the three chapters with their plates
+(`blurb` per scene), the glossary and the credits. The last page of a plate leads on to the next plate in reading order,
+and the last plate back to the contents; "☰ Contents" in the story card and in the panel reopen the cover.
+
+`data/glossary.json` holds the hover help: per term the forms to find (`match.en`, `match.uk`), a title and a short
+text. The first use of each term on a page gets a dotted underline; hovering, focusing or tapping it opens the card.
+English forms take only a plural ending (`pass` matches "passes", not "passed"); Ukrainian forms are stems.
+
 ## Send one place as one file
 
     uv run sars pack mexico-city-asc --theme scroll   # extra pack_scene.py options pass through
