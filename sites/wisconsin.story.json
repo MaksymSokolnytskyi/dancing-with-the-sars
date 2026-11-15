@@ -501,7 +501,8 @@
     "en": "After the harvest, bare soil lies open to the weather. When rain falls in the days before the satellite passes, the wet ground gleams a little brighter in the radar's eye.",
     "uk": "Після жнив гола земля відкрита негоді. Коли за кілька днів до прольоту супутника падає дощ, мокрий ґрунт трохи яскравіше блищить в очах радара."
    },
-   "cells_as": "dots"
+   "cells_as": "dots",
+   "appendix": true
   },
   {
    "section": "what",
@@ -559,7 +560,8 @@
     "en": "Winter. As the forest freezes, the water in every tree and every handful of soil turns to ice, and the echo fades by about two decibels. The woods, in their way, fall asleep.",
     "uk": "Зима. Коли ліс замерзає, вода в кожному дереві й кожній жмені ґрунту стає льодом, і відлуння слабне приблизно на два децибели. Ліс по-своєму засинає."
    },
-   "cells_as": "dots"
+   "cells_as": "dots",
+   "appendix": true
   },
   {
    "section": "why",

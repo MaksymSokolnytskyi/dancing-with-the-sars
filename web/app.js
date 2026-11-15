@@ -481,9 +481,14 @@ function tintParcels(d, key, rgbaOf) {                 // nearest block, rounded
       if (i < 0 || j < 0 || i >= W || j >= H) continue;
       const k = col[j * W + i];
       if (!k) continue;
-      const r = (fu ** 4 + fv ** 4) ** 0.25, a = r < 0.4 ? 1 : Math.max(0, (0.5 - r) / 0.1);
-      if (a <= 0) continue;
-      const o = (py * cw + qx) * 4; px[o] = k[0]; px[o + 1] = k[1]; px[o + 2] = k[2]; px[o + 3] = k[3] * a;
+      const su = Math.sign(u - i) || 1, sv = Math.sign(v - j) || 1;
+      const same = (a, b) => { const c = a >= 0 && b >= 0 && a < W && b < H ? col[b * W + a] : null; return c && c[0] === k[0] && c[1] === k[1] && c[2] === k[2]; };
+      const eu = same(i + su, j) ? 0 : fu, ev = same(i, j + sv) ? 0 : fv;   // no edge towards a block of the same class
+      const r = eu || ev ? (eu ** 4 + ev ** 4) ** 0.25 : (same(i + su, j + sv) ? 0 : (fu ** 4 + fv ** 4) ** 0.25 * 0.0);
+      if (r > 0.5) continue;
+      const o = (py * cw + qx) * 4, edge = r > 0.43;
+      px[o] = edge ? k[0] * 0.45 : k[0]; px[o + 1] = edge ? k[1] * 0.45 : k[1]; px[o + 2] = edge ? k[2] * 0.45 : k[2];
+      px[o + 3] = edge ? 235 : k[3];
     }
   }
   ctx.putImageData(im, 0, 0);
@@ -683,7 +688,7 @@ function buildLayers() {
         const bn = kn !== tkey && fr > 0.03 ? draw(kn) : null;
         if (bn) L.push(new deck.BitmapLayer({ id: lay.id + "-" + m.key + "-t" + kn + "-in", image: bn.img, bounds: bn.bounds, opacity: op * fr,
           textureParameters: { [10240]: 9729, [10241]: 9729 } }));
-        if (m.categorical || !bm) L.push(new deck.PathLayer({ id: lay.id + "-" + m.key + "-h", data: hatchCells(d, m, color, th, tkey),   // classes: engraved over the wash
+        if ((m.categorical && how !== "parcels") || !bm) L.push(new deck.PathLayer({ id: lay.id + "-" + m.key + "-h", data: hatchCells(d, m, color, th, tkey),   // classes: engraved over the wash
           widthUnits: "pixels", capRounded: true, getPath: (h) => h.p, getColor: (h) => h.c, getWidth: (h) => h.w,
           updateTriggers: { getColor: [th.name, m.key, tkey] } }));
       } else if (how !== "dots") {
@@ -697,7 +702,7 @@ function buildLayers() {
         const amax = Math.max(1, ...pal.map((c) => c[3] ?? 255)), rMax = d.cell_km * 1000 / 2 * 0.96;
         L.push(new deck.ScatterplotLayer({ id: lay.id + "-" + m.key, data: d.cells, pickable: false, radiusUnits: "meters",
           getPosition: (c) => [c[0], c[1]],
-          getRadius: (c) => { const a = (color(c)[3] ?? 0) / amax; return a <= 0.05 ? 0 : rMax * Math.min(1, a); },
+          getRadius: (c) => { const a = (color(c)[3] ?? 0) / amax; return a <= 0.3 ? 0 : rMax * Math.min(1, a); },
           getFillColor: (c) => { const k = color(c), a = Math.min(1, (k[3] ?? 0) / amax);
             return [k[0], k[1], k[2], Math.round((th.cells_alpha ?? 220) * (0.45 + 0.55 * a))]; },
           updateTriggers: { getFillColor: [th.name, m.key, tkey], getRadius: [th.name, m.key, tkey] } }));
@@ -1629,6 +1634,7 @@ function goPlate(id) {
 
 function showCover(on) {
   if (on && !atlas.idx?.atlas) return;
+  if (on) { clearTimeout(state.narrTimer); if ("speechSynthesis" in window) speechSynthesis.cancel(); }
   if (on) renderCover();
   $("cover").classList.toggle("hidden", !on); glossTip(null); renderSheet();
   setParam("cover", on ? "1" : null);
@@ -1952,11 +1958,10 @@ function drawNotes() {             // engraved call-outs: a ring on the place, a
     const P = map.project([m.lon, m.lat]), dx = m.dx ?? 30, dy = m.dy ?? -24, x = P.x + dx, y = P.y + dy;
     const sign = m.curve ? curveSign(m.curve) : SIGNS[m.icon], gap = sign ? 34 : 4, end = dx < 0 ? "end" : "start", tx = x + (dx < 0 ? -gap : gap);
     // the place is ringed in ink: a ground radius (r_m) gives an ink loop around the area the page talks about
-    const mpp = 40075016.7 * Math.cos(m.lat * Math.PI / 180) / (512 * 2 ** map.getZoom()), rr = m.r_m ? Math.max(9, m.r_m / mpp) : 4.5;
-    s += `<circle cx="${P.x}" cy="${P.y}" r="${rr}" fill="none" stroke="${ink}" stroke-width="${m.r_m ? 1.6 : 1.3}"${m.r_m ? ' stroke-dasharray="7 3 1.5 3"' : ""}/>` +
+    const mpp = 40075016.7 * Math.cos(m.lat * Math.PI / 180) / (512 * 2 ** map.getZoom()), rr = 4.5;
+    s += `<circle cx="${P.x}" cy="${P.y}" r="${rr}" fill="none" stroke="${ink}" stroke-width="1.3"/>` +
          `<line x1="${P.x + (dx > 0 ? 1 : -1) * rr * 0.7}" y1="${P.y + (dy > 0 ? 1 : -1) * rr * 0.7}" x2="${x}" y2="${y}" stroke="${ink}" stroke-width="0.8"/>` +
          (sign ? `<g transform="translate(${x + (dx < 0 ? -17 : 17)},${y})"><circle r="16" fill="${paper}" fill-opacity=".85" stroke="${ink}" stroke-width=".7"/>` +
-                 (m.color ? `<circle r="15.3" fill="rgb(${m.color})" fill-opacity=".38"/>` : "") +
                  `<path d="${sign}" fill="none" stroke="${ink}" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" transform="scale(.95)"/></g>` : "") +
          `<text x="${tx}" y="${y + 4}" text-anchor="${end}" class="nt">${label(m.text)}</text>`;
   }
