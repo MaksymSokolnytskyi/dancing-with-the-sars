@@ -25,7 +25,9 @@ Each plate also says how sure it is.
 | `src/hachure/trust.py` | per-pixel error budget behind "how sure" | `audit` |
 | `sites/<plate>.json` | one plate: bbox, direction, layers, context, pages (`.story.json`), pinned pairs (`.lock.json`) | |
 | `scripts/` | pipeline steps the CLI calls (`build_site`, `story`, `pack_scene`, fetchers, `export_quake`, `sbi_*`) | |
+| `scripts/reykjanes/` | Reykjanes research pipeline (uplift source, MCMC vs NPE, the 2023 dike); outside the CLI, writes `data/` and `output/` | `scripts/reykjanes/README.md` |
 | `web/` | the map app (MapLibre + deck.gl, no build step); `web/data/<plate>/` = built plates, in git | `web/README.md` |
+| `web/reykjanes-scroll.html` | the Reykjanes plate as one packed page (test build with the math window; `--no-math` for the jury) | `scripts/build_reykjanes_scroll.py` |
 | `experiments/` | one-off pre-registered tests behind `notes/experiments.md` | |
 | `notes/` | plans, research, experiment log; index in `notes/README.md` | |
 | `docs/` | data guide; `docs/uk/` = Ukrainian onboarding | `docs/data-guide.md` |
@@ -34,7 +36,7 @@ Each plate also says how sure it is.
 ## Commands
 
 ```bash
-uv sync                                   # add --group ml for PyTorch (SBI / quake experiments only)
+uv sync                                   # + --group ml (PyTorch, zuko) / --group research (shapely, osmium, pyproj, scikit-fem); name all groups you need in one call
 uv run sars doctor                        # environment, token, network, path length
 uv run sars fetch <plate> --dry-run       # what would be downloaded
 uv run sars fetch <plate>                 # DEM, NISAR windows (pinned by the lock), OSM, WorldCover, context, GNSS

@@ -3,6 +3,16 @@
 Rule: each experiment states up front what result counts as success, partial or failure.
 The thresholds are not moved after seeing the data. Results go under each block with a date.
 
+Rule (added 2026-11-14, from the PR reviews): a sign, a direction or a threshold chosen so that the result "looks right"
+makes the next check circular. Such choices are written here as **post-hoc**, with the independent evidence for them, if any.
+
+Post-hoc choices in the engine (recorded 2026-11-14):
+- **LOS sign** (`src/hachure/nisar.py`, `LOS_SIGN = −1`, positive = towards the satellite). The module docstring sets it by
+  the expected answer: "Mexico City must come out NEGATIVE; if not, use flip_sign". So "Mexico sinks" is not evidence for
+  the sign. Independent support: GNSS on two NISAR GUNW sites agrees in sign and size (Mexico City MMX1 −27.8 vs −27.0 cm/yr,
+  Reykjanes SENG +20.1 vs +21.0 cm/yr, the latter with the same convention in `scripts/reykjanes/`). The NISAR GUNW product
+  specification has not been checked for the phase convention.
+
 Baseline facts, measured by `scripts/atmo_stats.py` and `scripts/gnss_check.py`:
 - 12-day sinking in the bowl: about 0.73 cm.
 - Noise in one pair: about 2.0 cm std (1.5 cm after removing the height-linked part and a plane).
@@ -2007,6 +2017,283 @@ zone 16 (EPSG 32616), so the band A class layers are built on each window's own 
   text says (it was median dB minus median dB); W1a reports broken-layer and finite counts separately; the Faraday sign
   convention is fixed and stated (the W8 values above flipped sign, magnitudes unchanged); `experiments/w_selfcheck.py`
   reruns the synthetic checks of the polarimetry helpers.
+
+## O. Ostrava–Karviná mining subsidence: log of tests, recorded 2026-11-14
+
+**Status of this block: post-hoc record.** The Ostrava–Karviná analysis (`scripts/ostrava/`) was run before this log
+existed, so its thresholds were **not** written here in advance. The notebook's settings (bowl threshold −15 cm/yr vertical,
+track confirmation −8 cm/yr LOS on ≥ 2 tracks, water share ≤ 0.30, watershed split at 10 cm/yr, Isolation Forest
+contamination 0.03) were chosen while developing the method on these same data, so every result below is **post-hoc**.
+
+**Period.** All O1 numbers use the vertical from A158_F027 (8 pairs, 25 Jun – 11 Oct 2026) and D152_F063 (8 pairs,
+24 Jun – 10 Oct 2026), i.e. **24 Jun – 11 Oct 2026**; A057_F027 (9 pairs, 18 Jun – 16 Oct 2026) only confirms.
+The search window was 17 Jun – 14 Nov 2026 and returned pairs up to 17 Oct (frames D051, D080, A158_F026 were dropped for
+coverage < 30 %). This one period is used on the results page and in the data guide.
+
+### O1. Bowls and what stands on them (results of the first run)
+- 22 bowls after the water mask and the watershed split: 18 in PL (14.86 km²), 4 in CZ (2.81 km²).
+- 10 "reliable" PL bowls (M01–M09, M18): 11.88 km², area-weighted vertical −39.5 cm/yr, 932 buildings, 30.3 km of roads,
+  4.4 km of rail. Fastest: M01 (Bzie Górne), mean −68.4 cm/yr; its p10 (−174.6 cm/yr) is a lower bound near the unwrapping
+  limit, not a measurement.
+- Horizontal motion points to the bowl centre in 82 % of bowls: a **consistency check, not an independent test** (see O2).
+- Spoil heaps: where a heap covers part of a bowl, the heap sinks less than the ground next to it (M05, M08), so the strongest
+  sinking is not heap compaction.
+
+### O2. Sign, direction and other choices made to look right (post-hoc), and open issues
+Lesson for the team: a sign, direction or threshold chosen so that the result "looks right" makes the next check circular.
+Such choices are listed here.
+- **Phase sign `SIGN = −1`** (positive LOS = towards the satellite). In the first run it was set by the expected answer: the
+  notebook said "bowls must be negative; if they are positive, flip SIGN". So inside this study it is **post-hoc**, and
+  "the bowls are negative" is not evidence. Independent support: it is the same convention as the repo engine
+  (`src/hachure/nisar.py`, `LOS_SIGN = −1`), which matched GNSS on two other NISAR GUNW sites (Mexico City MMX1:
+  −27.8 vs −27.0 cm/yr; Reykjanes SENG: +20.1 vs +21.0 cm/yr). The NISAR GUNW product specification was **not** checked.
+  The notebook now fixes `SIGN` and says not to tune it.
+- **LOS vector direction.** The first run's `geometry()` flipped `losUnitVector` if its mean east component had the
+  "wrong" sign for a left-looking radar. It **did not trigger** on any track (the run printed `geometry: losUnitVector`
+  for A057, A158 and D152), so the vectors were used as given in the product. The notebook now never flips; it only warns.
+- **The 82 % horizontal check** therefore rests on product geometry (not tuned) and on a sign chosen post-hoc but supported
+  by GNSS elsewhere. Because the method's settings were also chosen on these data, it is a consistency check only.
+- **"Reliable" is a hand-picked list**, made by eye after the first run: M11, M12, M16, M17, M21, M22 are also confirmed by
+  3 tracks but were left as candidates. M16 is in CZ. So the headline "0 reliable bowls on the Czech side" depends on this
+  choice; with the plain rule "confirmed by 3 tracks" CZ would have 1 bowl (M16, 0.70 km², 2 buildings). The results page
+  labels the set "hand-picked, post-hoc" and names the 3-track CZ bowls next to the headline.
+- PROVISIONAL data, about 4 months: slow trends are not visible. The fastest centres (more than ~12 cm LOS in 12 days) are
+  near the limit of unambiguous L-band phase unwrapping, so peak values (~−2 m/yr LOS) are shown as lower bounds, faded.
+  Building counts carry "provisional, not validated" next to them.
+- No validation against EGMS or mining-lease maps yet. Mine names and statuses are OSM labels, not checked at the source.
+
+### O2b. How the thresholds were set (recorded 2026-11-15)
+Honestly: some were fixed in advance, some were changed after looking at the results, and then all were checked by tests
+that do not care about the wanted answer.
+- **Fixed in advance** (standard InSAR practice or physics): coherence ≥ 0.3; the expectation that bowls over mined-out
+  ground sink (`SIGN` was then set to match it: post-hoc, see O2, so "bowls are negative" is no evidence); merging of fragments; splitting bowls
+  with several centres.
+- **Changed after looking at the results (post-hoc):** the frame-coverage threshold (because of D080), the swath-edge trim,
+  the long-wavelength noise filter, the bowl threshold −15 cm/yr (instead of −10), and the water mask (because of a pond).
+- **Checks of these choices**: `scripts/ostrava/ostrava_thresholds.ipynb` (added 2026-11-15). It reads the saved stacks and
+  downloads nothing. Numbers below are from the run of 2026-11-15: the English notebook with the Kaggle paths, the
+  first-run stacks, **with the water mask** (8.2 % of the box), seed 42, `N_PERM` = 30. Its copy of the detector gives
+  **22 bowls, 16 of them confirmed by 3 tracks**, the same counts as O1 (22 bowls; the 10 reliable plus the 6 three-track
+  candidates of O2). An earlier run by the analyst without the water mask gave 24 / 17 and FDR values within ±1 point of these.
+  - A, coverage: frame coverage is bimodal (0.21 for D080, then 0.83 and above), so any threshold from 0.22 to 0.83 selects
+    the same frames;
+  - C, noise: σ of the vertical in stable places (1.4826·MAD) = 3.5 cm/yr, so −15 cm/yr ≈ 4.3σ (3σ = −10.6);
+  - D, null test: subtract each pixel's mean rate, put random signs on the pair deviations, and count the bowls the method
+    "finds" where there is no motion. At −15 cm/yr the FDR is **1 % for bowls confirmed by ≥ 3 tracks, 12 % for ≥ 2 tracks
+    (the default rule) and 21 % for ≥ 1 track**. Under the default rule the FDR is ≤ 10 % only from −20 cm/yr down
+    (5 % at −20). The test is conservative (random signs break the partial cancellation of shared acquisitions). The first
+    version of this test had a bug (~27 % of the motion leaked into the "null"); it was fixed;
+  - E, injected bowls at −15: found 73 % of −60, 76 % of −45, 56 % of −30, 47 % of −20 and 38 % of −10 cm/yr bowls
+    (11–17 bowls per cell, so these shares are rough and not monotonic). Recall of moderate bowls (−20…−30) is about half:
+    the bowl list is **not complete**;
+  - B, coherence: per-pair noise is 1.6× larger at γ ≈ 0.3 than at 0.7 (theory: 3.1×); only γ ≥ 0.3 is in the stacks;
+  - F, noise filter: with the mask the injected bowl keeps 100 % of its amplitude for σ = 1–12 km (73 % at 1 km without it);
+  - G, split depth: the bowl count is flat (22) from 8 to 12 cm/yr around the default 10;
+  - H, robustness: changing one parameter at a time recovers all 16 three-track bowls for most values, and 11–15 of 16 at
+    the edges (threshold −10: 15, −20: 13, −25: 11; split depth 15–20: 14; max. hole 0.5 km², water share 0.1, min. size
+    40 px, LOS confirmation −12: 15). So "the same bowls" holds near the defaults, not over the whole range.
+- Reading: the 12 % FDR for two-track bowls (above the notebook's own 10 % line) supports keeping them as candidates only;
+  three-track bowls (1 %) are the ones a plate may call reliable. H uses the detector's own 3-track set, which here equals
+  the first condition of the O3a rule; it will be repeated for the full O3a rule.
+
+### O3. Next tests, pre-registered 2026-11-14 (before running)
+- **O3a. Rule-based reliable set (a fixed rule, not a test).** Reliable = confirmed by 3 tracks AND no-data share < 0.6 AND
+  water share < 0.10, fixed now. It is written after seeing O1, so it is not a blind test: it only replaces the hand-picked
+  list. Any plate's PL-vs-CZ numbers will use this rule, whatever it gives.
+- **O3b. EGMS check.** For each bowl, the EGMS Ortho-Vertical (2019–2023) mean inside the polygon. Prediction: ≥ 8 of the 10
+  PL bowls of O1 have EGMS mean ≤ −2 cm/yr; ≤ 1 of the 4 CZ bowls does. Pass: both. Partial: one. Fail: neither.
+  **How the CZ half will be read (fixed now, before running).** A pass on the CZ half means NISAR's CZ bowls are mostly
+  absent from EGMS 2019–2023. We will read that as "**not confirmed: treat as possible NISAR artefacts**", and will **not**
+  read it as new post-2023 subsidence (e.g. after mine closures), unless a third, independent source shows motion there
+  after 2023 (Sentinel-1 2024–2026 or a published Czech mining-damage report). If instead ≥ 2 of the 4 CZ bowls are in EGMS
+  (CZ half fails), they are long-running real subsidence, and the "calmer Czech side" story is weakened, not supported.
+
+## B. Bakota, Dniester canyon: water and terrain geometry with GCOV (`edoTenseii` + Claude)
+
+Goal: a Ukrainian site far from any front, with a drowned village (Bakota, flooded in 1981 by the Dniester reservoir)
+and a ~150 m deep canyon. Three questions: does the product's radiometric terrain correction (RTC) flatten slopes that
+face the radar; does calm canyon water sit at the stated noise floor; does the radar see the reservoir's water area
+change the way optical images do.
+
+**Pre-registered before any GCOV backscatter value over this site was read; this commit is pushed to GitHub before the
+data run (the push time is the check).** Seen before writing, and nothing else:
+- ASF lists: 48 GCOV scenes (`2005_DHDH`, HH + HV) from 4 tracks (A100/26: 11, A172/26: 11, D94/64: 11, D166/64: 15),
+  Oct 2025 – Nov 2026; 39 GUNW pairs. One file's layer list: no layover/shadow layer in GCOV.
+- `experiments/b_geometry.py` (DEM + the line-of-sight and incidence cubes only, no backscatter): Copernicus DEM 30 m,
+  heights 117–307 m, slope p50 2.5°, p99 30.5°, max 48.4°. Predicted radar shadow and layover cover 0–32 of 130 869
+  pixels per track, so a shadow/layover test is **not** run here: the canyon walls are not steep enough for NISAR's
+  36–47° incidence. Forested slopes ≥ 15° facing the sensor / facing away: 1 351 / 2 170 (D94), 2 437 / 1 992 (A100),
+  1 365 / 2 188 (D166), 2 443 / 2 004 (A172) pixels.
+- ESA WorldCover 2021 shares, and the list of clear, full-coverage Sentinel-2 L2A dates (31, Oct 2025 – Nov 2026).
+
+**Window.** W 26.90, S 48.55, E 27.06, N 48.64 (Bakota bay and the canyon around it; the Dniester HPP dam, ~30 km
+downstream, is outside and is not studied). GCOV band A (20 m), all 48 scenes; terrain height 260 m above the ellipsoid
+for the incidence cube. dB = 10·log10 of gamma0. A window is used for a class only with ≥ 50 class pixels.
+
+**Classes** (radar-independent):
+- *forest slope, facing / away*: on the 30 m DEM grid, WorldCover tree fraction ≥ 0.9, slope ≥ 15°, and the slope
+  component toward the sensor (per track, from its line-of-sight vector) > tan 15° (*facing*) or < −tan 15° (*away*).
+- *water*: Sentinel-2 SCL = 6 for every S2 pixel under the radar pixel on both 2026-08-15 and 2026-03-10, eroded by one
+  band A pixel (no NDWI rule: section W showed it can empty a summer water class).
+
+**B1. Terrain flattening.** Dates 2026-06-01 … 2026-09-30. Per track, Δ = median over dates of
+[median γ⁰(facing) − median γ⁰(away)] in dB, for HH and for HV.
+- B1: |Δ| ≤ 1.0 dB in HH and in HV on ≥ 3 of 4 tracks (RTC removes the brightening of slopes that face the radar).
+- Reported, not judged: the same difference for σ⁰ = γ⁰ × `rtcGammaToSigmaFactor`, to show how much RTC changes.
+
+**B2. Noise floor on canyon water** (repeat of K1 / W1 on a Ukrainian site, band A).
+- B2a. Water HV / NEB_HV (median of 10·log10 of the per-pixel ratio) within ±2 dB in ≥ 80 % of the scenes where the
+  NEB layer is finite and > 0 under all water pixels; fewer than 5 such scenes: inconclusive. The number of scenes with a
+  broken NEB layer is reported.
+- B2b. Water HH ≥ water HV − 0.5 dB in ≥ 80 % of scenes.
+
+**B3. Does the radar see the reservoir's water area change?** Radar water per scene: band A HH (dB) below a scene
+threshold set halfway between the median HH of the *water* class and the median HH of WorldCover cropland
+(fraction ≥ 0.9) in the same scene. Optical water: S2 SCL = 6 on the clear S2 date nearest the radar date, used only
+if within ±5 days. Both as area (km²) over the whole window on the 20 m grid.
+- B3a. Radar area / optical area within 0.85–1.15 in ≥ 70 % of the matched pairs (≥ 6 pairs, else inconclusive).
+- B3b. Spearman ρ between the radar and the optical areas over the matched pairs ≥ 0.5 (the radar follows the same
+  rise and fall of the water area).
+
+**Results B (2026-11-15, `experiments/b_fetch.py`, `experiments/b_tests.py`; pre-registration pushed at 13:54 before
+the data run).** 47 band A windows (one SHSH scene left out: no HV), all on one 20 m grid: A100 10, A172 11, D94 11,
+D166 15; releases P05023/P05036, plus 5 X05009 scenes on D166. 16 Sentinel-2 dates matched a radar date within ±5 days.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| B1 facing − away γ⁰, HH | 0.79, 1.25, 0.42, 1.89 dB (D94, A100, D166, A172) | \|Δ\| ≤ 1 | 2 of 4 |
+| B1 facing − away γ⁰, HV | 3.07, 2.29, 2.47, 2.79 dB | \|Δ\| ≤ 1 | 0 of 4 |
+| B1 (both pols, ≥ 3 of 4 tracks) | | | **fail** |
+| B2a water HV / NEB_HV within ±2 dB | 43 of 47 (median +1.1 dB; outside: +2.2, +3.8, +4.7, +10.0); NEB layer complete under the water in all 47 | ≥ 80 % | **pass** |
+| B2b water HH ≥ HV − 0.5 dB | 34 of 47 | ≥ 80 % | **fail** |
+| B3a radar / optical water area within 0.85–1.15 | 0 of 33 (ratios 1.2–1.7 on 17 pairs, 6.6–9.0 on 13, 3.4 once, ~60 twice) | ≥ 70 % | **fail** |
+| B3b Spearman radar vs optical area | −0.20 (33 pairs) | ≥ 0.5 | **fail** |
+
+Reported (B1): σ⁰ = γ⁰ × `rtcGammaToSigmaFactor`, facing − away: HH −1.5 … −2.4 dB, HV −0.8 … +0.1 dB.
+
+**Post-hoc (not pre-registered).**
+- *B1 sign check (after the results, no change made).* The sides are as intended: NISAR looks **left** (`lookDirection`)
+  and the product defines its line-of-sight vector from the target to the sensor, which is how `b_geometry.py` used it.
+  So, after RTC, forested slopes that face the radar stay brighter than slopes that face away, by ~2.3–3.1 dB in HV and
+  0.4–1.9 dB in HH. The terrain correction under-corrects these slopes, more in the volume channel. The σ⁰ numbers are
+  reported only: we did not check what `rtcGammaToSigmaFactor` normalises to, so we draw nothing from their sign.
+- *B2: the first site where the stated noise floor holds.* Across the 47 scenes the product NEB (HV) ranges from
+  −22.9 to −10.9 dB (it changes by ~12 dB between tracks and dates), and calm canyon water follows it within ±2 dB in 43.
+  Compare Wisconsin (W1a: layer often broken, water 3–5 dB above where finite) and the Balaton control (+2.2 … +3.2 dB).
+  B2b fails because the water HH also sits near the floor: there is little wind-driven Bragg return in the canyon.
+- *B3: the optical reference is not stable.* Sentinel-2 SCL water in the window jumps between ~19 km² (close to
+  WorldCover's ~17 km²) and ~3.6 km² (once 0.5 km²) from one date to the next, which the reservoir cannot do; the SCL
+  class drops most of the water on those dates (likely turbid or algae-rich summer water, not checked). The radar area is
+  steady at 24–33 km² (one outlier, 64 km², on a date where water HH and cropland HH were equal). On the 17 pairs with a
+  plausible optical area, the radar threshold gives 1.2–1.7 × more water: dark, smooth ground and mixed shore pixels
+  pass the HH threshold. B3 as designed cannot show a water-level "breathing"; it would need a stable optical water mask
+  (e.g. NDWI with a per-date threshold) or gauge data.
+
+## TW. Do trees dry out by evening? Forest HV against the air's drying power (`edoTenseii` + Claude)
+
+**Idea.** Two natural processes and a link between them. (1) On a hot, dry afternoon the air pulls water out of leaves
+faster than roots refill the stems: the vapour pressure deficit (VPD) drives transpiration, and tree water content falls
+through the day and recovers at night. (2) Water sets the permittivity of wood (ε of fresh wood ~ 20 – 30 at 1.26 GHz,
+of dry wood ~ 2 – 4), and the L-band HV return of a forest is volume scattering from branches and stems. So drier wood
+should give a weaker HV echo. NISAR passes this latitude at dawn (ascending, ~05:00 local solar time) and at dusk
+(descending, ~19:05), so it sees the same forest after the night's recovery and after the day's drying. Tower radars
+(e.g. BorealScat in Sweden) have reported diurnal L-band forest backscatter changes linked to tree water; we test whether
+a satellite with a 12-day repeat can see it.
+
+**Pre-registered 2026-11-15 ~15:50 (Dnipro time), committed and pushed on its own before any value used below is computed.**
+Seen before writing:
+- Wisconsin: the per-date median HV of the deciduous class (section W, test W2) and the 2 m temperature at each
+  overpass (`temps.json`, frozen / unfrozen rule), but never set against VPD, humidity or rain.
+- Bakota: per-date HV medians of forest on slopes ≥ 15° (test B1); forest on flat ground was never computed.
+- Scene metadata only (track, direction, UTC time, release): every scene in the window below is release P05023.
+- Pixel counts of the Bakota forest class (from WorldCover and the DEM, no radar value).
+- No VPD or rain value for any site has been read.
+
+**Data.**
+- *Wisconsin*: band B 80 m, full window of section W, class *deciduous forest* exactly as in W.
+  Evening tracks D41, D113; morning track A76 (A148 has no scene in the window).
+- *Bakota*: band A 20 m, window of section B. Class *forest*: WorldCover tree fraction ≥ 0.9, DEM slope < 10° (keeps the
+  terrain-correction error of B1 out), not in the radar shadow or layover of that track. Evening tracks D94, D166;
+  morning tracks A100, A172.
+- Valid pixels: `mask` in 1 … 254 and HV > 0. Class value per scene = median of 10·log10(γ⁰ HV); fewer than 50 pixels
+  drops the scene.
+- *Season*: local solar dates 15 Jun – 30 Sep 2026 (leaf-on, unfrozen). Local solar time = UTC + longitude / 15°.
+  Wisconsin evening passes are at ~01:06 – 01:14 UTC, so their local date is the UTC date minus one day.
+- *Weather*: Open-Meteo historical archive, hourly at the window centre: `vapour_pressure_deficit` (kPa) and
+  `precipitation` (mm).
+
+**Variables.**
+- *Afternoon VPD* of a pass: mean hourly VPD over 12:00 – 18:00 local solar time of the latest afternoon that ended
+  before the pass (same day for an evening pass, previous day for a morning pass).
+- *Dry pass*: precipitation over the 24 h before the pass < 1.0 mm (a wet canopy adds water that is not in the wood).
+  Only dry passes are used in the judged tests.
+- *Anomalies*: within each (site, track), the dry-pass HV values and their afternoon VPD values are each detrended with a
+  straight line in time (removes slow phenology, growth and the seasonal VPD cycle). Each track is compared only with
+  itself, so incidence angle and look side cancel.
+
+**Tests.**
+- **TW1 (main).** Evening passes, both sites pooled: Spearman ρ between the HV anomaly and the afternoon-VPD anomaly.
+  Pass: ρ ≤ −0.3 and one-sided permutation p ≤ 0.05 (10 000 permutations of VPD within each track). Otherwise fail.
+  Fewer than 15 dry evening passes: inconclusive.
+- **TW2 (replication on two continents).** Evening passes, the same ρ at each site on its own. Pass: ρ < 0 at both
+  sites. Fail: ρ ≥ 0 at either. A site with fewer than 6 dry evening passes: inconclusive.
+- **TW3 (dawn against dusk).** Morning passes, pooled ρ_m by the same recipe. Pass: ρ_m ≥ ρ_e + 0.2 (the night refills
+  the trees, so the morning link is weaker). Judged only if TW1 passes; otherwise reported.
+- **Reported, not judged:** slope of HV anomaly on VPD anomaly (dB per kPa, evening, pooled, with a bootstrap 90 %
+  interval); the same tests with centring only (no linear trend), with a 48 h rain rule, for HH, and for the Wisconsin
+  conifer class; a placebo: the evening HV anomaly against the VPD of the afternoon *after* the pass (expected weaker
+  than TW1; it is not zero because weather persists for days).
+
+**What would go wrong.** The expected change is small: a few % of wood moisture moves ε by ~10 %, which moves a
+branch-scattering HV by roughly 0.5 – 1 dB, while the per-date class median scatters by ~0.3 dB plus calibration drift.
+In a dense canopy the echo depends on the scattering-to-extinction ratio, which is less sensitive to ε than either
+term alone. A fail is a usable result: it bounds what NISAR can see of tree water from orbit.
+
+**Timing note.** The pre-registration text says "~15:50"; its commit (ebab20e) is stamped 15:43 Dnipro time and was pushed
+right after, before `experiments/tw_tests.py` existed. GitHub records the branch creation with that commit at 15:43:17;
+the Open-Meteo VPD and rain files were first downloaded at 15:44:29, after it. The first run of the script returned no passes at all (an hour key
+kept fractional microseconds, so no VPD value matched); the fix touched only that key, no rule or threshold.
+
+**Results TW (2026-11-15 15:45 Dnipro time, `experiments/tw_tests.py`; this line said "~16:10" until the PR, the output
+files are stamped 15:45 and the results commit 15:46).** 53 passes in season, 38 dry (24 h rule): evening 21
+(Wisconsin D41 4, D113 5; Bakota D94 6, D166 6), morning 17 (Wisconsin A76 5; Bakota A100 5, A172 7). All release P05023.
+Class pixels per scene: Wisconsin deciduous 15 684 (80 m), Bakota flat forest ≥ 7 291 (20 m). Afternoon VPD ranged
+0.38 – 2.62 kPa; its detrended anomalies ±0.6 kPa.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| TW1 evening, pooled ρ (HV anomaly, VPD anomaly) | −0.11, permutation p = 0.34, n = 21 | ρ ≤ −0.3 and p ≤ 0.05 | **fail** |
+| TW2 evening ρ per site | Wisconsin +0.10 (n = 9), Bakota −0.08 (n = 12) | both < 0 | **fail** |
+| TW3 morning against evening | ρ_m = −0.31 (p = 0.13, n = 17) | judged only if TW1 passes | not judged |
+
+Reported:
+- Slope, evening pooled: +0.03 dB/kPa, bootstrap 90 % interval −0.25 … +0.43 dB/kPa.
+- Centring only (no trend): evening ρ +0.09, morning +0.15.
+- 48 h rain rule: evening n = 5 (too few), morning ρ −0.44 (p = 0.07).
+- HH: evening +0.12, morning −0.09.
+- Wisconsin conifer HV: evening +0.17 (n = 9).
+- Placebo (VPD of the afternoon after the pass): evening −0.04, morning −0.07.
+
+**Post-hoc (not pre-registered).**
+- *What the fail bounds.* Wisconsin evening alone: the deciduous HV anomaly scatters by only 0.11 dB (s.d.) while the
+  afternoon VPD anomaly spans ±0.5 kPa. Slope +0.03 dB/kPa, bootstrap 90 % −0.15 … +0.33. So a drier-than-usual
+  afternoon lowers the dusk HV of this forest by less than ~0.15 dB per kPa (one-sided 95 %). That is several times below
+  the 0.5 – 1 dB we expected from wood permittivity. Two readings, not tested:
+  1. The day-to-day change in wood water at dusk is smaller than a few %, because stems buffer it.
+  2. Most of the daily water swing is in the leaves and thin twigs, which the 24 cm wave does not see (W2).
+- *This is not the dawn-to-dusk swing itself.* Morning and evening tracks look from opposite sides at different angles,
+  so the test compares dusk with dusk only. A tower or a same-geometry morning/evening pair would be needed for the
+  full diurnal cycle.
+- *Bakota evening tracks sit close to the stated noise floor.* The flat-forest HV on D94 is about −9 dB with NEB_HV
+  −12 … −13 dB, so the floor is only 3 – 4 dB below the signal. On D166 the gap is ~6 dB, on the morning tracks ~11 dB
+  (NEB from section B). Noise not subtracted in GCOV can shift those medians. The HV anomaly does not follow the NEB
+  across dates (Spearman +0.15 evening, +0.01 morning).
+- *Two Bakota outliers.* D166 on 17 and 29 Sep: +1.18 dB, then −1.14 dB (forest HV −13.4 dB on 29 Sep, 2 dB below the
+  other dates). Both passes were dry by the 24 h rule. Cause not checked; it may be the start of leaf fall or a
+  processing change. They do not decide TW2: Wisconsin alone already has ρ > 0.
+- **Reading.** From orbit, at a 12-day repeat, NISAR does not see an afternoon's dryness in the dusk echo of a temperate
+  forest above ~0.15 dB/kPa. The stability is itself useful: summer dusk HV of a deciduous forest repeats within ~0.1 dB
+  in Wisconsin, a usable reference target for calibration checks.
 
 ## WS. Northern Wisconsin through the year: the story tests (`edoTenseii` + Claude)
 
