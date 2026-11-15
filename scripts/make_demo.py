@@ -1,8 +1,10 @@
 """Build the 30-second demo video (web/demo/edelweiss-demo.mp4) from plate screenshots, a Dufour sample and a narration.
 
-    uv run python scripts/make_demo.py <shots_dir> <narration.wav>
+    uv run python scripts/make_demo.py <shots_dir> <montage_dir> <voice_dir>
 
-shots_dir: PNG/JPG screenshots of the Reykjanes plate, page II, at increasing dates (sorted by name).
+shots_dir: screenshots of the Reykjanes plate, page II, at increasing dates (sorted by name);
+montage_dir: m1..m4 = full maps of Mexico City, Ostrava-Karvina, Central Valley, Wisconsin (story card hidden);
+voice_dir: c1..c8.wav, the narration lines in order (placed at the times in VOICE_AT).
 The narration is read by the Windows speech synthesizer (System.Speech); the script was drafted with AI (Claude),
 which the end card says. The Dufour sample is © swisstopo (free use with credit).
 """
@@ -21,6 +23,8 @@ W, H, FPS, DUR = 1280, 720, 24, 30.0
 PAPER, INK, MUTED, RED = (239, 230, 210), (40, 28, 18), (110, 92, 70), (150, 52, 36)
 FONT = "C:/Windows/Fonts/georgia.ttf"
 FONT_I = "C:/Windows/Fonts/georgiai.ttf"
+# when each narration line starts (s): title, Dufour, Reykjanes, then one word per plate, and the close
+VOICE_AT = [0.3, 4.8, 8.8, 16.7, 19.3, 21.8, 24.3, 26.7]
 
 
 def font(size, italic=False):
@@ -44,7 +48,6 @@ def spaced(t):
 
 def main():
     shots = sorted(p for p in Path(sys.argv[1]).iterdir() if p.suffix.lower() in (".png", ".jpg"))
-    wav = Path(sys.argv[2])
     title = card([(spaced("EDELWEISS"), 230, 76, False, INK),
                   ("an atlas of the moving ground", 340, 40, True, INK),
                   ("drawn from NISAR, the NASA–ISRO L-band radar · every 12 days", 420, 26, False, MUTED),
@@ -63,19 +66,19 @@ def main():
                 ("maksymsokolnytskyi.github.io/edelweiss-atlas", 420, 30, False, RED),
                 ("Mexico City · Ostrava–Karviná · Reykjanes · Central Valley · Wisconsin", 490, 22, False, MUTED),
                 ("Narration: synthetic voice; script drafted with AI (Claude) and checked by the team", 620, 18, False, MUTED)])
-    frames = []
-    for p in shots:
+    def plate(p, cap):
         im = Image.open(p).convert("RGB")
         im = im.resize((W, round(im.height * W / im.width)), Image.LANCZOS).crop((0, 0, W, H))
         d = ImageDraw.Draw(im)
         d.rectangle([0, H - 64, W, H], fill=PAPER)
-        cap = "Reykjanes, Iceland: the dome rises up to 23.5 ± 1.0 cm a year  (NISAR, 2025–2026)"
         d.text(((W - d.textlength(cap, font=font(26, True))) / 2, H - 50), cap, font=font(26, True), fill=INK)
-        frames.append(im)
-    # timeline: (image, seconds); cross-fades of 0.5 s between all
-    seq = [(title, 4.5), (duf, 6.0)] + [(f, 15.5 / len(frames)) for f in frames] + [(end, 4.0)]
-    total = sum(s for _, s in seq)
-    seq = [(im, s * DUR / total) for im, s in seq]
+        return im
+    frames = [plate(p, "Reykjanes, Iceland: the dome rises up to 23.5 ± 1.0 cm a year  (NISAR, 2025–2026)") for p in shots]
+    mdir = Path(sys.argv[2])
+    caps = ["MEXICO CITY  ·  a sinking city", "OSTRAVA–KARVINÁ  ·  coal under two countries",
+            "CENTRAL VALLEY  ·  the farm year", "WISCONSIN  ·  corn, soybean and the harvest"]
+    montage = [plate(mdir / f"m{k + 1}.jpg", c) for k, c in enumerate(caps)]
+    seq = [(title, 4.5), (duf, 4.0)] + [(f, 8.0 / len(frames)) for f in frames] + [(m, 2.5) for m in montage] + [(end, 3.5)]
     out = ROOT / "web" / "demo"
     out.mkdir(exist_ok=True)
     tmp = out / "_frames"
@@ -88,17 +91,25 @@ def main():
         i = next(j for j, (a, b) in enumerate(t_edges) if t < b or j == len(t_edges) - 1)
         a, b = t_edges[i]
         im = seq[i][0]
-        if i + 1 < len(seq) and t > b - 0.5:
-            im = Image.blend(im, seq[i + 1][0], (t - (b - 0.5)) / 0.5)
+        if i + 1 < len(seq) and t > b - 0.35:
+            im = Image.blend(im, seq[i + 1][0], (t - (b - 0.35)) / 0.35)
         im.save(tmp / f"f{k:04d}.jpg", quality=90)
-    with wave.open(str(wav)) as w:
-        print(f"narration {w.getnframes() / w.getframerate():.1f} s")
+    vdir = Path(sys.argv[3])
+    clips = sorted(vdir.glob("c*.wav"), key=lambda q: int(q.stem[1:]))
+    for c, at in zip(clips, VOICE_AT):
+        with wave.open(str(c)) as w:
+            print(f"{c.name} at {at:.1f} s, ends {at + w.getnframes() / w.getframerate():.1f} s")
     ff = imageio_ffmpeg.get_ffmpeg_exe()
     mp4 = out / "edelweiss-demo.mp4"
-    subprocess.run([ff, "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", str(tmp / "f%04d.jpg"), "-i", str(wav),
-                    "-af", "adelay=600|600,apad", "-t", str(DUR), "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "23",
-                    "-c:a", "aac", "-b:a", "128k", "-metadata", "comment=Narration: synthetic voice; script drafted with AI (Claude)",
-                    "-movflags", "+faststart", str(mp4)], check=True)
+    cmd = [ff, "-y", "-loglevel", "error", "-framerate", str(FPS), "-i", str(tmp / "f%04d.jpg")]
+    for c in clips:
+        cmd += ["-i", str(c)]
+    mix = "".join(f"[{k + 1}:a]adelay={int(at * 1000)}|{int(at * 1000)}[a{k}];" for k, at in enumerate(VOICE_AT[:len(clips)]))
+    mix += "".join(f"[a{k}]" for k in range(len(clips))) + f"amix=inputs={len(clips)}:normalize=0,apad[aout]"
+    cmd += ["-filter_complex", mix, "-map", "0:v", "-map", "[aout]", "-t", str(DUR), "-c:v", "libx264", "-pix_fmt", "yuv420p",
+            "-crf", "20", "-c:a", "aac", "-b:a", "128k", "-metadata", "comment=Narration: synthetic voice; script drafted with AI (Claude)",
+            "-movflags", "+faststart", str(mp4)]
+    subprocess.run(cmd, check=True)
     for p in tmp.iterdir():
         p.unlink()
     tmp.rmdir()
