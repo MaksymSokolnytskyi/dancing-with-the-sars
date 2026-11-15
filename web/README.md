@@ -84,7 +84,9 @@ lines and tints agree. While motion or cells are on the map, the terrain, contex
 theme `quiet` strength (0.65 in scroll) and every label is drawn last, over the strokes. Build numbers under the
 legend show only with `?debug=1`. A manifest's `base` list names the landscape layers (relief, woods, built-up land, roads,
 places) that stay on through every story page (a page can still drop one with `hide`); `scripts/add_landscape.py <plate>`
-draws them for plates built by their own scripts (Wisconsin, Central Valley). The locator globe in the corner
+draws them for plates built by their own scripts (Wisconsin, Central Valley; town streets come from the site's
+`osm.streets` box list), and `scripts/repack_reykjanes.py` adds the town streets and built-up hatch to the packed
+Reykjanes page. The locator globe in the corner
 (`renderLocator`, Natural Earth land in `data/world-land.json`) marks where on Earth the plate is. Page turns ease the
 camera in a straight line instead of a zoom-out flight. The score
 strip (layer kind `rhythm`, "the music") is left out of the atlas; `?score=1` brings it back.
@@ -98,7 +100,13 @@ and reload. Each page: `section` (intro | what | why | sure | next | listen, sho
 `layers` (the exact set of layer ids or groups that are on; theme-only layers still follow the theme), `modes`
 (`{cells layer id: mode key}`), `cut` (cut | scan | block, for a `surface` layer), `day` (start | end | YYYY-MM-DD),
 `play` (start the year when the camera arrives), `legend` (show the motion legend on the page), `pin` (a score row name),
-`marks[{lon, lat, text, dx, dy}]` (engraved call-outs with a leader line; dx/dy = where the words sit, in pixels).
+`marks[{lon, lat, text, dx, dy, icon, r_m}]` (engraved call-outs with a leader line; dx/dy = where the words sit, in
+pixels; `icon` adds an engraved sign from `SIGNS` in app.js: tree, corn, soy, sheaf, drop, frost, field, lake; `r_m`
+rings that many metres on the ground with a dashed ink loop), `focus` (layer ids that swell and fade three times, about
+2.4 s, once the camera arrives, so the eye finds what the page talks about), `appendix` (the page leaves the reading
+order: tabs number only the main pages and the last one offers the appendix as "Questions you may have"; Mexico City
+keeps its "how sure" pages there). Playing a year takes theme `play_ms` (11 s in scroll); between two dates the tints,
+contours and block tints cross-fade, so change flows instead of jumping.
 
 The plate opens on its pages (`?page=n` for a page, `?story=0` for the free map). ← → or PageUp/PageDown (a presentation
 clicker) turn pages, Esc leaves; "explore the map yourself" opens the usual panel and "Read the plate" comes back.

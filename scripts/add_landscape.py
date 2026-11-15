@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from hachure import engine  # noqa: E402
 
-BASE = ["terrain", "trees", "built", "roads", "rail", "water", "rivers", "canals", "places", "border", "peaks"]
+BASE = ["terrain", "trees", "built", "streets", "roads", "rail", "water", "rivers", "canals", "places", "border", "peaks"]
 
 
 def main():

@@ -165,7 +165,13 @@ def fix_text(st):
     for a, b in TEXT_FIX:
         if b not in txt:
             txt = txt.replace(a, b)
-    return json.loads(txt)
+    st = json.loads(txt)
+    for p in st.get("pages", []):                      # the layer a page talks about blinks when the camera arrives
+        if p.get("section") == "exhale":
+            p.setdefault("focus", ["dike_blind"])
+        if p.get("section") == "why" and "source" in p.get("layers", []):
+            p.setdefault("focus", ["source"])
+    return st
 
 
 def patch_app(app, with_math):

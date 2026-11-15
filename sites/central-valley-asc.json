@@ -46,7 +46,8 @@
   "water": "(way[\"natural\"=\"water\"][\"water\"~\"^(reservoir|lake)$\"]({b});relation[\"natural\"=\"water\"][\"water\"~\"^(reservoir|lake)$\"]({b}););out geom;",
   "places": "node[\"place\"~\"^(city|town)$\"]({b});out;",
   "roads": "way[\"highway\"~\"^(motorway|trunk|primary|secondary)$\"]({b});out tags geom;",
-  "rail": "way[\"railway\"=\"rail\"]({b});out geom;"
+  "rail": "way[\"railway\"=\"rail\"]({b});out geom;",
+  "streets": "(way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.275,-119.364,36.385,-119.221);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.168,-119.399,36.248,-119.295);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.288,-119.698,36.368,-119.594);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.073,-119.593,36.123,-119.528);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.271,-119.822,36.331,-119.744);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.183,-119.114,36.223,-119.062);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.276,-119.168,36.316,-119.116);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.283,-119.226,36.313,-119.188);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](36.025,-119.069,36.105,-118.965);way[\"highway\"~\"^(residential|living_street|unclassified|tertiary|secondary)$\"](35.984,-120.155,36.024,-120.103););out skel geom;"
  },
  "dem_res": 30,
  "context": [
@@ -141,6 +142,19 @@
    "attribution": "© OpenStreetMap contributors",
    "visible": true,
    "z": 1.25
+  },
+  {
+   "id": "streets",
+   "kind": "lines",
+   "src": "data/raw/osm/central-valley-asc/streets.json",
+   "style": "street",
+   "label": {
+    "en": "Town streets",
+    "uk": "Вулиці міст"
+   },
+   "attribution": "© OpenStreetMap contributors",
+   "visible": true,
+   "z": 1.15
   }
  ],
  "story": "sites/central-valley-asc.story.json",
