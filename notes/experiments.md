@@ -1949,8 +1949,8 @@ Such choices are listed here.
 ### O2b. How the thresholds were set (recorded 2026-11-15)
 Honestly: some were fixed in advance, some were changed after looking at the results, and then all were checked by tests
 that do not care about the wanted answer.
-- **Fixed in advance** (standard InSAR practice or physics): coherence ≥ 0.3; the sign convention (bowls over mined-out
-  ground must sink; see O2 for why this makes "bowls are negative" no evidence); merging of fragments; splitting bowls
+- **Fixed in advance** (standard InSAR practice or physics): coherence ≥ 0.3; the expectation that bowls over mined-out
+  ground sink (`SIGN` was then set to match it: post-hoc, see O2, so "bowls are negative" is no evidence); merging of fragments; splitting bowls
   with several centres.
 - **Changed after looking at the results (post-hoc):** the frame-coverage threshold (because of D080), the swath-edge trim,
   the long-wavelength noise filter, the bowl threshold −15 cm/yr (instead of −10), and the water mask (because of a pond).
