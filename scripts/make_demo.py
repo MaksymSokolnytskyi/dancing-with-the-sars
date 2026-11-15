@@ -34,8 +34,6 @@ def font(size, italic=False):
 def card(lines):
     im = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(im)
-    d.rectangle([28, 28, W - 29, H - 29], outline=INK, width=3)
-    d.rectangle([40, 40, W - 41, H - 41], outline=INK, width=1)
     for text, y, size, italic, col in lines:
         f = font(size, italic)
         d.text(((W - d.textlength(text, font=f)) / 2, y), text, font=f, fill=col)
@@ -74,11 +72,14 @@ def main():
         d.text(((W - d.textlength(cap, font=font(26, True))) / 2, H - 50), cap, font=font(26, True), fill=INK)
         return im
     frames = [plate(p, "Reykjanes, Iceland: the dome rises up to 23.5 ± 1.0 cm a year  (NISAR, 2025–2026)") for p in shots]
-    mdir = Path(sys.argv[2])
-    caps = ["MEXICO CITY  ·  a sinking city", "OSTRAVA–KARVINÁ  ·  coal under two countries",
-            "CENTRAL VALLEY  ·  the farm year", "WISCONSIN  ·  corn, soybean and the harvest"]
-    montage = [plate(mdir / f"m{k + 1}.jpg", c) for k, c in enumerate(caps)]
-    seq = [(title, 4.5), (duf, 4.0)] + [(f, 8.0 / len(frames)) for f in frames] + [(m, 2.5) for m in montage] + [(end, 3.5)]
+    mdir = Path(sys.argv[2])                                  # title.jpg, end.jpg (web/demo/cards.html), m1a.. m4c (plates)
+    shot = lambda p: Image.open(p).convert("RGB").resize((W, H), Image.LANCZOS)  # noqa: E731
+    title, end = shot(mdir / "title.jpg"), shot(mdir / "end.jpg")
+    seq = [(title, 4.5), (duf, 4.0)] + [(f, 8.0 / len(frames)) for f in frames]
+    for k in range(1, 5):                                      # each plate 2.5 s, its frames in turn (the map comes alive)
+        fs = sorted(mdir.glob(f"m{k}*.jpg"))
+        seq += [(shot(f), 2.5 / len(fs)) for f in fs]
+    seq += [(end, 3.5)]
     out = ROOT / "web" / "demo"
     out.mkdir(exist_ok=True)
     tmp = out / "_frames"
