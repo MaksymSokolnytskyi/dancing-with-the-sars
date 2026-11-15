@@ -2088,3 +2088,63 @@ Reported (B1): σ⁰ = γ⁰ × `rtcGammaToSigmaFactor`, facing − away: HH −
   plausible optical area, the radar threshold gives 1.2–1.7 × more water: dark, smooth ground and mixed shore pixels
   pass the HH threshold. B3 as designed cannot show a water-level "breathing"; it would need a stable optical water mask
   (e.g. NDWI with a per-date threshold) or gauge data.
+
+## TW. Do trees dry out by evening? Forest HV against the air's drying power (`edoTenseii` + Claude)
+
+**Idea.** Two natural processes and a link between them. (1) On a hot, dry afternoon the air pulls water out of leaves
+faster than roots refill the stems: the vapour pressure deficit (VPD) drives transpiration, and tree water content falls
+through the day and recovers at night. (2) Water sets the permittivity of wood (ε of fresh wood ~ 20 – 30 at 1.26 GHz,
+of dry wood ~ 2 – 4), and the L-band HV return of a forest is volume scattering from branches and stems. So drier wood
+should give a weaker HV echo. NISAR passes this latitude at dawn (ascending, ~05:00 local solar time) and at dusk
+(descending, ~19:05), so it sees the same forest after the night's recovery and after the day's drying. Tower radars
+(e.g. BorealScat in Sweden) have reported diurnal L-band forest backscatter changes linked to tree water; we test whether
+a satellite with a 12-day repeat can see it.
+
+**Pre-registered 2026-11-15 ~15:50 (Dnipro time), committed and pushed on its own before any value used below is computed.**
+Seen before writing:
+- Wisconsin: the per-date median HV of the deciduous class (section W, test W2) and the 2 m temperature at each
+  overpass (`temps.json`, frozen / unfrozen rule), but never set against VPD, humidity or rain.
+- Bakota: per-date HV medians of forest on slopes ≥ 15° (test B1); forest on flat ground was never computed.
+- Scene metadata only (track, direction, UTC time, release): every scene in the window below is release P05023.
+- Pixel counts of the Bakota forest class (from WorldCover and the DEM, no radar value).
+- No VPD or rain value for any site has been read.
+
+**Data.**
+- *Wisconsin*: band B 80 m, full window of section W, class *deciduous forest* exactly as in W.
+  Evening tracks D41, D113; morning track A76 (A148 has no scene in the window).
+- *Bakota*: band A 20 m, window of section B. Class *forest*: WorldCover tree fraction ≥ 0.9, DEM slope < 10° (keeps the
+  terrain-correction error of B1 out), not in the radar shadow or layover of that track. Evening tracks D94, D166;
+  morning tracks A100, A172.
+- Valid pixels: `mask` in 1 … 254 and HV > 0. Class value per scene = median of 10·log10(γ⁰ HV); fewer than 50 pixels
+  drops the scene.
+- *Season*: local solar dates 15 Jun – 30 Sep 2026 (leaf-on, unfrozen). Local solar time = UTC + longitude / 15°.
+  Wisconsin evening passes are at ~01:06 – 01:14 UTC, so their local date is the UTC date minus one day.
+- *Weather*: Open-Meteo historical archive, hourly at the window centre: `vapour_pressure_deficit` (kPa) and
+  `precipitation` (mm).
+
+**Variables.**
+- *Afternoon VPD* of a pass: mean hourly VPD over 12:00 – 18:00 local solar time of the latest afternoon that ended
+  before the pass (same day for an evening pass, previous day for a morning pass).
+- *Dry pass*: precipitation over the 24 h before the pass < 1.0 mm (a wet canopy adds water that is not in the wood).
+  Only dry passes are used in the judged tests.
+- *Anomalies*: within each (site, track), the dry-pass HV values and their afternoon VPD values are each detrended with a
+  straight line in time (removes slow phenology, growth and the seasonal VPD cycle). Each track is compared only with
+  itself, so incidence angle and look side cancel.
+
+**Tests.**
+- **TW1 (main).** Evening passes, both sites pooled: Spearman ρ between the HV anomaly and the afternoon-VPD anomaly.
+  Pass: ρ ≤ −0.3 and one-sided permutation p ≤ 0.05 (10 000 permutations of VPD within each track). Otherwise fail.
+  Fewer than 15 dry evening passes: inconclusive.
+- **TW2 (replication on two continents).** Evening passes, the same ρ at each site on its own. Pass: ρ < 0 at both
+  sites. Fail: ρ ≥ 0 at either. A site with fewer than 6 dry evening passes: inconclusive.
+- **TW3 (dawn against dusk).** Morning passes, pooled ρ_m by the same recipe. Pass: ρ_m ≥ ρ_e + 0.2 (the night refills
+  the trees, so the morning link is weaker). Judged only if TW1 passes; otherwise reported.
+- **Reported, not judged:** slope of HV anomaly on VPD anomaly (dB per kPa, evening, pooled, with a bootstrap 90 %
+  interval); the same tests with centring only (no linear trend), with a 48 h rain rule, for HH, and for the Wisconsin
+  conifer class; a placebo: the evening HV anomaly against the VPD of the afternoon *after* the pass (expected weaker
+  than TW1; it is not zero because weather persists for days).
+
+**What would go wrong.** The expected change is small: a few % of wood moisture moves ε by ~10 %, which moves a
+branch-scattering HV by roughly 0.5 – 1 dB, while the per-date class median scatters by ~0.3 dB plus calibration drift.
+In a dense canopy the echo depends on the scattering-to-extinction ratio, which is less sensitive to ε than either
+term alone. A fail is a usable result: it bounds what NISAR can see of tree water from orbit.
