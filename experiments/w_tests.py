@@ -53,8 +53,11 @@ def band_b(T):
                 v = L[k][m & np.isfinite(L["hh"])]
                 v = v[np.isfinite(v)]
                 r[f"{c}_{k}"] = float(np.median(v if k == "inc" else db(v))) if v.size >= MIN_PX else None
-        m = C["water"] & np.isfinite(L["hv"]) & np.isfinite(L["neb_hv"])
-        r["water_hv_over_neb"] = float(np.median(db(L["hv"][m] / L["neb_hv"][m]))) if m.sum() >= MIN_PX else None
+        m = C["water"] & np.isfinite(L["hv"])
+        neb = L["neb_hv"][m]
+        r["water_neb_broken"] = bool(m.sum() >= MIN_PX and (~np.isfinite(neb) | (neb <= 0)).any())
+        r["water_hv_over_neb"] = (float(np.median(db(L["hv"][m] / neb))) if m.sum() >= MIN_PX and not r["water_neb_broken"]
+                                  else None)
         rows.append(r)
     return rows, {k: int(v.sum()) for k, v in C.items()}
 
@@ -82,11 +85,15 @@ def h_alpha(T):
 
 
 def faraday_deg(c):
-    """Bickel-Bates estimate from the covariance: a = HV - VH, b = HH + VV."""
+    """Bickel-Bates estimate from the covariance: a = HV - VH, b = HH + VV.
+
+    Sign convention: a reciprocal target S seen through a one-way Faraday rotation Omega is M = R(Omega) S R(Omega) with
+    R(Omega) = [[cos, sin], [-sin, cos]] in the (H, V) basis; this function returns +Omega for such an M
+    (experiments/w_selfcheck.py)."""
     aa = c["hvhv"] + c["vhvh"] - 2 * c["hvvh"].real
     bb = c["hhhh"] + c["vvvv"] + 2 * c["hhvv"].real
     ab = np.conj(c["hhhv"]) + c["hvvv"] - np.conj(c["hhvh"]) - c["vhvv"]
-    return float(np.degrees(0.25 * np.angle(bb - aa - 2j * ab.real)))
+    return float(-np.degrees(0.25 * np.angle(bb - aa - 2j * ab.real)))
 
 
 def band_a(T):
@@ -113,6 +120,9 @@ def band_a(T):
                 r[f"{c}_{key}"] = float(np.median(db(terms[k][m])))
                 nb = w.extra.get(f"neb_{key}")
                 r[f"{c}_neb_{key}"] = float(np.median(db(nb[m]))) if nb is not None else None
+                ok_nb = None if nb is None else (np.isfinite(nb[m]) & (nb[m] > 0))
+                r[f"{c}_{key}_over_neb"] = (float(np.median(db(terms[k][m] / nb[m]))) if ok_nb is not None
+                                            and ok_nb.all() else None)       # median of 10*log10(term / NEB), as in K1c
             r[f"{c}_hv_vh_db"] = float(np.median(db(w.hv[m] / terms["vhvh"][m])))
             r[f"{c}_xcoh"] = float(abs(mean["hvvh"]) / math.sqrt(mean["hvhv"].real * mean["vhvh"].real))
             r[f"{c}_H"], r[f"{c}_alpha"] = h_alpha(coherency(mean))
@@ -133,15 +143,18 @@ def main():
     res = {"class_px_B": cls_px, "rows_B": rows, "rows_A": arows}
     tracks = sorted({r["track"] for r in rows})
 
-    k = [r for r in rows if r["water_hv_over_neb"] is not None]
-    res["W1a"] = {"n": len(k), "share": share([abs(r["water_hv_over_neb"]) <= 2 for r in k]),
-                  "median_db": float(np.median([r["water_hv_over_neb"] for r in k])) if k else None}
+    k = [r for r in rows if r["water_hv"] is not None]          # scenes with a water class
+    fin = [r["water_hv_over_neb"] for r in k if r["water_hv_over_neb"] is not None]
+    res["W1a"] = {"n": len(k), "share": share([v is not None and abs(v) <= 2 for v in (r["water_hv_over_neb"] for r in k)]),
+                  "n_neb_broken": sum(r["water_neb_broken"] for r in k), "n_finite": len(fin),
+                  "n_finite_within_2dB": sum(abs(v) <= 2 for v in fin),
+                  "finite_range_db": [round(min(fin), 2), round(max(fin), 2)] if fin else None}
     k = [r for r in rows if r["water_hh"] is not None and r["water_hv"] is not None]
     res["W1b"] = {"n": len(k), "share": share([r["water_hh"] >= r["water_hv"] - 0.5 for r in k])}
-    k = [r for r in arows if r.get("water_hv") is not None and r.get("water_neb_hv") is not None]
-    res["W1c"] = {"n": len(k), "share": share([abs(r["water_hv"] - r["water_neb_hv"]) <= 2 and
-                                               abs(r["water_vh"] - r["water_neb_vh"]) <= 2 for r in k]),
-                  "hv_minus_neb": [round(r["water_hv"] - r["water_neb_hv"], 2) for r in k]}
+    k = [r for r in arows if r.get("water_hv_over_neb") is not None and r.get("water_vh_over_neb") is not None]
+    res["W1c"] = {"n": len(k), "share": share([abs(r["water_hv_over_neb"]) <= 2 and abs(r["water_vh_over_neb"]) <= 2
+                                               for r in k]),
+                  "hv_over_neb": [round(r["water_hv_over_neb"], 2) for r in k]}
     for t in ("W1a", "W1b", "W1c"):
         s = res[t]["share"]
         res[t]["verdict"] = "inconclusive" if s is None else ("pass" if s >= 0.8 else "fail")

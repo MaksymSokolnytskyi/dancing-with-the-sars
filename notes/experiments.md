@@ -1899,9 +1899,13 @@ physical) on a clean site, and add the tests that need all four polarizations. N
 covariance matrix** in band A (10 terms, `isFullCovariance = True`, complex off-diagonals) and HH/HV in band B.
 (The goal sentence and the heading were reworded on 2026-11-14 to match section K; no test or threshold changed.)
 
-**Pre-registered 2026-11-14 ~22:00 (Dnipro time; committed on its own at 22:02, in the PR branch
-`kiberatlet/wisconsin-quadpol`, first written here as "~23:50" by mistake), before any GCOV backscatter value over this
-site was read.**
+**Pre-registered 2026-11-14, written ~22:00 (Dnipro time), before any GCOV backscatter value over this site was read.**
+What git shows (review of PR #6): the text was committed locally on its own at 22:02 (b5fe3df; it said "~23:50" by
+mistake). That commit was rewritten by two rebases during the data run (22:50 and ~23:11) to reword the goal and the
+heading; the branch was first pushed at 23:45, after the results commit (23:31). So, as in section K, the timing is our
+own record. The original commit is kept unchanged at `kiberatlet/w-prereg-original`; `git diff b5fe3df <this commit>
+-- notes/experiments.md` shows that only the heading, the goal sentence and this timing line changed, no test or
+threshold.
 Seen before writing, and nothing else: ASF scene lists (52 QPDH scenes, tracks A76/24: 18, A148/24: 7, D41/65: 10,
 D113/66: 16; no QPDH scenes Feb – mid-June 2026), the term lists and flags of one file (D113, 2026-11-01:
 `rfiLikelihood` = inf and 1e35), ESA WorldCover shares (used to choose the windows), Sentinel-2 scene lists, and the
@@ -1961,7 +1965,7 @@ zone 16 (EPSG 32616), so the band A class layers are built on each window's own 
 
 | test | value | limit | verdict |
 |---|---|---|---|
-| W1a water HV / NEB_HV within ±2 dB (band B) | 0 of 42; finite values +3.3 … +5.9 dB; NEB layer zero somewhere in the window in 28 of 52 scenes (inf) | ≥ 80 % | **fail** |
+| W1a water HV / NEB_HV within ±2 dB (band B) | 0 of 42: NEB layer zero or NaN under the water pixels in 30; finite in 12, all outside (+3.3 … +5.1 dB) | ≥ 80 % | **fail** |
 | W1b water HH ≥ HV − 0.5 dB | 42 of 42 | ≥ 80 % | pass |
 | W1c band A water vs NEB | no water pixels on the band A grid (see below) | | inconclusive |
 | W2a deciduous HV amplitude ≤ 2 dB | 0.8, 2.8, 1.8 dB (D41, A76, D113; A148 not eligible) | ≥ 2/3 | pass |
@@ -1974,7 +1978,7 @@ zone 16 (EPSG 32616), so the band A class layers are built on each window's own 
 | W6a forest \|VV − HH\| ≤ 1 dB | 5 of 27 (VV − HH −0.5 … −4.2 dB) | ≥ 80 % | **fail** |
 | W6b water VV − HH | no scene passes the NEB gate (no band A water class) | | inconclusive |
 | W7 forest H ≥ 0.7 and 40° ≤ ᾱ ≤ 55° | 18 of 22 unfrozen scenes (H 0.65–0.97, ᾱ 48.8–53.1°) | ≥ 80 % | pass |
-| W8 Faraday Ω (forest, reported) | Oct 2025 – Jan 2026: −1.8 … +1.2°; Jun – Oct 2026: +0.2 … +5.2° | expectation \|Ω\| ≤ 3° | reported |
+| W8 Faraday Ω (forest, reported; sign convention in `faraday_deg`) | Oct 2025 – Jan 2026: −1.2 … +1.8°; Jun – Nov 2026: −5.2 … +0.1° | expectation \|Ω\| ≤ 3° | reported |
 
 **Post-hoc (not pre-registered), what the fails and gaps show.**
 - *Processing version.* W5a and W6a split by `compositeReleaseId`: X05009/X05010 (Oct 2025 – Jan 2026, 10 scenes) give
@@ -1991,10 +1995,15 @@ zone 16 (EPSG 32616), so the band A class layers are built on each window's own 
 - *Empty water class on the band A grid.* The July NDWI rule (≥ 0.3) removes every lake pixel of the sub-window
   (NDWI there is below 0.3 in July; ≥ 0.3 in November). So W1c and W6b test nothing; the rule was too strict for a
   summer lake, not a radar result.
-- *Faraday.* The estimate is near zero in winter and +2 … +5° in summer, largest on the descending (evening) tracks.
+- *Faraday.* The estimate is near zero in winter and 2–5° in magnitude in summer (negative in the convention of
+  `faraday_deg`: M = R(Ω)·S·R(Ω), checked in `experiments/w_selfcheck.py`), largest on the descending (evening) tracks.
   That fits more ionospheric electron content in summer evenings, but crosstalk is not corrected, and no TEC data were
   compared. Not a claim.
 - **Reading.** On this clean site the surface physics behaves as textbook L-band: the wave does not see leaves (W2), forest
   γ⁰ is flat in angle (W3), freezing drops backscatter by ~2 dB (W4), forest is a high-entropy volume scatterer at
   ᾱ ≈ 50° (W7). What fails is the product's polarimetric calibration in the early releases (W5a, W6a) and its noise layer
   (W1a), plus our own too-strict water rule (W1c, W6b).
+- *Review of PR #6 (2026-11-15), code only, no verdict changed:* W1c now uses the median of 10·log10(HV / NEB) as the
+  text says (it was median dB minus median dB); W1a reports broken-layer and finite counts separately; the Faraday sign
+  convention is fixed and stated (the W8 values above flipped sign, magnitudes unchanged); `experiments/w_selfcheck.py`
+  reruns the synthetic checks of the polarimetry helpers.
