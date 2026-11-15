@@ -66,6 +66,7 @@ web/data/<plate>/                                               the built plate:
 | NISAR GUNW HH windows, northern Wisconsin (phase, iono screen, coherence) | NASA open data | tests WS6–WS8 (frozen coherence, frost heave, two ionosphere meters) | `experiments/ws_fetch.py gunw` |
 | GOES-19 water vapour, IGRA radiosondes | public | atmosphere tests (B6, E2, T2) | `experiments/fetch_goes.py`, `experiments/t2_radiosonde.py` |
 | NISAR L2 GUNW PROVISIONAL (Ostrava–Karviná; pairs 24 Jun – 11 Oct 2026 behind the vertical, search window 17 Jun – 14 Nov) | NASA open data (provisional product) | mining subsidence bowls (block O) | `scripts/ostrava/ostrava_karvina.ipynb` (earthaccess search, HTTPS window reads; Earthdata token) |
+| EGMS L3 Ortho vertical, release 2019–2023 (European Ground Motion Service, Copernicus Land Monitoring Service) | free with registration; © European Union, Copernicus Land Monitoring Service, EEA | test O3b: EGMS vertical inside and around the Ostrava bowls | `scripts/ostrava/egms_fetch.py` with the personal download key in `EGMS_TOKEN` (tiles E49N29, E49N30, ~150 MB zipped, in `data/ostrava/egms/`) |
 | OpenStreetMap via the Overpass API and osmnx (Ostrava–Karviná) | ODbL | water and spoil-heap masks, buildings, roads, rail, land use, mines, borders per bowl | the notebook (osmnx) and `scripts/ostrava/ostrava_osm.mjs` (Overpass, cached in `data/ostrava/osm_cache/`) |
 | Sentinel-1 interferograms, Nov 2023 – Jul 2024 (Reykjanes) | Copernicus, free and open; processed by ASF HyP3 (INSAR_GAMMA) | real-dike check of the NPE (10 Nov 2023), null pairs, 2024 events, coherence loss | `scripts/reykjanes/run_s1_dike.py`, `scripts/reykjanes/hyp3_wait.py` (Earthdata token) |
 | GNSS daily series, Iceland (SENG, AUSV, GEVK, VOGC, NYLA, VOGS, REYK) | Nevada Geodetic Laboratory; free, cite Blewitt, Hammond & Kreemer (2018) | independent check of the uplift (R1), dike inversion (R3) | `.tenv3` files into `data/gnss/` (`scripts/fetch_ngl.py --name reykjanes --bbox -22.8 63.75 -22.0 64.05`, then copy) |
@@ -83,6 +84,7 @@ web/data/<plate>/                                               the built plate:
 | `langtang-asc` | sudden change (debris flow) | NISAR (25 pairs), DEM, OSM | `sars fetch` + `sars build` (checked on a clean clone: same result) |
 | `central-valley-asc` | fields rhythm (coherence) | NISAR (25 pairs), plus a land-cover grid | **two extra steps**, see below |
 | `panama-quake` | earthquake card | quake windows, a trained network (GPU) | research pipeline: `scripts/fetch_event.py`, then `scripts/export_quake.py` with `uv sync --group ml` |
+| `ostrava-karvina-asc` | slow motion (mining subsidence) + the study's bowls | NISAR (8 pairs, track 158 A), DEM, WorldCover, OSM, and the Ostrava study outputs for the bowls | run the study first (`scripts/ostrava/`), then `plate_layers.py`, `sars fetch` + `sars build` (below) |
 | `reykjanes` (packed page `web/reykjanes-scroll.html`) | uplift + dike | NISAR GUNW 159A + 082D (also 010D, 087A, 111D), Copernicus DEM tile N63W023, GNSS (NGL), Sentinel-1 HyP3, FIRMS, HLS, OSM extract | research pipeline in `scripts/reykjanes/` (below), then `scripts/build_reykjanes_scroll.py` |
 
 **Central Valley, extra steps.** The `fields` layer clusters cropland pixels, so it needs WorldCover fractions on the
@@ -114,7 +116,13 @@ Not yet checked on a clean clone. Extra packages used only here: `uv sync --grou
 **Ostrava–Karviná, research pipeline.** Not in the CLI yet. A notebook plus plain Node scripts in `scripts/ostrava/`
 (order and requirements in `scripts/ostrava/README.md`); outputs go to `output/ostrava_karvina/` (ignored by git). The
 Earthdata login comes from `EARTHDATA_TOKEN`, `~/.edl_token` or `~/.netrc`. EGMS (Copernicus, free after registration) is
-the planned validation (O3b) and is not used yet.
+used for test O3b (`egms_fetch.py`, `egms_o3b.py`; result in block O).
+
+**Ostrava–Karviná plate** (`sites/ostrava-karvina-asc.json`). The motion is the engine's own (one ascending track, as for the
+other plates); the bowl outlines come from the study. Steps: the study (steps 1–2 of `scripts/ostrava/README.md`), then
+`uv run python scripts/ostrava/plate_layers.py` (writes `data/ostrava/plate/`), `uv run sars fetch ostrava-karvina-asc`,
+`uv run sars build ostrava-karvina-asc`. The built plate in `web/data/ostrava-karvina-asc/` is in git, so the map opens
+without the study. Checked once on this machine, not on a clean clone.
 
 ## File formats
 
