@@ -2107,3 +2107,80 @@ scales Ω_p but does not change the ranking).
 power (|HH − VV|², 2|HV|², |HH + VV|²) of the first scene of each month. For the map: block medians of band B HH and HV per
 date, each relative to the block's own summer (Jun – Sep 2026) median on the same track, and the class strips per date.
 These are pictures and data for the plate, not claims.
+
+**Timing note.** The pre-registration text says "~17:00"; its commit (54b98ea) is stamped 16:45 Dnipro time and was pushed
+at once, before any band A read on SUB2, any GUNW read and any Sentinel-2 read of 2026 or of the lakes started.
+Fixes made after a debug run on partial data (no rule or threshold changed):
+- GUNW pixels where the iono screen is NaN are dropped from the WS7 class medians (they made every pair NaN);
+- the band A readers were split into 8 parallel processes and the GUNW reader into two, only to fetch faster.
+Implementation choices the text left open:
+- WS4: the radar drop is searched only after the date of the 2026 HV maximum ("falls below its maximum");
+- WS9: "the line of sight" = the product's LOS unit vector, from target to sensor;
+- band A classes come from the 80 m layers by nearest resampling, for every band A use, including the forest class of
+  WS8/WS9 (section W used 20 m Sentinel-2 classes on SUB).
+
+**Results WS (2026-11-15 ~18:10, `experiments/ws_fetch.py`, `experiments/ws_tests.py`, `experiments/ws_plot.py`).**
+Data: 52 band B windows, 52 band A full-covariance windows on each of SUB and SUB2, 58 GUNW pairs, 52 CODE GIM days,
+63 Sentinel-2 dates (42 for NDVI, 21 for the lakes). Class pixels on the 80 m grid: corn 6 946, soybean 5 870,
+swamp forest 9 544, upland forest 10 117, lake 796, cropland 21 538.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| WS1a corn − soybean HH/VV, Oct–Nov 2025 | +2.1, +1.5, +1.3, +0.8, +0.9 dB (5 scenes) | ≥ +1 dB in ≥ 2/3 | **fail** (3 of 5) |
+| WS1b corn − soybean HV, Oct–Nov 2025 | +8.4, +7.9, +6.4, +4.8, +3.0 dB | ≥ +1 dB in ≥ 2/3 | **pass** |
+| WS2a swamp − upland forest HH (band B) | median −0.3 dB, 0 of 38 ≥ +1 dB | ≥ 2/3 | **fail** |
+| WS2b \|φ_swamp\| − \|φ_upland\| (band A) | median −0.1°, 13 of 38 ≥ 10° | ≥ 2/3 | **fail** |
+| WS3 lake HH ice − open (S2: open 21 Nov, ice 30 Dec 2025) | A76 −0.3, D113 −0.4, A148 +1.4 dB | ≥ +3 dB on half | **fail** |
+| WS4 radar vs optical harvest date | 45 (block, track) pairs, 42 within ±24 d (93 %), median lag radar − optical +13 d | ≥ 60 % | **pass** |
+| WS5 cropland HH anomaly vs 72 h rain | ρ = +0.64, p = 0.005, n = 13 | ρ ≥ 0.4, p ≤ 0.05 | **pass** |
+| WS6 frozen − unfrozen coherence | upland forest −0.16 (A76), −0.35 (D113); cropland +0.02, +0.09 | ≥ +0.10 on 2/3 | **fail** |
+| WS7 cropland − forest LOS, Nov–Jan | A76 +7.8 mm (6 pairs), D113 −4.4 mm (5), A148 +3.4 mm (3) | ≥ +5 mm on 2 tracks | **fail** |
+| WS8 ΔΩ (GCOV) vs iono screen (GUNW) | ρ = +0.59, p < 10⁻⁴, n = 45; slope 0.0173°/rad | \|ρ\| ≥ 0.5, p ≤ 0.05 | **pass** |
+| WS9a \|Ω\| vs \|Ω_p\| from CODE TEC | ρ = 0.81, p < 10⁻⁴, n = 52 | ρ ≥ 0.5 | **pass** |
+| WS9b sign of Ω = sign of Ω_p | 35 of 50 (70 %) | ≥ 80 % | **fail** |
+
+Reported (pre-registered, not judged):
+- WS9 regression of Ω on Ω_p: slope 0.81. With an offset: Ω = 0.81·Ω_p + 1.5°, residual s.d. 1.4°.
+- WS8 slope against theory. Expected from B∥ and the two dispersion laws (+ΔΩ per rad of screen):
+  A76 0.021, D113 0.019, D41 0.016, A148 0.018°/rad. Measured per track: A76 0.019, D113 0.015, D41 0.032°/rad.
+- WS4 map: radar harvest dates of the 1 km crop blocks fall between 29 Jun and 15 Oct 2026, optical dates between 2 Sep and
+  6 Oct; lag p10 / p50 / p90 = +1 / +13 / +21 days (one block at −80 days).
+- WS10: monthly entropy, ᾱ and Pauli maps of SUB and SUB2 (`ws10_SUB.png`, `ws10_SUB2.png`). The January 2026 SUB2 scene
+  is A148, which covers only part of the box. Block series for the plate: `story_cells.json` (1 km blocks, HH and HV
+  relative to each block's own summer on its own track) and `story_harvest.json` (radar and optical harvest date per block).
+
+**Post-hoc (not pre-registered).**
+- *WS9 splits by processing release, as in W5a.* In the 2026 releases (P05023 / P05036) the measured Ω has the sign of the
+  TEC prediction in 32 of 33 scenes, with an offset of −0.3 … +2.1° (track and release means, mostly +1 … +2°); dusk tracks reach −5°, dawn tracks
+  −1 … −3°. In the early releases (X05009 / X05010, Oct 2025 – Jan 2026) the sign agrees in 3 of 19, and Ω sits +1.0 … +6.8°
+  above the prediction. So, with the 2026 calibration, NISAR's polarimetric Faraday rotation follows the global TEC maps
+  in size and sign. The early releases carry a polarimetric bias, the same releases that fail reciprocity in W5a.
+  The remaining offset may be uncorrected crosstalk (all-zero layers) or the fixed-field approximation of B∥.
+- *WS8 in physical units.* The pooled slope (0.017°/rad) is within ~10 % of the value expected from Faraday ∝ B∥·TEC/f² and
+  the split-spectrum phase ∝ TEC/f, for the same field model. A76 agrees within 10 %, D113 within 25 %. D41 is 2× steeper:
+  its pairs are summer-only, with a small TEC range. Two independent radar measurements of the ionosphere agree in rank
+  and in physical scale: the polarisation of the wave and the dispersion of its phase.
+- *WS2b: the co-pol phase is not calibrated in GCOV.* The class-mean arg⟨HH·VV*⟩ of upland forest is about −120° in P05023,
+  −8° in P05036 and +140° in X05009 / X05010. A forest should sit near 0°. So the |φ| comparison as written tests nothing.
+  The offset-free difference φ_swamp − φ_upland (wrapped) is positive in 35 of 38 unfrozen scenes, median +15°. Swamp
+  forest has a different scattering mechanism, but how far towards a dihedral cannot be read from an uncalibrated phase.
+  Add to the K0 audit.
+- *WS6: frozen pairs are snowy pairs.* Every frozen 12-day pair had snowfall or a changing snow pack (Open-Meteo: 6 – 31 mm
+  of precipitation, snow depth changing by 1 – 8 cm). Forest coherence is 0.24 – 0.59 then (median 0.42, against 0.58 – 0.66 unfrozen) (snow on branches),
+  cropland holds 0.34 – 0.59. Our "frozen = still" expectation forgot the snow.
+- *WS3: early lake ice is dark at L-band.* S2 shows the lakes open on 21 Nov and ice- or snow-covered from 30 Dec 2025.
+  Lake HH barely moves on A76 and D113 (−0.3 dB) and rises 1.4 dB on A148. New, clear, bubble-free ice over calm water
+  gives a smooth interface, as we feared in the risk line; a test in late winter (bubbly ice) would be the fair one,
+  but there are no scenes from February to mid-June.
+- *WS1 in 2026: crop rotation.* In the 2026 season, CDL-2025 corn fields have 2 – 6 dB *lower* HV than CDL-2025 soybean
+  fields. That is what a corn–soybean rotation would give: last year's soybean fields are this year's corn. Not tested;
+  the 2026 CDL is not released yet.
+- *WS4: optical before radar.* NDVI falls when the crop dries (senescence), HV falls when the stalks are cut. The radar
+  date lags by ~2 weeks, so the two sensors see two steps of the same harvest.
+- **Reading.** Wisconsin gives one year of a northern landscape seen by L-band:
+  - the wave sees corn stalks (WS1b), the harvest (WS4) and rain on bare soil (WS5);
+  - it does not see early lake ice (WS3) or frost heave above the noise (WS7);
+  - snow, not frost, sets winter coherence (WS6);
+  - the strongest result is about the sky: the radar measures the ionosphere twice, by Faraday rotation and by phase
+    dispersion, and both agree with each other (WS8) and with the global TEC maps (WS9a), once the 2026 calibration is
+    used.

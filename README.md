@@ -74,9 +74,11 @@ All site keys, layer kinds, themes and the page format are in [web/README.md](we
 - OpenStreetMap (ODbL): © OpenStreetMap contributors.
 - Mexico City context (lakebed zone, mapped cracks): Atlas de Riesgos de la Ciudad de México.
 - GNSS station series (Mexico, Reykjanes): Nevada Geodetic Laboratory.
-- Kakhovka and Wisconsin tests (`notes/experiments.md`, sections K and W): contains modified Copernicus Sentinel-2 data
+- Kakhovka and Wisconsin tests (`notes/experiments.md`, sections K, W and WS): contains modified Copernicus Sentinel-2 data
   (2025–2026), via Element 84
-  Earth Search; Open-Meteo historical weather (CC BY 4.0).
+  Earth Search; Open-Meteo historical weather (CC BY 4.0); USDA NASS Cropland Data Layer 2025 (public domain);
+  U.S. Fish and Wildlife Service National Wetlands Inventory (public domain); CODE (AIUB, University of Bern) final global
+  ionosphere maps, IGS products via NASA CDDIS.
 - Reykjanes plate (`web/reykjanes-scroll.html`): Copernicus Sentinel-1 interferograms of November 2023 processed by ASF HyP3
   (dike check only); NASA FIRMS VIIRS 375 m active fires; NASA HLS (LP DAAC) vents; ASTER GDEM v3 (NASA/METI) for the FE model; reference values from Sigmundsson et al.
   2024, Science 383:1228 (doi 10.1126/science.adn2838).
