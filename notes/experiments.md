@@ -2107,3 +2107,190 @@ that do not care about the wanted answer.
   read it as new post-2023 subsidence (e.g. after mine closures), unless a third, independent source shows motion there
   after 2023 (Sentinel-1 2024–2026 or a published Czech mining-damage report). If instead ≥ 2 of the 4 CZ bowls are in EGMS
   (CZ half fails), they are long-running real subsidence, and the "calmer Czech side" story is weakened, not supported.
+
+## B. Bakota, Dniester canyon: water and terrain geometry with GCOV (`edoTenseii` + Claude)
+
+Goal: a Ukrainian site far from any front, with a drowned village (Bakota, flooded in 1981 by the Dniester reservoir)
+and a ~150 m deep canyon. Three questions: does the product's radiometric terrain correction (RTC) flatten slopes that
+face the radar; does calm canyon water sit at the stated noise floor; does the radar see the reservoir's water area
+change the way optical images do.
+
+**Pre-registered before any GCOV backscatter value over this site was read; this commit is pushed to GitHub before the
+data run (the push time is the check).** Seen before writing, and nothing else:
+- ASF lists: 48 GCOV scenes (`2005_DHDH`, HH + HV) from 4 tracks (A100/26: 11, A172/26: 11, D94/64: 11, D166/64: 15),
+  Oct 2025 – Nov 2026; 39 GUNW pairs. One file's layer list: no layover/shadow layer in GCOV.
+- `experiments/b_geometry.py` (DEM + the line-of-sight and incidence cubes only, no backscatter): Copernicus DEM 30 m,
+  heights 117–307 m, slope p50 2.5°, p99 30.5°, max 48.4°. Predicted radar shadow and layover cover 0–32 of 130 869
+  pixels per track, so a shadow/layover test is **not** run here: the canyon walls are not steep enough for NISAR's
+  36–47° incidence. Forested slopes ≥ 15° facing the sensor / facing away: 1 351 / 2 170 (D94), 2 437 / 1 992 (A100),
+  1 365 / 2 188 (D166), 2 443 / 2 004 (A172) pixels.
+- ESA WorldCover 2021 shares, and the list of clear, full-coverage Sentinel-2 L2A dates (31, Oct 2025 – Nov 2026).
+
+**Window.** W 26.90, S 48.55, E 27.06, N 48.64 (Bakota bay and the canyon around it; the Dniester HPP dam, ~30 km
+downstream, is outside and is not studied). GCOV band A (20 m), all 48 scenes; terrain height 260 m above the ellipsoid
+for the incidence cube. dB = 10·log10 of gamma0. A window is used for a class only with ≥ 50 class pixels.
+
+**Classes** (radar-independent):
+- *forest slope, facing / away*: on the 30 m DEM grid, WorldCover tree fraction ≥ 0.9, slope ≥ 15°, and the slope
+  component toward the sensor (per track, from its line-of-sight vector) > tan 15° (*facing*) or < −tan 15° (*away*).
+- *water*: Sentinel-2 SCL = 6 for every S2 pixel under the radar pixel on both 2026-08-15 and 2026-03-10, eroded by one
+  band A pixel (no NDWI rule: section W showed it can empty a summer water class).
+
+**B1. Terrain flattening.** Dates 2026-06-01 … 2026-09-30. Per track, Δ = median over dates of
+[median γ⁰(facing) − median γ⁰(away)] in dB, for HH and for HV.
+- B1: |Δ| ≤ 1.0 dB in HH and in HV on ≥ 3 of 4 tracks (RTC removes the brightening of slopes that face the radar).
+- Reported, not judged: the same difference for σ⁰ = γ⁰ × `rtcGammaToSigmaFactor`, to show how much RTC changes.
+
+**B2. Noise floor on canyon water** (repeat of K1 / W1 on a Ukrainian site, band A).
+- B2a. Water HV / NEB_HV (median of 10·log10 of the per-pixel ratio) within ±2 dB in ≥ 80 % of the scenes where the
+  NEB layer is finite and > 0 under all water pixels; fewer than 5 such scenes: inconclusive. The number of scenes with a
+  broken NEB layer is reported.
+- B2b. Water HH ≥ water HV − 0.5 dB in ≥ 80 % of scenes.
+
+**B3. Does the radar see the reservoir's water area change?** Radar water per scene: band A HH (dB) below a scene
+threshold set halfway between the median HH of the *water* class and the median HH of WorldCover cropland
+(fraction ≥ 0.9) in the same scene. Optical water: S2 SCL = 6 on the clear S2 date nearest the radar date, used only
+if within ±5 days. Both as area (km²) over the whole window on the 20 m grid.
+- B3a. Radar area / optical area within 0.85–1.15 in ≥ 70 % of the matched pairs (≥ 6 pairs, else inconclusive).
+- B3b. Spearman ρ between the radar and the optical areas over the matched pairs ≥ 0.5 (the radar follows the same
+  rise and fall of the water area).
+
+**Results B (2026-11-15, `experiments/b_fetch.py`, `experiments/b_tests.py`; pre-registration pushed at 13:54 before
+the data run).** 47 band A windows (one SHSH scene left out: no HV), all on one 20 m grid: A100 10, A172 11, D94 11,
+D166 15; releases P05023/P05036, plus 5 X05009 scenes on D166. 16 Sentinel-2 dates matched a radar date within ±5 days.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| B1 facing − away γ⁰, HH | 0.79, 1.25, 0.42, 1.89 dB (D94, A100, D166, A172) | \|Δ\| ≤ 1 | 2 of 4 |
+| B1 facing − away γ⁰, HV | 3.07, 2.29, 2.47, 2.79 dB | \|Δ\| ≤ 1 | 0 of 4 |
+| B1 (both pols, ≥ 3 of 4 tracks) | | | **fail** |
+| B2a water HV / NEB_HV within ±2 dB | 43 of 47 (median +1.1 dB; outside: +2.2, +3.8, +4.7, +10.0); NEB layer complete under the water in all 47 | ≥ 80 % | **pass** |
+| B2b water HH ≥ HV − 0.5 dB | 34 of 47 | ≥ 80 % | **fail** |
+| B3a radar / optical water area within 0.85–1.15 | 0 of 33 (ratios 1.2–1.7 on 17 pairs, 6.6–9.0 on 13, 3.4 once, ~60 twice) | ≥ 70 % | **fail** |
+| B3b Spearman radar vs optical area | −0.20 (33 pairs) | ≥ 0.5 | **fail** |
+
+Reported (B1): σ⁰ = γ⁰ × `rtcGammaToSigmaFactor`, facing − away: HH −1.5 … −2.4 dB, HV −0.8 … +0.1 dB.
+
+**Post-hoc (not pre-registered).**
+- *B1 sign check (after the results, no change made).* The sides are as intended: NISAR looks **left** (`lookDirection`)
+  and the product defines its line-of-sight vector from the target to the sensor, which is how `b_geometry.py` used it.
+  So, after RTC, forested slopes that face the radar stay brighter than slopes that face away, by ~2.3–3.1 dB in HV and
+  0.4–1.9 dB in HH. The terrain correction under-corrects these slopes, more in the volume channel. The σ⁰ numbers are
+  reported only: we did not check what `rtcGammaToSigmaFactor` normalises to, so we draw nothing from their sign.
+- *B2: the first site where the stated noise floor holds.* Across the 47 scenes the product NEB (HV) ranges from
+  −22.9 to −10.9 dB (it changes by ~12 dB between tracks and dates), and calm canyon water follows it within ±2 dB in 43.
+  Compare Wisconsin (W1a: layer often broken, water 3–5 dB above where finite) and the Balaton control (+2.2 … +3.2 dB).
+  B2b fails because the water HH also sits near the floor: there is little wind-driven Bragg return in the canyon.
+- *B3: the optical reference is not stable.* Sentinel-2 SCL water in the window jumps between ~19 km² (close to
+  WorldCover's ~17 km²) and ~3.6 km² (once 0.5 km²) from one date to the next, which the reservoir cannot do; the SCL
+  class drops most of the water on those dates (likely turbid or algae-rich summer water, not checked). The radar area is
+  steady at 24–33 km² (one outlier, 64 km², on a date where water HH and cropland HH were equal). On the 17 pairs with a
+  plausible optical area, the radar threshold gives 1.2–1.7 × more water: dark, smooth ground and mixed shore pixels
+  pass the HH threshold. B3 as designed cannot show a water-level "breathing"; it would need a stable optical water mask
+  (e.g. NDWI with a per-date threshold) or gauge data.
+
+## TW. Do trees dry out by evening? Forest HV against the air's drying power (`edoTenseii` + Claude)
+
+**Idea.** Two natural processes and a link between them. (1) On a hot, dry afternoon the air pulls water out of leaves
+faster than roots refill the stems: the vapour pressure deficit (VPD) drives transpiration, and tree water content falls
+through the day and recovers at night. (2) Water sets the permittivity of wood (ε of fresh wood ~ 20 – 30 at 1.26 GHz,
+of dry wood ~ 2 – 4), and the L-band HV return of a forest is volume scattering from branches and stems. So drier wood
+should give a weaker HV echo. NISAR passes this latitude at dawn (ascending, ~05:00 local solar time) and at dusk
+(descending, ~19:05), so it sees the same forest after the night's recovery and after the day's drying. Tower radars
+(e.g. BorealScat in Sweden) have reported diurnal L-band forest backscatter changes linked to tree water; we test whether
+a satellite with a 12-day repeat can see it.
+
+**Pre-registered 2026-11-15 ~15:50 (Dnipro time), committed and pushed on its own before any value used below is computed.**
+Seen before writing:
+- Wisconsin: the per-date median HV of the deciduous class (section W, test W2) and the 2 m temperature at each
+  overpass (`temps.json`, frozen / unfrozen rule), but never set against VPD, humidity or rain.
+- Bakota: per-date HV medians of forest on slopes ≥ 15° (test B1); forest on flat ground was never computed.
+- Scene metadata only (track, direction, UTC time, release): every scene in the window below is release P05023.
+- Pixel counts of the Bakota forest class (from WorldCover and the DEM, no radar value).
+- No VPD or rain value for any site has been read.
+
+**Data.**
+- *Wisconsin*: band B 80 m, full window of section W, class *deciduous forest* exactly as in W.
+  Evening tracks D41, D113; morning track A76 (A148 has no scene in the window).
+- *Bakota*: band A 20 m, window of section B. Class *forest*: WorldCover tree fraction ≥ 0.9, DEM slope < 10° (keeps the
+  terrain-correction error of B1 out), not in the radar shadow or layover of that track. Evening tracks D94, D166;
+  morning tracks A100, A172.
+- Valid pixels: `mask` in 1 … 254 and HV > 0. Class value per scene = median of 10·log10(γ⁰ HV); fewer than 50 pixels
+  drops the scene.
+- *Season*: local solar dates 15 Jun – 30 Sep 2026 (leaf-on, unfrozen). Local solar time = UTC + longitude / 15°.
+  Wisconsin evening passes are at ~01:06 – 01:14 UTC, so their local date is the UTC date minus one day.
+- *Weather*: Open-Meteo historical archive, hourly at the window centre: `vapour_pressure_deficit` (kPa) and
+  `precipitation` (mm).
+
+**Variables.**
+- *Afternoon VPD* of a pass: mean hourly VPD over 12:00 – 18:00 local solar time of the latest afternoon that ended
+  before the pass (same day for an evening pass, previous day for a morning pass).
+- *Dry pass*: precipitation over the 24 h before the pass < 1.0 mm (a wet canopy adds water that is not in the wood).
+  Only dry passes are used in the judged tests.
+- *Anomalies*: within each (site, track), the dry-pass HV values and their afternoon VPD values are each detrended with a
+  straight line in time (removes slow phenology, growth and the seasonal VPD cycle). Each track is compared only with
+  itself, so incidence angle and look side cancel.
+
+**Tests.**
+- **TW1 (main).** Evening passes, both sites pooled: Spearman ρ between the HV anomaly and the afternoon-VPD anomaly.
+  Pass: ρ ≤ −0.3 and one-sided permutation p ≤ 0.05 (10 000 permutations of VPD within each track). Otherwise fail.
+  Fewer than 15 dry evening passes: inconclusive.
+- **TW2 (replication on two continents).** Evening passes, the same ρ at each site on its own. Pass: ρ < 0 at both
+  sites. Fail: ρ ≥ 0 at either. A site with fewer than 6 dry evening passes: inconclusive.
+- **TW3 (dawn against dusk).** Morning passes, pooled ρ_m by the same recipe. Pass: ρ_m ≥ ρ_e + 0.2 (the night refills
+  the trees, so the morning link is weaker). Judged only if TW1 passes; otherwise reported.
+- **Reported, not judged:** slope of HV anomaly on VPD anomaly (dB per kPa, evening, pooled, with a bootstrap 90 %
+  interval); the same tests with centring only (no linear trend), with a 48 h rain rule, for HH, and for the Wisconsin
+  conifer class; a placebo: the evening HV anomaly against the VPD of the afternoon *after* the pass (expected weaker
+  than TW1; it is not zero because weather persists for days).
+
+**What would go wrong.** The expected change is small: a few % of wood moisture moves ε by ~10 %, which moves a
+branch-scattering HV by roughly 0.5 – 1 dB, while the per-date class median scatters by ~0.3 dB plus calibration drift.
+In a dense canopy the echo depends on the scattering-to-extinction ratio, which is less sensitive to ε than either
+term alone. A fail is a usable result: it bounds what NISAR can see of tree water from orbit.
+
+**Timing note.** The pre-registration text says "~15:50"; its commit (ebab20e) is stamped 15:43 Dnipro time and was pushed
+right after, before `experiments/tw_tests.py` existed. GitHub records the branch creation with that commit at 15:43:17;
+the Open-Meteo VPD and rain files were first downloaded at 15:44:29, after it. The first run of the script returned no passes at all (an hour key
+kept fractional microseconds, so no VPD value matched); the fix touched only that key, no rule or threshold.
+
+**Results TW (2026-11-15 15:45 Dnipro time, `experiments/tw_tests.py`; this line said "~16:10" until the PR, the output
+files are stamped 15:45 and the results commit 15:46).** 53 passes in season, 38 dry (24 h rule): evening 21
+(Wisconsin D41 4, D113 5; Bakota D94 6, D166 6), morning 17 (Wisconsin A76 5; Bakota A100 5, A172 7). All release P05023.
+Class pixels per scene: Wisconsin deciduous 15 684 (80 m), Bakota flat forest ≥ 7 291 (20 m). Afternoon VPD ranged
+0.38 – 2.62 kPa; its detrended anomalies ±0.6 kPa.
+
+| test | value | limit | verdict |
+|---|---|---|---|
+| TW1 evening, pooled ρ (HV anomaly, VPD anomaly) | −0.11, permutation p = 0.34, n = 21 | ρ ≤ −0.3 and p ≤ 0.05 | **fail** |
+| TW2 evening ρ per site | Wisconsin +0.10 (n = 9), Bakota −0.08 (n = 12) | both < 0 | **fail** |
+| TW3 morning against evening | ρ_m = −0.31 (p = 0.13, n = 17) | judged only if TW1 passes | not judged |
+
+Reported:
+- Slope, evening pooled: +0.03 dB/kPa, bootstrap 90 % interval −0.25 … +0.43 dB/kPa.
+- Centring only (no trend): evening ρ +0.09, morning +0.15.
+- 48 h rain rule: evening n = 5 (too few), morning ρ −0.44 (p = 0.07).
+- HH: evening +0.12, morning −0.09.
+- Wisconsin conifer HV: evening +0.17 (n = 9).
+- Placebo (VPD of the afternoon after the pass): evening −0.04, morning −0.07.
+
+**Post-hoc (not pre-registered).**
+- *What the fail bounds.* Wisconsin evening alone: the deciduous HV anomaly scatters by only 0.11 dB (s.d.) while the
+  afternoon VPD anomaly spans ±0.5 kPa. Slope +0.03 dB/kPa, bootstrap 90 % −0.15 … +0.33. So a drier-than-usual
+  afternoon lowers the dusk HV of this forest by less than ~0.15 dB per kPa (one-sided 95 %). That is several times below
+  the 0.5 – 1 dB we expected from wood permittivity. Two readings, not tested:
+  1. The day-to-day change in wood water at dusk is smaller than a few %, because stems buffer it.
+  2. Most of the daily water swing is in the leaves and thin twigs, which the 24 cm wave does not see (W2).
+- *This is not the dawn-to-dusk swing itself.* Morning and evening tracks look from opposite sides at different angles,
+  so the test compares dusk with dusk only. A tower or a same-geometry morning/evening pair would be needed for the
+  full diurnal cycle.
+- *Bakota evening tracks sit close to the stated noise floor.* The flat-forest HV on D94 is about −9 dB with NEB_HV
+  −12 … −13 dB, so the floor is only 3 – 4 dB below the signal. On D166 the gap is ~6 dB, on the morning tracks ~11 dB
+  (NEB from section B). Noise not subtracted in GCOV can shift those medians. The HV anomaly does not follow the NEB
+  across dates (Spearman +0.15 evening, +0.01 morning).
+- *Two Bakota outliers.* D166 on 17 and 29 Sep: +1.18 dB, then −1.14 dB (forest HV −13.4 dB on 29 Sep, 2 dB below the
+  other dates). Both passes were dry by the 24 h rule. Cause not checked; it may be the start of leaf fall or a
+  processing change. They do not decide TW2: Wisconsin alone already has ρ > 0.
+- **Reading.** From orbit, at a 12-day repeat, NISAR does not see an afternoon's dryness in the dusk echo of a temperate
+  forest above ~0.15 dB/kPa. The stability is itself useful: summer dusk HV of a deciduous forest repeats within ~0.1 dB
+  in Wisconsin, a usable reference target for calibration checks.
