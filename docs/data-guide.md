@@ -157,6 +157,13 @@ Read one with `nisar.RawWindow.load(path)`, then use `nisar.process(raw, ...)` t
 
 `Window.db("hv")` returns values in dB. Frequency B (80 m) is about 13 MB per date for the Central Valley box.
 
+Northern Wisconsin (sections W, WS, TW), cache on disk:
+- band B HH/HV, full box, 52 dates: ~2.7 MB per date, 139 MB;
+- band A full covariance (10 terms), 52 dates on each sub-window: ~9 – 11 MB per date, SUB 501 MB, SUB2 587 MB;
+- GUNW HH pair windows (WS6 – WS8): 58 pairs, ~2 MB each, 134 MB;
+- references (`data/raw/ws/`): CODE GIM 83 MB, NWI 103 MB, CDL 2025 40 MB, Sentinel-2 29 MB.
+In total about 1.6 GB on disk for this site.
+
 **Lock file** (`sites/<plate>.lock.json`):
 - Contains `site`, `bbox`, `direction`, `track {path, frame}` and `searched` (UTC time of the ASF search).
 - `granules[]` lists each pair as `{name, url, ref, sec, days}`.

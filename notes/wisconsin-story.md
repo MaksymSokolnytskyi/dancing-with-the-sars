@@ -20,18 +20,21 @@ Oct 2025 – Nov 2026 (no data Feb – mid-June 2026).
    - facts: 52 dates · 4 tracks · 24 cm.
 
 2. **what: "Leaves are invisible" (W2, W3)**
-   - en: When the maples drop their leaves, the forest's cross-polarised echo hardly moves (0.8 – 2.8 dB over the year). The wave
-     is scattered by branches comparable to its length; a leaf is too thin to matter.
-   - uk: Коли клени скидають листя, крос-поляризоване відлуння лісу майже не змінюється (0.8 – 2.8 дБ за рік). Хвилю
-     розсіюють гілки, порівнянні з її довжиною, а лист для неї надто тонкий.
+   - en: When the maples drop their leaves, the forest's cross-polarised echo moves no more than that of the evergreen
+     conifers, which keep their needles (within 1 dB), and less than the echo of the fields. The wave is scattered by
+     branches comparable to its length; a leaf is too thin to matter.
+   - uk: Коли клени скидають листя, крос-поляризоване відлуння лісу змінюється не більше, ніж у вічнозелених хвойних, які
+     хвою не скидають (у межах 1 дБ), і менше, ніж відлуння полів. Хвилю розсіюють гілки, порівнянні з її довжиною, а
+     лист для неї надто тонкий.
+   - facts: deciduous − conifer HV amplitude −1.6 … +0.1 dB (W2c); fields 2.6 – 4.4 dB against forest 0.8 – 2.8 dB (W2b).
    - map: `story_cells.json` mode `hv_anom_db` (time), forest cells stay pale through October.
 
 3. **what: "Corn stands up" (WS1b; WS1a failed)**
    - en: In late October 2025, corn fields were 3 – 8 dB brighter in HV than soybean fields: standing stalks and tall stubble make
-     a volume, soybean stubble does not. The gap shrank week by week as the corn was harvested. The co-pol ratio test (HH/VV)
+     a volume, soybean stubble does not. The gap shrank week by week, probably as the corn was harvested. The co-pol ratio test (HH/VV)
      passed on only 3 of 5 dates.
    - uk: Наприкінці жовтня 2025 року поля кукурудзи були на 3 – 8 дБ яскравіші в HV, ніж поля сої: стебла й висока стерня
-     утворюють об'єм, а соєва стерня ні. Різниця танула щотижня в міру збирання кукурудзи. Тест співвідношення HH/VV пройшов
+     утворюють об'єм, а соєва стерня ні. Різниця танула щотижня, ймовірно, в міру збирання кукурудзи. Тест співвідношення HH/VV пройшов
      лише на 3 датах із 5.
    - facts: +8.4 dB (22 Oct) → +3.0 dB (20 Nov).
 
@@ -58,24 +61,36 @@ Oct 2025 – Nov 2026 (no data Feb – mid-June 2026).
 
 7. **why: "The radar measures the sky twice" (WS8, WS9a; WS9b failed)**
    - en: On its way down and back, the wave crosses the ionosphere. Its polarisation turns (Faraday rotation), and its phase is
-     delayed differently at the band's two ends. The two measurements agree (ρ = 0.59 on 45 pairs, and their ratio is
-     within ~10 % of theory). The rotation also follows the global TEC maps (ρ = 0.81): up to 5° on summer evenings, less at
-     dawn. In the 2026 processing the sign agrees too (32 of 33 scenes). The 2025 releases did not.
+     delayed differently at the band's two ends. The two measurements agree (ρ = 0.59 on 45 pairs). Pooled over the
+     tracks, their ratio is within ~10 % of theory; per track it is 0.8 – 2× the theory (dusk track D41 2×, summer pairs
+     only). The size of the rotation also follows the global TEC maps (ρ = 0.81): up to 5° on summer evenings, less at
+     dawn. Its sign did not (35 of 50 scenes, below the 80 % we set). Found after the test: in the 2026 processing the
+     sign agrees in 32 of 33 scenes, in the 2025 releases in 3 of 19; but the 2025 scenes are all from Oct – Jan, when
+     the expected rotation is small, so release and season cannot be told apart here.
    - uk: Дорогою вниз і назад хвиля двічі проходить іоносферу. Її поляризація повертається (ефект Фарадея), а фаза
-     запізнюється по-різному на двох краях діапазону. Обидва виміри узгоджуються (ρ = 0.59 на 45 парах, а їхнє
-     співвідношення в межах ~10 % від теорії). Поворот іде і за глобальними картами TEC (ρ = 0.81): до 5° влітку ввечері,
-     менше на світанку. У обробці 2026 року збігається й знак (32 з 33 знімків), у релізах 2025 року — ні.
+     запізнюється по-різному на двох краях діапазону. Обидва виміри узгоджуються (ρ = 0.59 на 45 парах). У сумі по
+     треках їхнє співвідношення в межах ~10 % від теорії, а на окремих треках становить від 0.8 до 2 теоретичних (вечірній
+     трек D41 — 2×, лише літні пари). Величина повороту йде і за глобальними картами TEC (ρ = 0.81): до 5° влітку
+     ввечері, менше на світанку. Знак — ні (35 з 50 знімків, нижче за наші 80 %). Знайдено вже після тесту: в обробці
+     2026 року знак збігається в 32 з 33 знімків, у релізах 2025 року — в 3 з 19; але знімки 2025 року всі з жовтня –
+     січня, коли очікуваний поворот малий, тож реліз і сезон тут не розділити.
+   - facts: ρ = 0.59 (n = 45); measured / theory: pooled ~0.9, A76 0.9, D113 0.8, D41 2.0; TEC ρ = 0.81.
    - map: a bars strip per date: measured Ω and predicted Ω (`ws_results.json` → `WS9.points`).
 
 8. **sure: "How sure, and what failed"**
    - en: Failed and stated: early lake ice is dark, not bright (WS3); no frost heave above the noise (WS7); swamp forest is not
      brighter in HH (WS2a). The product's co-pol phase is not calibrated (forest at −120° or +140° instead of 0°); 2025
-     releases have a ~1 dB HV/VH imbalance (W5a) and a Faraday offset; the noise layer is often broken (W1a). Summer dusk
-     HV of the forest repeats within 0.1 dB (TW).
+     releases have a ~1 dB HV/VH imbalance (W5a) and a Faraday offset; the noise layer is often broken (W1a). A dry
+     afternoon does not dim the forest's dusk echo by more than ~0.15 dB/kPa (TW failed; the bound was computed after the
+     test). After removing a straight-line
+     trend per track, summer dusk HV of the forest repeats within ~0.1 dB (9 passes); without that, it moves 0.8 – 2.8 dB
+     over the season.
    - uk: Провали чесно: ранній лід на озерах темний, а не яскравий (WS3); морозного здимання понад шум не видно (WS7); болотний ліс
      не яскравіший у HH (WS2a). Фаза між HH і VV у продукті не відкалібрована (ліс на −120° або +140° замість 0°); у релізах
-     2025 року є дисбаланс HV/VH ~1 дБ (W5a) і зсув фарадеївського кута; шар шуму часто зламаний (W1a). Вечірній HV лісу
-     влітку повторюється з точністю 0.1 дБ (TW).
+     2025 року є дисбаланс HV/VH ~1 дБ (W5a) і зсув фарадеївського кута; шар шуму часто зламаний (W1a). Сухий день не
+     притлумлює вечірнє відлуння лісу більше ніж на ~0.15 дБ/кПа (TW провалився; межу пораховано після тесту). Якщо прибрати лінійний тренд на
+     кожному треку, вечірній HV лісу влітку повторюється з точністю ~0.1 дБ (9 прольотів); без цього за сезон він
+     змінюється на 0.8 – 2.8 дБ.
 
 9. **next: monthly polarimetry**
    - en: Entropy, alpha and Pauli colour of the fields month by month (`ws10_SUB2.png`): fields switch from surface to volume

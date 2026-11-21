@@ -2528,5 +2528,15 @@ Reported (pre-registered, not judged):
   - it does not see early lake ice (WS3) or frost heave above the noise (WS7);
   - snow, not frost, sets winter coherence (WS6);
   - the strongest result is about the sky: the radar measures the ionosphere twice, by Faraday rotation and by phase
-    dispersion, and both agree with each other (WS8) and with the global TEC maps (WS9a), once the 2026 calibration is
-    used.
+    dispersion, and both agree with each other (WS8) and with the TEC maps in size (WS9a). The sign test failed (WS9b);
+    that the sign agrees in the 2026 releases is post-hoc (below).
+
+**Added after the PR #8 review (post-hoc).**
+- *WS9b release split is confounded with season.* "Once the 2026 calibration is used" was found only after WS9b failed, so
+  it is post-hoc. The early-release scenes (X05009 / X05010) are all from Oct 2025 – Jan 2026, when the predicted |Ω_p| is
+  small, and the 2026 scenes are mostly from summer and autumn. A release bias and a weak-signal season give the same
+  split here; telling them apart needs early- and late-release scenes of the same dates (a reprocessing).
+- *WS8 per track.* The "~10 % of theory" is pooled over tracks. Per track, measured / expected slope is A76 0.90,
+  D113 0.79, D41 2.0 (summer-only pairs, small TEC range).
+- *WS8 p-value is optimistic.* The 45 pairs share dates (each scene enters several ΔΩ), so they are not independent and the
+  permutation p < 10⁻⁴ overstates the evidence. The result rests on ρ = 0.59 and on the physical slope, not on p.
